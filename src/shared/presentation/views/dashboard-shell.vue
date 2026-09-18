@@ -10,12 +10,12 @@
         </p>
       </div>
       <div class="hero-stat">
-        <strong>87%</strong>
+        <strong>{{ overviewStore.healthScore }}%</strong>
         <span>salud operacional</span>
       </div>
     </section>
 
-    <section v-for="metric in metrics" :key="metric.label" class="metric-card compact">
+    <section v-for="metric in overviewStore.indicators" :key="metric.label" class="metric-card compact">
       <div class="metric-icon">
         <i :class="metric.icon"></i>
       </div>
@@ -30,7 +30,7 @@
         <button type="button">{{ $t('common.view_all') }}</button>
       </div>
       <div class="timeline">
-        <article v-for="event in activity" :key="event.title">
+        <article v-for="event in overviewStore.activity" :key="event.title">
           <span :class="['status-dot', event.kind]"></span>
           <div>
             <strong>{{ event.title }}</strong>
@@ -59,23 +59,20 @@
 </template>
 
 <script setup>
-const metrics = [
-  { label: 'Inventario', value: '1,248', detail: 'unidades disponibles', icon: 'pi pi-box' },
-  { label: 'Alertas', value: '14', detail: 'requieren atencion', icon: 'pi pi-bell' },
-  { label: 'Pedidos', value: '32', detail: 'en seguimiento', icon: 'pi pi-truck' },
-];
+import { onMounted } from 'vue';
+import { useDashboardOverviewStore } from '../../application/dashboard-overview.store.js';
 
-const activity = [
-  { title: 'Lote proximo a vencer', detail: 'Yogurt organico vence en 5 dias.', time: '09:20', kind: 'warning' },
-  { title: 'Pedido aceptado', detail: 'Proveedor BioAndes confirmado.', time: '10:45', kind: 'success' },
-  { title: 'Sensor actualizado', detail: 'Camara fria dentro del rango.', time: '11:10', kind: 'info' },
-];
+const overviewStore = useDashboardOverviewStore();
 
 const modules = [
   { name: 'Shared', description: 'Layout, router, estilos e infraestructura base.', icon: 'pi pi-th-large' },
   { name: 'Features DDD', description: 'Cada bounded context mantiene sus capas.', icon: 'pi pi-sitemap' },
   { name: 'API base', description: 'Cliente HTTP comun para adapters.', icon: 'pi pi-server' },
 ];
+
+onMounted(() => {
+  overviewStore.fetchOverview();
+});
 </script>
 
 <style scoped>

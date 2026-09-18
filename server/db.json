@@ -1,0 +1,252 @@
+{
+  "health": {
+    "status": "ok",
+    "service": "marketgo-fake-api"
+  },
+  "dashboard": {
+    "healthScore": 87,
+    "indicators": [
+      {
+        "title": "Inventario",
+        "label": "Inventario",
+        "type": "inventory",
+        "value": 1248,
+        "detail": "unidades disponibles",
+        "variation": 8,
+        "icon": "pi pi-box"
+      },
+      {
+        "title": "Alertas",
+        "label": "Alertas",
+        "type": "alerts",
+        "value": 14,
+        "detail": "requieren atencion",
+        "variation": -2,
+        "icon": "pi pi-bell"
+      },
+      {
+        "title": "Pedidos",
+        "label": "Pedidos",
+        "type": "procurements",
+        "value": 32,
+        "detail": "en seguimiento",
+        "variation": 12,
+        "icon": "pi pi-truck"
+      }
+    ],
+    "activity": [
+      {
+        "title": "Lote proximo a vencer",
+        "detail": "Yogurt organico vence en 5 dias.",
+        "time": "09:20",
+        "kind": "warning"
+      },
+      {
+        "title": "Pedido aceptado",
+        "detail": "Proveedor BioAndes confirmado.",
+        "time": "10:45",
+        "kind": "success"
+      },
+      {
+        "title": "Sensor actualizado",
+        "detail": "Camara fria dentro del rango.",
+        "time": "11:10",
+        "kind": "info"
+      }
+    ]
+  },
+  "analytics": {
+    "indicators": [
+      {
+        "label": "Inventario total",
+        "currentValue": 1248,
+        "previousValue": 1180,
+        "unit": "items"
+      },
+      {
+        "label": "Mermas registradas",
+        "currentValue": 21,
+        "previousValue": 28,
+        "unit": "kg"
+      },
+      {
+        "label": "Ventas por oferta",
+        "currentValue": 86,
+        "previousValue": 64,
+        "unit": "ops"
+      },
+      {
+        "label": "Score conservacion",
+        "currentValue": 92,
+        "previousValue": 88,
+        "unit": "%"
+      }
+    ]
+  },
+  "users": [
+    {
+      "id": "usr-admin",
+      "name": "Ana Mercado",
+      "email": "ana@marketgo.pe",
+      "status": "active",
+      "roles": ["Administrador minimarket"],
+      "permissions": ["inventory:write", "procurements:approve", "users:manage"]
+    },
+    {
+      "id": "usr-provider",
+      "name": "Luis Proveedor",
+      "email": "luis@bioandes.pe",
+      "status": "active",
+      "roles": ["Proveedor organico"],
+      "permissions": ["products:write", "procurements:track"]
+    }
+  ],
+  "profiles": [
+    {
+      "id": "prof-market",
+      "userId": "usr-admin",
+      "type": "minimarket",
+      "businessName": "Minimarket Verde Sur",
+      "phone": "+51 987 654 321",
+      "address": "Av. Los Alimentos 120",
+      "district": "Surco"
+    },
+    {
+      "id": "prof-provider",
+      "userId": "usr-provider",
+      "type": "provider",
+      "businessName": "BioAndes Organic",
+      "phone": "+51 955 222 110",
+      "address": "Ruta Agricola 45",
+      "specialty": "Lacteos y vegetales organicos",
+      "coverageArea": "Lima Metropolitana"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-1",
+      "name": "Lechuga hidroponica",
+      "description": "Hojas frescas certificadas.",
+      "category": "Vegetales",
+      "expirationDate": "2026-09-25",
+      "quantity": 42,
+      "price": 4.5,
+      "available": true
+    },
+    {
+      "id": "prod-2",
+      "name": "Yogurt organico",
+      "description": "Lacteo artesanal sin preservantes.",
+      "category": "Lacteos",
+      "expirationDate": "2026-09-22",
+      "quantity": 12,
+      "price": 8.9,
+      "available": true
+    }
+  ],
+  "inventory": [
+    {
+      "id": "inv-1",
+      "productName": "Lechuga hidroponica",
+      "stock": 42,
+      "minimumStock": 20,
+      "lotCode": "LOT-001",
+      "expirationDate": "2026-09-25",
+      "status": "healthy"
+    },
+    {
+      "id": "inv-2",
+      "productName": "Yogurt organico",
+      "stock": 12,
+      "minimumStock": 18,
+      "lotCode": "LOT-014",
+      "expirationDate": "2026-09-22",
+      "status": "risk"
+    }
+  ],
+  "requisitions": [
+    {
+      "id": "req-1",
+      "requester": "Ana Mercado",
+      "productName": "Yogurt organico",
+      "quantity": 24,
+      "reason": "Reposicion por venta rapida",
+      "status": "pending",
+      "createdAt": "2026-09-18"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord-1001",
+      "supplier": "BioAndes Organic",
+      "minimarket": "Minimarket Verde Sur",
+      "status": "pending",
+      "total": 420.5,
+      "createdAt": "2026-09-18",
+      "items": ["Yogurt organico", "Lechuga hidroponica"]
+    }
+  ],
+  "suppliers": [
+    {
+      "id": "sup-1",
+      "businessName": "BioAndes Organic",
+      "ruc": "20600011122",
+      "email": "ventas@bioandes.pe",
+      "phone": "+51 955 222 110",
+      "address": "Ruta Agricola 45",
+      "specialty": "Lacteos y vegetales",
+      "coverageArea": "Lima"
+    }
+  ],
+  "conservationMonitoring": [
+    {
+      "id": "con-1",
+      "zone": "Camara fria A",
+      "productName": "Yogurt organico",
+      "temperature": 4,
+      "humidity": 61,
+      "recordedAt": "2026-09-18 09:30",
+      "status": "healthy"
+    },
+    {
+      "id": "con-2",
+      "zone": "Anaquel fresco",
+      "productName": "Lechuga hidroponica",
+      "temperature": 9,
+      "humidity": 72,
+      "recordedAt": "2026-09-18 09:35",
+      "status": "risk"
+    }
+  ],
+  "conservationAlerts": [
+    {
+      "id": "alert-1",
+      "title": "Humedad elevada",
+      "message": "Anaquel fresco supera el rango recomendado.",
+      "type": "conservation",
+      "read": false,
+      "createdAt": "2026-09-18 09:35"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "msg-1",
+      "sender": "Sistema MarketGo",
+      "receiver": "Ana Mercado",
+      "subject": "Alerta de vencimiento",
+      "body": "Yogurt organico vence pronto.",
+      "read": false,
+      "starred": true,
+      "sentAt": "2026-09-18 09:10"
+    }
+  ],
+  "activityHistory": [
+    {
+      "id": "act-1",
+      "user": "Ana Mercado",
+      "action": "Acepto orden de abastecimiento",
+      "resource": "ord-1001",
+      "createdAt": "2026-09-18 10:45"
+    }
+  ]
+}
