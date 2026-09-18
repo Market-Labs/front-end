@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import iamRoutes from './iam/presentation/iam-routes.js';
+import profilesRoutes from './profiles/presentation/profiles-routes.js';
 
 const featurePlaceholder = () => import('./shared/presentation/views/feature-placeholder.vue');
 
@@ -47,6 +48,7 @@ const routes = [
     meta: { title: 'Acceso denegado' },
   },
   ...iamRoutes,
+  ...profilesRoutes,
   ...featureRoutes,
   {
     path: '/:pathMatch(.*)*',
