@@ -5,14 +5,28 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "json-server --watch server/db.json --routes server/routes.json --port 3000",
+    "dev:mock": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.5.42"
+    "@primeuix/themes": "^2.0.3",
+    "axios": "^1.16.1",
+    "chart.js": "^4.5.1",
+    "html2pdf.js": "^0.14.0",
+    "pinia": "^3.0.4",
+    "primeflex": "^4.0.0",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.5.5",
+    "vue": "^3.5.42",
+    "vue-i18n": "^11.4.2",
+    "vue-router": "^5.0.7"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",
+    "concurrently": "^9.2.1",
+    "json-server": "^0.17.4",
     "vite": "^8.3.0"
   }
 }

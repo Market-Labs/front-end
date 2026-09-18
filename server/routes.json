@@ -1,0 +1,16 @@
+{
+  "/api/v1/health": "/health",
+  "/api/v1/dashboard": "/dashboard",
+  "/api/v1/analytics": "/analytics",
+  "/api/v1/users": "/users",
+  "/api/v1/profiles": "/profiles",
+  "/api/v1/products": "/products",
+  "/api/v1/inventory": "/inventory",
+  "/api/v1/requisitions": "/requisitions",
+  "/api/v1/orders": "/orders",
+  "/api/v1/suppliers": "/suppliers",
+  "/api/v1/conservation/monitoring": "/conservationMonitoring",
+  "/api/v1/conservation/alerts": "/conservationAlerts",
+  "/api/v1/notifications": "/notifications",
+  "/api/v1/activity-history": "/activityHistory"
+}

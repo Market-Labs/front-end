@@ -1,0 +1,27 @@
+{
+  "app": {
+    "name": "MarketGo",
+    "tagline": "Organic operations for minimarkets"
+  },
+  "option": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "analytics": "Analytics",
+    "inventory": "Inventory",
+    "products": "Products",
+    "requisition": "Requisitions",
+    "procurements": "Procurements",
+    "suppliers": "Suppliers",
+    "conservation": "Conservation",
+    "communication": "Communication",
+    "profiles": "Profiles",
+    "iam": "Users and roles",
+    "settings": "Settings",
+    "logout": "Sign out"
+  },
+  "common": {
+    "search_placeholder": "Search MarketGo",
+    "coming_soon": "Module ready for implementation",
+    "view_all": "View all"
+  }
+}
