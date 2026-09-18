@@ -11,28 +11,6 @@ import suppliersRoutes from './suppliers/presentation/suppliers-routes.js';
 import conservationRoutes from './conservation/presentation/conservation-routes.js';
 import communicationRoutes from './communication/presentation/communication-routes.js';
 
-const featurePlaceholder = () => import('./shared/presentation/views/feature-placeholder.vue');
-
-const featureRoutes = [
-  ['analytics', 'Analitica'],
-  ['communication', 'Comunicacion'],
-  ['conservation', 'Conservacion'],
-  ['dashboard', 'Dashboard'],
-  ['iam', 'Usuarios y roles'],
-  ['inventory', 'Inventario'],
-  ['procurements', 'Abastecimiento'],
-  ['products', 'Productos'],
-  ['profiles', 'Perfiles'],
-  ['requisition', 'Requisiciones'],
-  ['suppliers', 'Proveedores'],
-].map(([path, title]) => ({
-  path: `/${path}`,
-  name: path,
-  component: featurePlaceholder,
-  props: { title, context: path },
-  meta: { title },
-}));
-
 const routes = [
   {
     path: '/',
@@ -67,7 +45,6 @@ const routes = [
   ...suppliersRoutes,
   ...conservationRoutes,
   ...communicationRoutes,
-  ...featureRoutes,
   {
     path: '/:pathMatch(.*)*',
     redirect: '/home',
