@@ -1,7 +1,7 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <HelloWorld />
+  <marketgo-layout />
 </template>
+
+<script setup>
+import MarketgoLayout from './shared/presentation/components/marketgo-layout.vue';
+</script>

@@ -1,0 +1,27 @@
+{
+  "app": {
+    "name": "MarketGo",
+    "tagline": "Gestion organica para minimarkets"
+  },
+  "option": {
+    "home": "Inicio",
+    "dashboard": "Dashboard",
+    "analytics": "Analitica",
+    "inventory": "Inventario",
+    "products": "Productos",
+    "requisition": "Requisiciones",
+    "procurements": "Abastecimiento",
+    "suppliers": "Proveedores",
+    "conservation": "Conservacion",
+    "communication": "Comunicacion",
+    "profiles": "Perfiles",
+    "iam": "Usuarios y roles",
+    "settings": "Configuracion",
+    "logout": "Cerrar sesion"
+  },
+  "common": {
+    "search_placeholder": "Buscar en MarketGo",
+    "coming_soon": "Modulo preparado para implementacion",
+    "view_all": "Ver todo"
+  }
+}
