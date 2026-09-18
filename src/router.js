@@ -4,6 +4,7 @@ import profilesRoutes from './profiles/presentation/profiles-routes.js';
 import dashboardRoutes from './dashboard/presentation/dashboard-routes.js';
 import analyticsRoutes from './analytics/presentation/analytics-routes.js';
 import inventoryRoutes from './inventory/presentation/inventory-routes.js';
+import productsRoutes from './products/presentation/products-routes.js';
 
 const featurePlaceholder = () => import('./shared/presentation/views/feature-placeholder.vue');
 
@@ -55,6 +56,7 @@ const routes = [
   ...dashboardRoutes,
   ...analyticsRoutes,
   ...inventoryRoutes,
+  ...productsRoutes,
   ...featureRoutes,
   {
     path: '/:pathMatch(.*)*',
