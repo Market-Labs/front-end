@@ -8,6 +8,7 @@ import productsRoutes from './products/presentation/products-routes.js';
 import requisitionRoutes from './requisition/presentation/requisition-routes.js';
 import procurementsRoutes from './procurements/presentation/procurements-routes.js';
 import suppliersRoutes from './suppliers/presentation/suppliers-routes.js';
+import conservationRoutes from './conservation/presentation/conservation-routes.js';
 
 const featurePlaceholder = () => import('./shared/presentation/views/feature-placeholder.vue');
 
@@ -63,6 +64,7 @@ const routes = [
   ...requisitionRoutes,
   ...procurementsRoutes,
   ...suppliersRoutes,
+  ...conservationRoutes,
   ...featureRoutes,
   {
     path: '/:pathMatch(.*)*',
