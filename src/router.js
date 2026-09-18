@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import iamRoutes from './iam/presentation/iam-routes.js';
 import profilesRoutes from './profiles/presentation/profiles-routes.js';
 import dashboardRoutes from './dashboard/presentation/dashboard-routes.js';
+import analyticsRoutes from './analytics/presentation/analytics-routes.js';
 
 const featurePlaceholder = () => import('./shared/presentation/views/feature-placeholder.vue');
 
@@ -51,6 +52,7 @@ const routes = [
   ...iamRoutes,
   ...profilesRoutes,
   ...dashboardRoutes,
+  ...analyticsRoutes,
   ...featureRoutes,
   {
     path: '/:pathMatch(.*)*',
