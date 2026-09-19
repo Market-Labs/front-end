@@ -6,7 +6,7 @@
         <h2>Ordenes de abastecimiento</h2>
         <p>Creacion, visualizacion, filtrado, aceptacion, rechazo y seguimiento de estado.</p>
       </div>
-      <pv-button label="Crear orden" icon="pi pi-plus" />
+      <pv-button label="Crear orden" icon="pi pi-plus" @click="procurementsStore.addDemoOrder()" />
     </div>
 
     <div class="table-card">

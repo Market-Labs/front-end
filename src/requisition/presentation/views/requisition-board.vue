@@ -6,7 +6,7 @@
         <h2>Solicitudes internas de productos</h2>
         <p>Creacion, revision, aprobacion/rechazo y conversion a abastecimiento.</p>
       </div>
-      <pv-button label="Nueva solicitud" icon="pi pi-plus" />
+      <pv-button label="Nueva solicitud" icon="pi pi-plus" @click="requisitionStore.addDemoRequisition()" />
     </div>
 
     <div class="table-card">

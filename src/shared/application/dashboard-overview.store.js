@@ -6,9 +6,9 @@ const overviewApi = new DashboardOverviewApi();
 const fallbackOverview = {
   healthScore: 87,
   indicators: [
-    { label: 'Inventario', value: '1,248', detail: 'unidades disponibles', icon: 'pi pi-box' },
-    { label: 'Alertas', value: '14', detail: 'requieren atencion', icon: 'pi pi-bell' },
-    { label: 'Pedidos', value: '32', detail: 'en seguimiento', icon: 'pi pi-truck' },
+    { label: 'Inventario', value: '1,248', detail: 'unidades disponibles', icon: 'pi pi-box', route: '/inventory' },
+    { label: 'Alertas', value: '1', detail: 'requiere atencion', icon: 'pi pi-bell', route: '/communication' },
+    { label: 'Pedidos', value: '3', detail: 'en seguimiento', icon: 'pi pi-truck', route: '/procurements' },
   ],
   activity: [
     { title: 'Lote proximo a vencer', detail: 'Yogurt organico vence en 5 dias.', time: '09:20', kind: 'warning' },

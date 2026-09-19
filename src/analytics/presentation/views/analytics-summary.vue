@@ -6,7 +6,7 @@
         <h2>Indicadores y reportes operativos</h2>
         <p>Resumen agregado para inventario, mermas, ventas, conservacion y abastecimiento.</p>
       </div>
-      <pv-button label="Generar reporte" icon="pi pi-file-pdf" />
+      <pv-button :label="reportButtonLabel" icon="pi pi-file-pdf" @click="generateReport()" />
     </div>
 
     <div class="analytics-grid">
@@ -22,20 +22,35 @@
     <div class="reports-card">
       <h3>Reportes disponibles</h3>
       <div>
-        <button v-for="report in analyticsStore.reports" :key="report" type="button">
+        <button
+          v-for="report in analyticsStore.reports"
+          :key="report"
+          type="button"
+          :class="{ active: selectedReport === report }"
+          @click="selectedReport = report"
+        >
           <i class="pi pi-chart-line"></i>
           {{ report }}
         </button>
       </div>
+      <p v-if="generatedReport" class="report-feedback">{{ generatedReport }}</p>
     </div>
   </section>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useAnalyticsStore } from '../../application/analytics.store.js';
 
 const analyticsStore = useAnalyticsStore();
+const selectedReport = ref('Inventario');
+const generatedReport = ref('');
+
+const reportButtonLabel = computed(() => `Generar ${selectedReport.value}`);
+
+const generateReport = () => {
+  generatedReport.value = `Reporte de ${selectedReport.value} generado para revision.`;
+};
 
 onMounted(() => {
   analyticsStore.fetchSummary();
@@ -136,5 +151,17 @@ onMounted(() => {
   gap: 8px;
   min-height: 42px;
   padding: 0 14px;
+}
+
+.reports-card button.active {
+  background: #10261c;
+  color: #ffffff;
+}
+
+.report-feedback {
+  color: #247b5d;
+  font-size: 13px;
+  font-weight: 900;
+  margin: 16px 0 0;
 }
 </style>

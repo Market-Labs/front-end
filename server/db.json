@@ -17,25 +17,28 @@
         "value": 1248,
         "detail": "unidades disponibles",
         "variation": 8,
-        "icon": "pi pi-box"
+        "icon": "pi pi-box",
+        "route": "/inventory"
       },
       {
         "title": "Alertas",
         "label": "Alertas",
         "type": "alerts",
-        "value": 14,
-        "detail": "requieren atencion",
+        "value": 1,
+        "detail": "requiere atencion",
         "variation": -2,
-        "icon": "pi pi-bell"
+        "icon": "pi pi-bell",
+        "route": "/communication"
       },
       {
         "title": "Pedidos",
         "label": "Pedidos",
         "type": "procurements",
-        "value": 32,
+        "value": 3,
         "detail": "en seguimiento",
         "variation": 12,
-        "icon": "pi pi-truck"
+        "icon": "pi pi-truck",
+        "route": "/procurements"
       }
     ],
     "activity": [
@@ -90,18 +93,18 @@
   "users": [
     {
       "id": "usr-admin",
-      "name": "Ana Mercado",
-      "email": "ana@marketgo.pe",
+      "name": "Albino Caceres",
+      "email": "albinoca@marketgo.pe",
       "status": "active",
-      "roles": ["Administrador minimarket"],
+      "roles": ["Administrador de Minimarket"],
       "permissions": ["inventory:write", "procurements:approve", "users:manage"]
     },
     {
       "id": "usr-provider",
-      "name": "Luis Proveedor",
-      "email": "luis@bioandes.pe",
+      "name": "Anita Gamboa",
+      "email": "anitaG@bioandes.pe",
       "status": "active",
-      "roles": ["Proveedor organico"],
+      "roles": ["Proveedor Organico"],
       "permissions": ["products:write", "procurements:track"]
     }
   ],
@@ -251,12 +254,39 @@
   "requisitions": [
     {
       "id": "req-1",
-      "requester": "Ana Mercado",
+      "requester": "Albino Caceres",
       "productName": "Yogurt organico",
       "quantity": 24,
       "reason": "Reposicion por venta rapida",
       "status": "pending",
       "createdAt": "2026-09-18"
+    },
+    {
+      "id": "req-2",
+      "requester": "Albino Caceres",
+      "productName": "Leche organica",
+      "quantity": 30,
+      "reason": "Demanda semanal de lacteos",
+      "status": "approved",
+      "createdAt": "2026-09-18"
+    },
+    {
+      "id": "req-3",
+      "requester": "Albino Caceres",
+      "productName": "Tomate organico",
+      "quantity": 45,
+      "reason": "Reposicion para anaquel principal",
+      "status": "pending",
+      "createdAt": "2026-09-17"
+    },
+    {
+      "id": "req-4",
+      "requester": "Albino Caceres",
+      "productName": "Queso organico",
+      "quantity": 15,
+      "reason": "Stock minimo alcanzado",
+      "status": "rejected",
+      "createdAt": "2026-09-16"
     }
   ],
   "purchaseOrders": [
@@ -268,6 +298,24 @@
       "total": 420.5,
       "createdAt": "2026-09-18",
       "items": ["Yogurt organico", "Lechugas organicas"]
+    },
+    {
+      "id": "ord-1002",
+      "supplier": "Anita Gamboa",
+      "minimarket": "Minimarket Verde Sur",
+      "status": "pending",
+      "total": 315.8,
+      "createdAt": "2026-09-18",
+      "items": ["Leche organica", "Queso organico"]
+    },
+    {
+      "id": "ord-1003",
+      "supplier": "BioAndes Organic",
+      "minimarket": "Minimarket Verde Sur",
+      "status": "approved",
+      "total": 228.4,
+      "createdAt": "2026-09-17",
+      "items": ["Tomate organico", "Pepino organico", "Zanahoria organica"]
     }
   ],
   "suppliers": [

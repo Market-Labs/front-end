@@ -6,7 +6,7 @@
         <h2>Monitoreo de temperatura y humedad</h2>
         <p>Control de condiciones para conservacion de productos organicos.</p>
       </div>
-      <pv-button label="Ver alertas" icon="pi pi-bell" />
+      <pv-button label="Ver alertas" icon="pi pi-bell" @click="router.push('/communication')" />
     </div>
 
     <div class="table-card">
@@ -30,8 +30,10 @@
 
 <script setup>
 import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useConservationStore } from '../../application/conservation.store.js';
 
+const router = useRouter();
 const conservationStore = useConservationStore();
 
 onMounted(() => {

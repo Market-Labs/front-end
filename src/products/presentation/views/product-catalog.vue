@@ -6,7 +6,7 @@
         <h2>Catalogo de productos organicos</h2>
         <p>Datos de producto, vencimiento, cantidad, precio y disponibilidad.</p>
       </div>
-      <pv-button label="Nuevo producto" icon="pi pi-plus" />
+      <pv-button label="Nuevo producto" icon="pi pi-plus" @click="productsStore.addDemoProduct()" />
     </div>
 
     <div class="products-grid">

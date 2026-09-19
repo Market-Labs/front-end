@@ -7,16 +7,18 @@ const iamApi = new IamApi();
 const demoUsers = [
   new User({
     id: 'usr-admin',
-    name: 'Ana Mercado',
-    email: 'ana@marketgo.pe',
-    roles: ['Administrador minimarket'],
+    name: 'Albino Caceres',
+    email: 'albinoca@marketgo.pe',
+    status: 'active',
+    roles: ['Administrador de Minimarket'],
     permissions: ['inventory:write', 'procurements:approve', 'users:manage'],
   }),
   new User({
     id: 'usr-provider',
-    name: 'Luis Proveedor',
-    email: 'luis@bioandes.pe',
-    roles: ['Proveedor organico'],
+    name: 'Anita Gamboa',
+    email: 'anitaG@bioandes.pe',
+    status: 'active',
+    roles: ['Proveedor Organico'],
     permissions: ['products:write', 'procurements:track'],
   }),
 ];
@@ -50,6 +52,20 @@ export const useIamStore = defineStore('iam', {
     logout() {
       window.localStorage.removeItem('marketgo.auth.token');
       this.currentUser = null;
+    },
+    addDemoUser() {
+      const next = this.users.length + 1;
+      this.users = [
+        new User({
+          id: `usr-demo-${next}`,
+          name: `Usuario MarketGo ${next}`,
+          email: `usuario${next}@marketgo.pe`,
+          status: 'active',
+          roles: ['Operador de Minimarket'],
+          permissions: ['inventory:read'],
+        }),
+        ...this.users,
+      ];
     },
   },
 });

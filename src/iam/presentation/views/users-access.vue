@@ -6,7 +6,7 @@
         <h2>Usuarios, roles y permisos</h2>
         <p>Control de acceso para administradores de minimarket y proveedores organicos.</p>
       </div>
-      <pv-button label="Nuevo usuario" icon="pi pi-user-plus" />
+      <pv-button label="Nuevo usuario" icon="pi pi-user-plus" @click="iamStore.addDemoUser()" />
     </div>
 
     <div class="summary-grid">
