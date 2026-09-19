@@ -35,21 +35,5 @@ export const useProductsStore = defineStore('products', {
         this.loading = false;
       }
     },
-    addDemoProduct() {
-      const next = this.products.length + 1;
-      this.products = [
-        new Product({
-          id: `prod-demo-${next}`,
-          name: `Producto organico ${next}`,
-          description: 'Nuevo producto registrado desde la interfaz.',
-          category: 'Organicos',
-          expirationDate: '2026-10-10',
-          quantity: 25,
-          price: 6.5,
-          available: true,
-        }),
-        ...this.products,
-      ];
-    },
   },
 });

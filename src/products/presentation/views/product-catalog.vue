@@ -6,8 +6,43 @@
         <h2>Catalogo de productos organicos</h2>
         <p>Datos de producto, vencimiento, cantidad, precio y disponibilidad.</p>
       </div>
-      <pv-button label="Nuevo producto" icon="pi pi-plus" @click="productsStore.addDemoProduct()" />
+      <pv-button label="Nuevo producto" icon="pi pi-plus" @click="showProductForm = true" />
     </div>
+
+    <pv-dialog v-model:visible="showProductForm" modal header="Nuevo producto" :style="{ width: '520px' }">
+      <form class="entity-form" @submit.prevent>
+        <label>
+          Nombre
+          <pv-input-text v-model="productForm.name" placeholder="Tomate organico" />
+        </label>
+        <label>
+          Categoria
+          <pv-select v-model="productForm.category" :options="categoryOptions" placeholder="Seleccionar categoria" />
+        </label>
+        <label>
+          Fecha de vencimiento
+          <pv-input-text v-model="productForm.expirationDate" placeholder="2026-10-01" />
+        </label>
+        <div class="form-row">
+          <label>
+            Cantidad
+            <pv-input-text v-model="productForm.quantity" placeholder="40" />
+          </label>
+          <label>
+            Precio
+            <pv-input-text v-model="productForm.price" placeholder="5.80" />
+          </label>
+        </div>
+        <label>
+          Descripcion
+          <pv-input-text v-model="productForm.description" placeholder="Producto organico fresco" />
+        </label>
+      </form>
+      <template #footer>
+        <pv-button label="Cancelar" text @click="showProductForm = false" />
+        <pv-button label="Guardar" icon="pi pi-save" disabled />
+      </template>
+    </pv-dialog>
 
     <div class="products-grid">
       <article v-for="product in productsStore.products" :key="product.id">
@@ -29,10 +64,20 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { useProductsStore } from '../../application/products.store.js';
 
 const productsStore = useProductsStore();
+const showProductForm = ref(false);
+const categoryOptions = ['Vegetales', 'Frutas', 'Lacteos', 'Organicos'];
+const productForm = reactive({
+  name: '',
+  category: '',
+  expirationDate: '',
+  quantity: '',
+  price: '',
+  description: '',
+});
 
 onMounted(() => {
   productsStore.fetchProducts();
@@ -105,5 +150,24 @@ footer {
   color: #f08a24;
   font-size: 18px;
   font-weight: 950;
+}
+
+.entity-form {
+  display: grid;
+  gap: 14px;
+}
+
+.entity-form label {
+  color: #33423a;
+  display: grid;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.form-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 </style>

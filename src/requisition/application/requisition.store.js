@@ -29,20 +29,5 @@ export const useRequisitionStore = defineStore('requisition', {
         this.loading = false;
       }
     },
-    addDemoRequisition() {
-      const next = this.requisitions.length + 1;
-      this.requisitions = [
-        new Requisition({
-          id: `req-demo-${next}`,
-          requester: 'Albino Caceres',
-          productName: 'Leche organica',
-          quantity: 18,
-          reason: 'Reposicion preventiva para la semana',
-          status: 'pending',
-          createdAt: '2026-09-18',
-        }),
-        ...this.requisitions,
-      ];
-    },
   },
 });

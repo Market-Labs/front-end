@@ -53,19 +53,5 @@ export const useIamStore = defineStore('iam', {
       window.localStorage.removeItem('marketgo.auth.token');
       this.currentUser = null;
     },
-    addDemoUser() {
-      const next = this.users.length + 1;
-      this.users = [
-        new User({
-          id: `usr-demo-${next}`,
-          name: `Usuario MarketGo ${next}`,
-          email: `usuario${next}@marketgo.pe`,
-          status: 'active',
-          roles: ['Operador de Minimarket'],
-          permissions: ['inventory:read'],
-        }),
-        ...this.users,
-      ];
-    },
   },
 });

@@ -28,20 +28,5 @@ export const useProcurementsStore = defineStore('procurements', {
         this.loading = false;
       }
     },
-    addDemoOrder() {
-      const next = this.orders.length + 1;
-      this.orders = [
-        new ProcurementOrder({
-          id: `ord-demo-${1000 + next}`,
-          supplier: 'Anita Gamboa',
-          minimarket: 'Minimarket Verde Sur',
-          status: 'pending',
-          total: 315.8,
-          createdAt: '2026-09-18',
-          items: ['Leche organica', 'Queso organico'],
-        }),
-        ...this.orders,
-      ];
-    },
   },
 });
