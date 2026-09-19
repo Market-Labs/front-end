@@ -92,7 +92,7 @@ onMounted(() => {
 .report-detail,
 .report-metrics article {
   background: #ffffff;
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
 }
@@ -105,7 +105,7 @@ onMounted(() => {
 }
 
 .view-header span {
-  color: #3d9f7d;
+  color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
@@ -114,14 +114,14 @@ onMounted(() => {
 .view-header h2,
 .reports-card h3,
 .report-detail h3 {
-  color: #16251d;
+  color: #021c45;
   font-weight: 950;
   margin: 6px 0;
 }
 
 .view-header p,
 .report-detail p {
-  color: #66756b;
+  color: #526780;
   font-weight: 700;
   margin: 0;
 }
@@ -140,18 +140,18 @@ onMounted(() => {
 
 .analytics-grid span,
 .reports-card button {
-  color: #66756b;
+  color: #526780;
   font-weight: 850;
 }
 
 .analytics-grid strong {
-  color: #16251d;
+  color: #021c45;
   font-size: 30px;
   font-weight: 950;
 }
 
 .up {
-  color: #247b5d;
+  color: #023192;
 }
 
 .down {
@@ -170,8 +170,8 @@ onMounted(() => {
 
 .reports-card button {
   align-items: center;
-  background: #f9fbf8;
-  border: 1px solid #e8ede9;
+  background: #eff3fa;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
@@ -181,12 +181,12 @@ onMounted(() => {
 }
 
 .reports-card button.active {
-  background: #10261c;
+  background: #021c45;
   color: #ffffff;
 }
 
 .report-feedback {
-  color: #247b5d;
+  color: #023192;
   font-size: 13px;
   font-weight: 900;
   margin: 16px 0 0;
@@ -199,7 +199,7 @@ onMounted(() => {
 }
 
 .report-detail > div:first-child span {
-  color: #3d9f7d;
+  color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
@@ -219,13 +219,13 @@ onMounted(() => {
 }
 
 .report-metrics span {
-  color: #66756b;
+  color: #526780;
   font-size: 13px;
   font-weight: 850;
 }
 
 .report-metrics strong {
-  color: #16251d;
+  color: #021c45;
   font-size: 24px;
   font-weight: 950;
 }
@@ -240,13 +240,13 @@ onMounted(() => {
 
 .report-detail li {
   align-items: center;
-  color: #33423a;
+  color: #023192;
   display: flex;
   font-weight: 750;
   gap: 8px;
 }
 
 .report-detail li i {
-  color: #3d9f7d;
+  color: #0d8cfb;
 }
 </style>

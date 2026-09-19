@@ -11,7 +11,7 @@
 .access-denied {
   align-items: center;
   background: #ffffff;
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -22,19 +22,19 @@
 }
 
 .access-denied .pi-lock {
-  color: #f08a24;
+  color: #fc6910;
   font-size: 42px;
 }
 
 .access-denied h2 {
-  color: #16251d;
+  color: #021c45;
   font-size: 28px;
   font-weight: 950;
   margin: 0;
 }
 
 .access-denied p {
-  color: #66756b;
+  color: #526780;
   font-weight: 700;
   margin: 0;
 }

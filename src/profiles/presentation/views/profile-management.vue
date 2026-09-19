@@ -53,7 +53,7 @@ onMounted(() => {
 .view-header,
 .profiles-grid article {
   background: #ffffff;
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
 }
@@ -67,7 +67,7 @@ onMounted(() => {
 
 .view-header span,
 .profile-type {
-  color: #3d9f7d;
+  color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
@@ -75,7 +75,7 @@ onMounted(() => {
 
 .view-header h2,
 .profiles-grid h3 {
-  color: #16251d;
+  color: #021c45;
   font-weight: 950;
   margin: 6px 0;
 }
@@ -83,7 +83,7 @@ onMounted(() => {
 .view-header p,
 .profiles-grid p,
 dd {
-  color: #66756b;
+  color: #526780;
   font-weight: 700;
 }
 
@@ -104,7 +104,7 @@ dl {
 }
 
 dt {
-  color: #94a3b8;
+  color: #526780;
   font-size: 12px;
   font-weight: 900;
 }

@@ -28,7 +28,7 @@ defineProps({
 .feature-placeholder {
   align-items: center;
   background: #ffffff;
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   display: flex;
   gap: 18px;
@@ -38,7 +38,7 @@ defineProps({
 
 .feature-icon {
   align-items: center;
-  background: #10261c;
+  background: #021c45;
   border-radius: 8px;
   color: #ffffff;
   display: inline-flex;
@@ -48,21 +48,21 @@ defineProps({
 }
 
 .feature-placeholder span {
-  color: #3d9f7d;
+  color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
 }
 
 .feature-placeholder h2 {
-  color: #16251d;
+  color: #021c45;
   font-size: 28px;
   font-weight: 950;
   margin: 6px 0;
 }
 
 .feature-placeholder p {
-  color: #66756b;
+  color: #526780;
   font-weight: 700;
   margin: 0;
 }

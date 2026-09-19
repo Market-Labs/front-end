@@ -112,12 +112,12 @@ const todayDate = computed(() => (
 .marketgo-layout {
   display: flex;
   min-height: 100vh;
-  background: #f5f7f4;
+  background: #eff3fa;
 }
 
 .sidebar {
   align-self: stretch;
-  background: #10261c;
+  background: #021c45;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -163,7 +163,7 @@ const todayDate = computed(() => (
 
 .brand small,
 .profile-button small {
-  color: #9fb0a6;
+  color: #b8c9e8;
   display: block;
   font-size: 11px;
   font-weight: 700;
@@ -179,7 +179,7 @@ const todayDate = computed(() => (
 .menu-item {
   align-items: center;
   border-radius: 8px;
-  color: #a8b8ae;
+  color: #b8c9e8;
   display: flex;
   font-size: 14px;
   font-weight: 800;
@@ -197,7 +197,7 @@ const todayDate = computed(() => (
 }
 
 .menu-item.router-link-active {
-  background: #f08a24;
+  background: #0d8cfb;
   color: #ffffff;
 }
 
@@ -222,8 +222,8 @@ const todayDate = computed(() => (
 }
 
 .logout-button {
-  background: #1a3829;
-  color: #d4ded8;
+  background: #023192;
+  color: #eff3fa;
   font-weight: 800;
 }
 
@@ -234,7 +234,7 @@ const todayDate = computed(() => (
 
 .avatar {
   align-items: center;
-  background: #3d9f7d;
+  background: #0d8cfb;
   border-radius: 50%;
   color: #ffffff;
   display: inline-flex;
@@ -261,11 +261,11 @@ const todayDate = computed(() => (
   display: flex;
   justify-content: space-between;
   min-height: 86px;
-  padding: 18px 28px 12px;
+  padding: 24px 40px 16px;
 }
 
 .topbar h1 {
-  color: #16251d;
+  color: #021c45;
   font-size: 26px;
   font-weight: 900;
   line-height: 1.1;
@@ -273,7 +273,7 @@ const todayDate = computed(() => (
 }
 
 .topbar p {
-  color: #7a887f;
+  color: #526780;
   font-size: 13px;
   font-weight: 700;
   margin: 6px 0 0;
@@ -288,7 +288,7 @@ const todayDate = computed(() => (
 .search-box {
   align-items: center;
   background: #ffffff;
-  border: 1px solid #e7ece8;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
   display: flex;
@@ -300,7 +300,7 @@ const todayDate = computed(() => (
 
 .search-box input {
   border: 0;
-  color: #334155;
+  color: #023192;
   font: inherit;
   font-size: 14px;
   font-weight: 700;
@@ -309,13 +309,13 @@ const todayDate = computed(() => (
 }
 
 .search-box .pi {
-  color: #94a3b8;
+  color: #526780;
 }
 
 .icon-button {
   align-items: center;
   background: #ffffff;
-  border: 1px solid #e7ece8;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   color: #475569;
   cursor: pointer;
@@ -327,7 +327,7 @@ const todayDate = computed(() => (
 }
 
 .notification-dot {
-  background: #e9592c;
+  background: #fc6910;
   border: 2px solid #ffffff;
   border-radius: 50%;
   height: 10px;
@@ -341,7 +341,7 @@ const todayDate = computed(() => (
   flex: 1;
   min-width: 0;
   overflow: auto;
-  padding: 0 28px 28px;
+  padding: 0 40px 40px;
 }
 
 @media (max-width: 1000px) {
@@ -369,6 +369,14 @@ const todayDate = computed(() => (
 
   .search-box {
     width: 100%;
+  }
+
+  .topbar {
+    padding: 16px;
+  }
+
+  .content {
+    padding: 0 16px 16px;
   }
 }
 </style>
