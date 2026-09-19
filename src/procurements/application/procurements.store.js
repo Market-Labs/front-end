@@ -5,9 +5,10 @@ import { ProcurementOrder } from '../domain/model/procurement-order.entity.js';
 const procurementsApi = new ProcurementsApi();
 
 const demoOrders = [
-  new ProcurementOrder({ id: 'ord-1001', supplier: 'BioAndes Organic', minimarket: 'Minimarket Verde Sur', status: 'pending', total: 420.5, createdAt: '2026-09-18', items: ['Yogurt organico', 'Lechugas organicas'] }),
-  new ProcurementOrder({ id: 'ord-1002', supplier: 'Anita Gamboa', minimarket: 'Minimarket Verde Sur', status: 'pending', total: 315.8, createdAt: '2026-09-18', items: ['Leche organica', 'Queso organico'] }),
-  new ProcurementOrder({ id: 'ord-1003', supplier: 'BioAndes Organic', minimarket: 'Minimarket Verde Sur', status: 'approved', total: 228.4, createdAt: '2026-09-17', items: ['Tomate organico', 'Pepino organico', 'Zanahoria organica'] }),
+  new ProcurementOrder({ id: 'ship-1001', supplyRequestId: 'req-2', supplierId: 'sup-2', minimarketId: 'min-1', supplier: 'Anita Gamboa', minimarket: 'Minimarket Verde Sur', status: 'pending-reception', total: 315.8, createdAt: '2026-09-18', shippingDate: '2026-09-19', observations: 'Despacho refrigerado para lacteos.', items: [{ productName: 'Leche organica', quantity: 30, unitPrice: 7.2 }, { productName: 'Queso organico', quantity: 12, unitPrice: 14.5 }] }),
+  new ProcurementOrder({ id: 'ship-1002', supplyRequestId: 'req-3', supplierId: 'sup-1', minimarketId: 'min-1', supplier: 'BioAndes Organic', minimarket: 'Minimarket Verde Sur', status: 'pending-reception', total: 228.4, createdAt: '2026-09-17', shippingDate: '2026-09-19', observations: 'Entrega parcial de vegetales frescos.', items: [{ productName: 'Tomate organico', quantity: 45, unitPrice: 3.8 }, { productName: 'Pepino organico', quantity: 20, unitPrice: 2.9 }] }),
+  new ProcurementOrder({ id: 'ship-1003', supplyRequestId: 'req-5', supplierId: 'sup-2', minimarketId: 'min-1', supplier: 'Anita Gamboa', minimarket: 'Minimarket Verde Sur', status: 'received', total: 252.6, createdAt: '2026-09-15', shippingDate: '2026-09-16', receivedAt: '2026-09-16 15:40', observations: 'Recepcion aceptada sin observaciones.', items: [{ productName: 'Brocoli organico', quantity: 18, unitPrice: 6.3 }, { productName: 'Pimientos organicos', quantity: 24, unitPrice: 5.8 }] }),
+  new ProcurementOrder({ id: 'ship-1004', supplyRequestId: 'req-4', supplierId: 'sup-2', minimarketId: 'min-1', supplier: 'Anita Gamboa', minimarket: 'Minimarket Verde Sur', status: 'rejected', total: 217.5, createdAt: '2026-09-16', shippingDate: '2026-09-17', rejectionReason: 'Solicitud rechazada por disponibilidad.', items: [{ productName: 'Queso organico', quantity: 15, unitPrice: 14.5 }] }),
 ];
 
 export const useProcurementsStore = defineStore('procurements', {
@@ -27,6 +28,75 @@ export const useProcurementsStore = defineStore('procurements', {
       } finally {
         this.loading = false;
       }
+    },
+    visibleForUser(user) {
+      if (!user) return [];
+      if (user.roles?.includes('Proveedor Organico')) {
+        return this.orders.filter((order) => order.supplierId === 'sup-2');
+      }
+      return this.orders.filter((order) => order.minimarketId === 'min-1');
+    },
+    createFromSupplyRequest(request) {
+      const orderId = `ship-${Date.now().toString().slice(-5)}`;
+      const items = request.items.map((item) => ({
+        productName: item.productName,
+        quantity: Number(item.quantity),
+        unitPrice: item.unitPrice || 8.5,
+      }));
+      const total = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+      this.orders = [
+        new ProcurementOrder({
+          id: orderId,
+          supplyRequestId: request.id,
+          supplierId: request.supplierId,
+          minimarketId: request.minimarketId,
+          supplier: request.supplier,
+          minimarket: 'Minimarket Verde Sur',
+          status: 'pending-reception',
+          total: Number(total.toFixed(2)),
+          createdAt: new Date().toISOString().slice(0, 10),
+          shippingDate: new Date().toISOString().slice(0, 10),
+          observations: 'Orden de envio generada desde una solicitud aceptada.',
+          items,
+        }),
+        ...this.orders,
+      ];
+      return orderId;
+    },
+    acceptReception(orderId) {
+      this.orders = this.orders.map((order) => (
+        order.id === orderId
+          ? new ProcurementOrder({
+            ...order,
+            status: 'received',
+            receivedAt: new Date().toISOString(),
+            reception: {
+              administratorId: 'usr-admin',
+              accepted: true,
+              comment: 'Recepcion aceptada; inventario listo para actualizar.',
+              reviewedAt: new Date().toISOString(),
+            },
+          })
+          : order
+      ));
+    },
+    rejectReception(orderId, reason = 'Recepcion rechazada por diferencias en la entrega.') {
+      this.orders = this.orders.map((order) => (
+        order.id === orderId
+          ? new ProcurementOrder({
+            ...order,
+            status: 'rejected',
+            receivedAt: new Date().toISOString(),
+            rejectionReason: reason,
+            reception: {
+              administratorId: 'usr-admin',
+              accepted: false,
+              comment: reason,
+              reviewedAt: new Date().toISOString(),
+            },
+          })
+          : order
+      ));
     },
   },
 });

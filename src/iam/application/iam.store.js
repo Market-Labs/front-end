@@ -35,6 +35,10 @@ export const useIamStore = defineStore('iam', {
     userName: (state) => state.currentUser?.name || 'Invitado',
     userRole: (state) => state.currentUser?.roles?.[0] || 'Sin rol',
     isAdmin: (state) => state.currentUser?.permissions?.includes('users:manage') || false,
+    isMinimarketAdmin: (state) => state.currentUser?.roles?.includes('Administrador de Minimarket') || false,
+    isSupplier: (state) => state.currentUser?.roles?.includes('Proveedor Organico') || false,
+    currentSupplierId: (state) => (state.currentUser?.roles?.includes('Proveedor Organico') ? 'sup-2' : null),
+    currentMinimarketId: (state) => (state.currentUser?.roles?.includes('Administrador de Minimarket') ? 'min-1' : 'min-1'),
   },
   actions: {
     async fetchUsers() {
@@ -52,6 +56,10 @@ export const useIamStore = defineStore('iam', {
     logout() {
       window.localStorage.removeItem('marketgo.auth.token');
       this.currentUser = null;
+    },
+    switchDemoUser(userId) {
+      const nextUser = this.users.find((user) => user.id === userId);
+      if (nextUser) this.currentUser = nextUser;
     },
   },
 });

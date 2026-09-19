@@ -13,7 +13,7 @@
         </router-link>
 
         <nav class="menu" aria-label="MarketGo navigation">
-          <router-link v-for="item in menuItems" :key="item.to" :to="item.to" class="menu-item">
+          <router-link v-for="item in visibleMenuItems" :key="item.to" :to="item.to" class="menu-item">
             <i :class="item.icon"></i>
             <span>{{ t(item.labelKey) }}</span>
           </router-link>
@@ -21,15 +21,23 @@
       </div>
 
       <div class="sidebar-footer">
+        <label class="role-switcher">
+          <span>{{ t('common.current_role') }}</span>
+          <select :value="iamStore.currentUser?.id" @change="iamStore.switchDemoUser($event.target.value)">
+            <option v-for="user in iamStore.users" :key="user.id" :value="user.id">
+              {{ user.roles[0] }}
+            </option>
+          </select>
+        </label>
         <button type="button" class="logout-button">
           <i class="pi pi-sign-out"></i>
           <span>{{ t('option.logout') }}</span>
         </button>
         <button type="button" class="profile-button" @click="router.push('/settings')">
-          <span class="avatar">AM</span>
+          <span class="avatar">{{ userInitials }}</span>
           <span>
-            <strong>Administrador</strong>
-            <small>Minimarket organico</small>
+            <strong>{{ iamStore.userName }}</strong>
+            <small>{{ iamStore.userRole }}</small>
           </span>
           <i class="pi pi-ellipsis-v"></i>
         </button>
@@ -68,10 +76,12 @@ import { computed, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import LanguageSwitcher from './language-switcher.vue';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 
 const route = useRoute();
 const router = useRouter();
 const { locale, t } = useI18n();
+const iamStore = useIamStore();
 const searchQuery = ref('');
 
 provide('marketgoSearchQuery', searchQuery);
@@ -81,19 +91,34 @@ watch(() => route.fullPath, () => {
 });
 
 const menuItems = [
-  { to: '/home', icon: 'pi pi-microsoft', labelKey: 'option.dashboard' },
-  { to: '/inventory', icon: 'pi pi-box', labelKey: 'option.inventory' },
-  { to: '/products', icon: 'pi pi-shopping-bag', labelKey: 'option.products' },
-  { to: '/requisition', icon: 'pi pi-list-check', labelKey: 'option.requisition' },
-  { to: '/procurements', icon: 'pi pi-truck', labelKey: 'option.procurements' },
-  { to: '/suppliers', icon: 'pi pi-users', labelKey: 'option.suppliers' },
-  { to: '/conservation', icon: 'pi pi-cloud', labelKey: 'option.conservation' },
-  { to: '/analytics', icon: 'pi pi-chart-bar', labelKey: 'option.analytics' },
-  { to: '/communication', icon: 'pi pi-comments', labelKey: 'option.communication' },
-  { to: '/profiles', icon: 'pi pi-id-card', labelKey: 'option.profiles' },
-  { to: '/iam', icon: 'pi pi-shield', labelKey: 'option.iam' },
-  { to: '/settings', icon: 'pi pi-cog', labelKey: 'option.settings' },
+  { to: '/home', icon: 'pi pi-microsoft', labelKey: 'option.dashboard', roles: ['admin', 'supplier'] },
+  { to: '/inventory', icon: 'pi pi-box', labelKey: 'option.inventory', roles: ['admin'] },
+  { to: '/products', icon: 'pi pi-shopping-bag', labelKey: 'option.products', roles: ['admin', 'supplier'] },
+  { to: '/requisition', icon: 'pi pi-list-check', labelKey: 'option.requisition', roles: ['admin', 'supplier'] },
+  { to: '/procurements', icon: 'pi pi-truck', labelKey: 'option.procurements', roles: ['admin', 'supplier'] },
+  { to: '/suppliers', icon: 'pi pi-users', labelKey: 'option.suppliers', roles: ['admin', 'supplier'] },
+  { to: '/conservation', icon: 'pi pi-cloud', labelKey: 'option.conservation', roles: ['admin'] },
+  { to: '/analytics', icon: 'pi pi-chart-bar', labelKey: 'option.analytics', roles: ['admin', 'supplier'] },
+  { to: '/communication', icon: 'pi pi-comments', labelKey: 'option.communication', roles: ['admin', 'supplier'] },
+  { to: '/profiles', icon: 'pi pi-id-card', labelKey: 'option.profiles', roles: ['admin', 'supplier'] },
+  { to: '/iam', icon: 'pi pi-shield', labelKey: 'option.iam', roles: ['admin'] },
+  { to: '/settings', icon: 'pi pi-cog', labelKey: 'option.settings', roles: ['admin', 'supplier'] },
 ];
+
+const activeRoleKey = computed(() => (iamStore.isSupplier ? 'supplier' : 'admin'));
+
+const visibleMenuItems = computed(() => (
+  menuItems.filter((item) => item.roles.includes(activeRoleKey.value))
+));
+
+const alwaysAllowedPaths = ['/dashboard', '/access-denied'];
+
+const userInitials = computed(() => iamStore.userName
+  .split(' ')
+  .map((part) => part[0])
+  .join('')
+  .slice(0, 2)
+  .toUpperCase());
 
 const routeTitleKeys = {
   home: 'option.dashboard',
@@ -104,6 +129,13 @@ const routeTitleKeys = {
 const pageTitle = computed(() => {
   const key = route.meta.titleKey || routeTitleKeys[route.name];
   return key ? t(key) : route.meta.title || t('option.dashboard');
+});
+
+watch([() => route.path, visibleMenuItems], () => {
+  const hasVisibleRoute = visibleMenuItems.value.some((item) => route.path === item.to);
+  if (!hasVisibleRoute && !alwaysAllowedPaths.includes(route.path)) {
+    router.push('/access-denied');
+  }
 });
 
 const todayDate = computed(() => (
@@ -212,6 +244,26 @@ const todayDate = computed(() => (
   display: grid;
   gap: 12px;
   padding: 0 14px;
+}
+
+.role-switcher {
+  color: #b8c9e8;
+  display: grid;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 6px;
+  text-transform: uppercase;
+}
+
+.role-switcher select {
+  background: #ffffff;
+  border: 1px solid #d9e5f6;
+  border-radius: 8px;
+  color: #023192;
+  font: inherit;
+  min-height: 40px;
+  padding: 0 10px;
+  text-transform: none;
 }
 
 .logout-button,
