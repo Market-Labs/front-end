@@ -45,7 +45,7 @@
     </pv-dialog>
 
     <div class="products-grid">
-      <article v-for="product in productsStore.products" :key="product.id">
+      <article v-for="product in filteredProducts" :key="product.id">
         <div class="card-top">
           <span>{{ product.category }}</span>
           <strong>{{ product.formattedPrice }}</strong>
@@ -66,8 +66,10 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import { useProductsStore } from '../../application/products.store.js';
+import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const productsStore = useProductsStore();
+const filteredProducts = useSearchFilter(() => productsStore.products);
 const showProductForm = ref(false);
 const categoryOptions = ['Vegetales', 'Frutas', 'Lacteos', 'Organicos'];
 const productForm = reactive({

@@ -2,21 +2,21 @@
   <section class="conservation-view">
     <div class="view-header">
       <div>
-        <span>Conservation</span>
-        <h2>Monitoreo de temperatura y humedad</h2>
-        <p>Control de condiciones para conservacion de productos organicos.</p>
+        <span>{{ $t('page.conservation.eyebrow') }}</span>
+        <h2>{{ $t('page.conservation.title') }}</h2>
+        <p>{{ $t('page.conservation.description') }}</p>
       </div>
-      <pv-button label="Ver alertas" icon="pi pi-bell" @click="router.push('/communication')" />
+      <pv-button :label="$t('page.conservation.viewAlerts')" icon="pi pi-bell" @click="router.push('/communication')" />
     </div>
 
     <div class="table-card">
-      <pv-data-table :value="conservationStore.records" class="marketgo-datatable" responsive-layout="scroll">
-        <pv-column field="zone" header="Zona" />
-        <pv-column field="productName" header="Producto" />
-        <pv-column field="temperature" header="Temp C" />
-        <pv-column field="humidity" header="Humedad %" />
-        <pv-column field="recordedAt" header="Registro" />
-        <pv-column header="Estado">
+      <pv-data-table :value="filteredRecords" class="marketgo-datatable" responsive-layout="scroll">
+        <pv-column field="zone" :header="$t('page.conservation.zone')" />
+        <pv-column field="productName" :header="$t('common.product')" />
+        <pv-column field="temperature" :header="$t('page.conservation.temperature')" />
+        <pv-column field="humidity" :header="$t('page.conservation.humidity')" />
+        <pv-column field="recordedAt" :header="$t('page.conservation.record')" />
+        <pv-column :header="$t('common.status')">
           <template #body="{ data }">
             <span :class="['status-badge', data.isRisky ? 'status-risk' : 'status-healthy']">
               {{ data.status }}
@@ -32,9 +32,11 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useConservationStore } from '../../application/conservation.store.js';
+import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const router = useRouter();
 const conservationStore = useConservationStore();
+const filteredRecords = useSearchFilter(() => conservationStore.records);
 
 onMounted(() => {
   conservationStore.fetchMonitoring();

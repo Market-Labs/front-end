@@ -13,7 +13,7 @@
     </section>
 
     <button
-      v-for="metric in overviewStore.indicators"
+      v-for="metric in filteredIndicators"
       :key="metric.label"
       type="button"
       class="metric-card compact"
@@ -33,7 +33,7 @@
         <button type="button">{{ $t('common.view_all') }}</button>
       </div>
       <div class="timeline">
-        <article v-for="event in overviewStore.activity" :key="event.title">
+        <article v-for="event in filteredActivity" :key="event.title">
           <span :class="['status-dot', event.kind]"></span>
           <div>
             <strong>{{ event.title }}</strong>
@@ -49,7 +49,7 @@
         <h2>{{ $t('page.dashboard.summary') }}</h2>
       </div>
       <div class="module-list">
-        <article v-for="module in modules" :key="module.name">
+        <article v-for="module in filteredModules" :key="module.name">
           <i :class="module.icon"></i>
           <div>
             <strong>{{ module.name }}</strong>
@@ -65,6 +65,7 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDashboardOverviewStore } from '../../application/dashboard-overview.store.js';
+import { useSearchFilter } from '../../application/use-search-filter.js';
 
 const router = useRouter();
 const overviewStore = useDashboardOverviewStore();
@@ -74,6 +75,9 @@ const modules = [
   { name: 'Conservacion', description: 'Temperatura y humedad monitoreadas por zona.', icon: 'pi pi-cloud' },
   { name: 'Abastecimiento', description: 'Ordenes de compra listas para seguimiento.', icon: 'pi pi-truck' },
 ];
+const filteredIndicators = useSearchFilter(() => overviewStore.indicators);
+const filteredActivity = useSearchFilter(() => overviewStore.activity);
+const filteredModules = useSearchFilter(() => modules);
 
 const goToMetric = (metric) => {
   if (metric.route) router.push(metric.route);

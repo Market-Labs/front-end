@@ -66,6 +66,84 @@
       "units": "units",
       "selectCategory": "Select category"
     },
+    "requisition": {
+      "eyebrow": "Requisitions",
+      "title": "Internal product requests",
+      "description": "Creation, review, approval/rejection and conversion into procurement.",
+      "newRequest": "New request",
+      "requester": "Requester",
+      "reason": "Reason"
+    },
+    "procurements": {
+      "eyebrow": "Procurements",
+      "title": "Procurement orders",
+      "description": "Creation, visualization, filtering, acceptance, rejection and status tracking.",
+      "createOrder": "Create order",
+      "order": "Order",
+      "supplier": "Supplier",
+      "estimatedTotal": "Estimated total",
+      "selectStatus": "Select status"
+    },
+    "suppliers": {
+      "eyebrow": "Suppliers",
+      "title": "Supplier directory",
+      "description": "Manage commercial data, specialty and supplier coverage.",
+      "newSupplier": "New supplier",
+      "businessName": "Business name",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "specialty": "Specialty",
+      "coverage": "Coverage"
+    },
+    "profiles": {
+      "eyebrow": "Profiles",
+      "title": "Minimarket and supplier profiles",
+      "description": "Lookup and update commercial data, contact details and coverage.",
+      "updateProfile": "Update profile",
+      "phone": "Phone",
+      "zone": "Zone",
+      "specialty": "Specialty"
+    },
+    "iam": {
+      "eyebrow": "IAM",
+      "title": "Users, roles and permissions",
+      "description": "Access control for minimarket administrators and organic suppliers.",
+      "newUser": "New user",
+      "user": "User",
+      "email": "Email",
+      "role": "Role",
+      "selectRole": "Select role",
+      "selectStatus": "Select status",
+      "activeUsers": "Active users",
+      "definedRoles": "Defined roles",
+      "keyPermissions": "Key permissions"
+    },
+    "conservation": {
+      "eyebrow": "Conservation",
+      "title": "Temperature and humidity monitoring",
+      "description": "Condition control for organic product conservation.",
+      "viewAlerts": "View alerts",
+      "zone": "Zone",
+      "temperature": "Temp C",
+      "humidity": "Humidity %",
+      "record": "Record"
+    },
+    "alerts": {
+      "eyebrow": "Alerts",
+      "title": "Alert center",
+      "description": "Conservation, expiration, stock and procurement alerts.",
+      "viewSuppliers": "View suppliers",
+      "unread": "{count} unread",
+      "markRead": "Mark read"
+    },
+    "roleDashboard": {
+      "eyebrow": "Dashboard",
+      "title": "Role-based indicators",
+      "description": "Operational view for inventory, requisitions, procurements, alerts and activity.",
+      "refresh": "Refresh",
+      "periodComparison": "vs previous period"
+    },
     "analytics": {
       "eyebrow": "Analytics",
       "title": "Operational indicators and reports",

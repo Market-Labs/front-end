@@ -2,18 +2,18 @@
   <section class="communication-view">
     <div class="view-header">
       <div>
-        <span>Alertas</span>
-        <h2>Centro de alertas</h2>
-        <p>Alertas de conservacion, vencimiento, stock y abastecimiento.</p>
+        <span>{{ $t('page.alerts.eyebrow') }}</span>
+        <h2>{{ $t('page.alerts.title') }}</h2>
+        <p>{{ $t('page.alerts.description') }}</p>
       </div>
       <div class="header-actions">
-        <pv-button label="Ver proveedores" icon="pi pi-truck" severity="secondary" @click="router.push('/suppliers')" />
-        <pv-button :label="`${communicationStore.unreadCount} sin leer`" icon="pi pi-bell" />
+        <pv-button :label="$t('page.alerts.viewSuppliers')" icon="pi pi-truck" severity="secondary" @click="router.push('/suppliers')" />
+        <pv-button :label="$t('page.alerts.unread', { count: communicationStore.unreadCount })" icon="pi pi-bell" />
       </div>
     </div>
 
     <div class="message-list">
-      <article v-for="message in communicationStore.messages" :key="message.id" :class="{ unread: !message.read }">
+      <article v-for="message in filteredMessages" :key="message.id" :class="{ unread: !message.read }">
         <button type="button" @click="communicationStore.toggleStarred(message.id)">
           <i :class="message.starred ? 'pi pi-star-fill' : 'pi pi-star'"></i>
         </button>
@@ -22,7 +22,7 @@
           <p>{{ message.body }}</p>
           <small>{{ message.sender }} - {{ message.sentAt }}</small>
         </div>
-        <pv-button v-if="!message.read" label="Marcar leido" text @click="communicationStore.markAsRead(message.id)" />
+        <pv-button v-if="!message.read" :label="$t('page.alerts.markRead')" text @click="communicationStore.markAsRead(message.id)" />
       </article>
     </div>
   </section>
@@ -32,8 +32,10 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCommunicationStore } from '../../application/communication.store.js';
+import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const communicationStore = useCommunicationStore();
+const filteredMessages = useSearchFilter(() => communicationStore.messages);
 const router = useRouter();
 
 onMounted(() => {

@@ -46,7 +46,7 @@
         <div class="topbar-actions">
           <div class="search-box">
             <i class="pi pi-search"></i>
-            <input :placeholder="t('common.search_placeholder')" type="search" />
+            <input v-model="searchQuery" :placeholder="t('common.search_placeholder')" type="search" />
           </div>
           <button type="button" class="icon-button" aria-label="Notifications">
             <i class="pi pi-bell"></i>
@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import LanguageSwitcher from './language-switcher.vue';
@@ -72,6 +72,13 @@ import LanguageSwitcher from './language-switcher.vue';
 const route = useRoute();
 const router = useRouter();
 const { locale, t } = useI18n();
+const searchQuery = ref('');
+
+provide('marketgoSearchQuery', searchQuery);
+
+watch(() => route.fullPath, () => {
+  searchQuery.value = '';
+});
 
 const menuItems = [
   { to: '/home', icon: 'pi pi-microsoft', labelKey: 'option.dashboard' },

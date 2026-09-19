@@ -10,7 +10,7 @@
     </div>
 
     <div class="analytics-grid">
-      <article v-for="indicator in analyticsStore.indicators" :key="indicator.label">
+      <article v-for="indicator in filteredIndicators" :key="indicator.label">
         <span>{{ indicator.label }}</span>
         <strong>{{ indicator.currentValue }}{{ indicator.unit }}</strong>
         <small :class="indicator.variation >= 0 ? 'up' : 'down'">
@@ -23,7 +23,7 @@
       <h3>{{ $t('page.analytics.availableReports') }}</h3>
       <div>
         <button
-          v-for="report in analyticsStore.reports"
+          v-for="report in filteredReports"
           :key="report"
           type="button"
           :class="{ active: selectedReport === report }"
@@ -64,11 +64,14 @@
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAnalyticsStore } from '../../application/analytics.store.js';
+import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const analyticsStore = useAnalyticsStore();
 const { t } = useI18n();
 const selectedReport = ref('Inventario');
 const generatedReport = ref('');
+const filteredIndicators = useSearchFilter(() => analyticsStore.indicators);
+const filteredReports = useSearchFilter(() => analyticsStore.reports);
 
 const reportButtonLabel = computed(() => t('page.analytics.generate', { report: selectedReport.value }));
 const selectedReportSummary = computed(() => analyticsStore.reportSummaries[selectedReport.value]);

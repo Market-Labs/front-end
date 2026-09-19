@@ -43,7 +43,7 @@
     </pv-dialog>
 
     <div class="table-card">
-      <pv-data-table :value="inventoryStore.items" class="marketgo-datatable" responsive-layout="scroll">
+      <pv-data-table :value="filteredItems" class="marketgo-datatable" responsive-layout="scroll">
         <pv-column field="productName" :header="$t('common.product')" />
         <pv-column field="lotCode" :header="$t('page.inventory.lot')" />
         <pv-column field="stock" header="Stock" />
@@ -64,8 +64,10 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import { useInventoryStore } from '../../application/inventory.store.js';
+import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const inventoryStore = useInventoryStore();
+const filteredItems = useSearchFilter(() => inventoryStore.items);
 const showStockForm = ref(false);
 const stockForm = reactive({
   productName: '',

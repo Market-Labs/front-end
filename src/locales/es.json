@@ -66,6 +66,84 @@
       "units": "unidades",
       "selectCategory": "Seleccionar categoria"
     },
+    "requisition": {
+      "eyebrow": "Requisiciones",
+      "title": "Solicitudes internas de productos",
+      "description": "Creacion, revision, aprobacion/rechazo y conversion a abastecimiento.",
+      "newRequest": "Nueva solicitud",
+      "requester": "Solicitante",
+      "reason": "Motivo"
+    },
+    "procurements": {
+      "eyebrow": "Abastecimiento",
+      "title": "Ordenes de abastecimiento",
+      "description": "Creacion, visualizacion, filtrado, aceptacion, rechazo y seguimiento de estado.",
+      "createOrder": "Crear orden",
+      "order": "Orden",
+      "supplier": "Proveedor",
+      "estimatedTotal": "Total estimado",
+      "selectStatus": "Seleccionar estado"
+    },
+    "suppliers": {
+      "eyebrow": "Proveedores",
+      "title": "Directorio de proveedores",
+      "description": "Gestion de datos comerciales, especialidad y cobertura de proveedores.",
+      "newSupplier": "Nuevo proveedor",
+      "businessName": "Nombre comercial",
+      "phone": "Telefono",
+      "email": "Correo",
+      "address": "Direccion",
+      "specialty": "Especialidad",
+      "coverage": "Cobertura"
+    },
+    "profiles": {
+      "eyebrow": "Perfiles",
+      "title": "Perfiles de minimarket y proveedor",
+      "description": "Consulta y actualizacion de datos comerciales, contacto y cobertura.",
+      "updateProfile": "Actualizar perfil",
+      "phone": "Telefono",
+      "zone": "Zona",
+      "specialty": "Especialidad"
+    },
+    "iam": {
+      "eyebrow": "IAM",
+      "title": "Usuarios, roles y permisos",
+      "description": "Control de acceso para administradores de minimarket y proveedores organicos.",
+      "newUser": "Nuevo usuario",
+      "user": "Usuario",
+      "email": "Correo",
+      "role": "Rol",
+      "selectRole": "Seleccionar rol",
+      "selectStatus": "Seleccionar estado",
+      "activeUsers": "Usuarios activos",
+      "definedRoles": "Roles definidos",
+      "keyPermissions": "Permisos clave"
+    },
+    "conservation": {
+      "eyebrow": "Conservacion",
+      "title": "Monitoreo de temperatura y humedad",
+      "description": "Control de condiciones para conservacion de productos organicos.",
+      "viewAlerts": "Ver alertas",
+      "zone": "Zona",
+      "temperature": "Temp C",
+      "humidity": "Humedad %",
+      "record": "Registro"
+    },
+    "alerts": {
+      "eyebrow": "Alertas",
+      "title": "Centro de alertas",
+      "description": "Alertas de conservacion, vencimiento, stock y abastecimiento.",
+      "viewSuppliers": "Ver proveedores",
+      "unread": "{count} sin leer",
+      "markRead": "Marcar leido"
+    },
+    "roleDashboard": {
+      "eyebrow": "Dashboard",
+      "title": "Indicadores por rol",
+      "description": "Vista operativa para inventario, requisiciones, abastecimiento, alertas y actividad.",
+      "refresh": "Refrescar",
+      "periodComparison": "vs periodo anterior"
+    },
     "analytics": {
       "eyebrow": "Analitica",
       "title": "Indicadores y reportes operativos",

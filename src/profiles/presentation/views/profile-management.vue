@@ -2,29 +2,29 @@
   <section class="profiles-view">
     <div class="view-header">
       <div>
-        <span>Profiles</span>
-        <h2>Perfiles de minimarket y proveedor</h2>
-        <p>Consulta y actualizacion de datos comerciales, contacto y cobertura.</p>
+        <span>{{ $t('page.profiles.eyebrow') }}</span>
+        <h2>{{ $t('page.profiles.title') }}</h2>
+        <p>{{ $t('page.profiles.description') }}</p>
       </div>
-      <pv-button label="Actualizar perfil" icon="pi pi-pencil" />
+      <pv-button :label="$t('page.profiles.updateProfile')" icon="pi pi-pencil" />
     </div>
 
     <div class="profiles-grid">
-      <article v-for="profile in profilesStore.profiles" :key="profile.id">
+      <article v-for="profile in filteredProfiles" :key="profile.id">
         <div class="profile-type">{{ profile.type }}</div>
         <h3>{{ profile.businessName }}</h3>
         <p>{{ profile.address }}</p>
         <dl>
           <div>
-            <dt>Telefono</dt>
+            <dt>{{ $t('page.profiles.phone') }}</dt>
             <dd>{{ profile.phone }}</dd>
           </div>
           <div>
-            <dt>Zona</dt>
+            <dt>{{ $t('page.profiles.zone') }}</dt>
             <dd>{{ profile.displayArea }}</dd>
           </div>
           <div v-if="profile.specialty">
-            <dt>Especialidad</dt>
+            <dt>{{ $t('page.profiles.specialty') }}</dt>
             <dd>{{ profile.specialty }}</dd>
           </div>
         </dl>
@@ -36,8 +36,10 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useProfilesStore } from '../../application/profiles.store.js';
+import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const profilesStore = useProfilesStore();
+const filteredProfiles = useSearchFilter(() => profilesStore.profiles);
 
 onMounted(() => {
   profilesStore.fetchProfiles();
