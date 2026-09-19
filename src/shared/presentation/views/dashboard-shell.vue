@@ -2,16 +2,13 @@
   <div class="dashboard-grid">
     <section class="metric-card hero-card">
       <div>
-        <span class="eyebrow">MarketGo overview</span>
-        <h2>Control operativo de productos organicos</h2>
-        <p>
-          Base visual preparada para conectar inventario, abastecimiento,
-          alertas de conservacion y actividad por rol.
-        </p>
+        <span class="eyebrow">{{ $t('page.dashboard.eyebrow') }}</span>
+        <h2>{{ $t('page.dashboard.title') }}</h2>
+        <p>{{ $t('page.dashboard.description') }}</p>
       </div>
       <div class="hero-stat">
         <strong>{{ overviewStore.healthScore }}%</strong>
-        <span>salud operacional</span>
+        <span>{{ $t('page.dashboard.health') }}</span>
       </div>
     </section>
 
@@ -32,7 +29,7 @@
 
     <section class="panel-card activity-card">
       <div class="section-header">
-        <h2>Actividad reciente</h2>
+        <h2>{{ $t('page.dashboard.activity') }}</h2>
         <button type="button">{{ $t('common.view_all') }}</button>
       </div>
       <div class="timeline">
@@ -49,7 +46,7 @@
 
     <section class="panel-card modules-card">
       <div class="section-header">
-        <h2>Resumen operativo</h2>
+        <h2>{{ $t('page.dashboard.summary') }}</h2>
       </div>
       <div class="module-list">
         <article v-for="module in modules" :key="module.name">

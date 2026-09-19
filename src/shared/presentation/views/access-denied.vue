@@ -1,9 +1,9 @@
 <template>
   <section class="access-denied">
     <i class="pi pi-lock"></i>
-    <h2>Acceso denegado</h2>
-    <p>No tienes permisos para consultar este recurso.</p>
-    <pv-button label="Volver al inicio" icon="pi pi-home" @click="$router.push('/home')" />
+    <h2>{{ $t('page.accessDenied.title') }}</h2>
+    <p>{{ $t('page.accessDenied.description') }}</p>
+    <pv-button :label="$t('page.accessDenied.backHome')" icon="pi pi-home" @click="$router.push('/home')" />
   </section>
 </template>
 

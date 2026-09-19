@@ -22,6 +22,72 @@
   "common": {
     "search_placeholder": "Search MarketGo",
     "coming_soon": "Module ready for implementation",
-    "view_all": "View all"
+    "view_all": "View all",
+    "save": "Save",
+    "cancel": "Cancel",
+    "status": "Status",
+    "product": "Product",
+    "quantity": "Quantity",
+    "price": "Price",
+    "description": "Description",
+    "category": "Category",
+    "expiration": "Expiration",
+    "name": "Name"
+  },
+  "page": {
+    "accessDenied": {
+      "title": "Access denied",
+      "description": "You do not have permission to view this resource.",
+      "backHome": "Back home"
+    },
+    "dashboard": {
+      "eyebrow": "MarketGo overview",
+      "title": "Organic product operations control",
+      "description": "Visual base prepared to connect inventory, procurement, conservation alerts and role-based activity.",
+      "health": "operational health",
+      "activity": "Recent activity",
+      "summary": "Operational summary"
+    },
+    "inventory": {
+      "eyebrow": "Inventory",
+      "title": "Inventory, lots and expirations",
+      "description": "Stock, lots, expiration dates and risk status control.",
+      "registerStock": "Register stock",
+      "lot": "Lot",
+      "minimumStock": "Minimum stock"
+    },
+    "products": {
+      "eyebrow": "Products",
+      "title": "Organic product catalog",
+      "description": "Product data, expiration, quantity, price and availability.",
+      "newProduct": "New product",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "units": "units",
+      "selectCategory": "Select category"
+    },
+    "analytics": {
+      "eyebrow": "Analytics",
+      "title": "Operational indicators and reports",
+      "description": "Aggregated summary for inventory, waste, sales, conservation and procurement.",
+      "availableReports": "Available reports",
+      "selectedReport": "Selected report",
+      "generate": "Generate {report}",
+      "generated": "{report} report generated for review."
+    },
+    "settings": {
+      "eyebrow": "Settings",
+      "title": "MarketGo preferences",
+      "description": "Manage language, visual theme, notifications and work session.",
+      "saveChanges": "Save changes",
+      "saved": "Settings saved locally.",
+      "language": "Primary language",
+      "theme": "Visual theme",
+      "notifications": "Notifications",
+      "session": "Session",
+      "lightTheme": "Operational light",
+      "notificationsDetail": "Expiration and conservation alerts active",
+      "sessionDetail": "Demo local token protected by IAM"
+    }
   }
 }

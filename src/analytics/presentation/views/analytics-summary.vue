@@ -2,9 +2,9 @@
   <section class="analytics-view">
     <div class="view-header">
       <div>
-        <span>Analytics</span>
-        <h2>Indicadores y reportes operativos</h2>
-        <p>Resumen agregado para inventario, mermas, ventas, conservacion y abastecimiento.</p>
+        <span>{{ $t('page.analytics.eyebrow') }}</span>
+        <h2>{{ $t('page.analytics.title') }}</h2>
+        <p>{{ $t('page.analytics.description') }}</p>
       </div>
       <pv-button :label="reportButtonLabel" icon="pi pi-file-pdf" @click="generateReport()" />
     </div>
@@ -20,7 +20,7 @@
     </div>
 
     <div class="reports-card">
-      <h3>Reportes disponibles</h3>
+      <h3>{{ $t('page.analytics.availableReports') }}</h3>
       <div>
         <button
           v-for="report in analyticsStore.reports"
@@ -38,7 +38,7 @@
 
     <section v-if="selectedReportSummary" class="report-detail">
       <div>
-        <span>Reporte seleccionado</span>
+        <span>{{ $t('page.analytics.selectedReport') }}</span>
         <h3>{{ selectedReportSummary.title }}</h3>
         <p>{{ selectedReportSummary.description }}</p>
       </div>
@@ -62,17 +62,19 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAnalyticsStore } from '../../application/analytics.store.js';
 
 const analyticsStore = useAnalyticsStore();
+const { t } = useI18n();
 const selectedReport = ref('Inventario');
 const generatedReport = ref('');
 
-const reportButtonLabel = computed(() => `Generar ${selectedReport.value}`);
+const reportButtonLabel = computed(() => t('page.analytics.generate', { report: selectedReport.value }));
 const selectedReportSummary = computed(() => analyticsStore.reportSummaries[selectedReport.value]);
 
 const generateReport = () => {
-  generatedReport.value = `Reporte de ${selectedReport.value} generado para revision.`;
+  generatedReport.value = t('page.analytics.generated', { report: selectedReport.value });
 };
 
 onMounted(() => {

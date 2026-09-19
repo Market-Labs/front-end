@@ -10,6 +10,7 @@ import procurementsRoutes from './procurements/presentation/procurements-routes.
 import suppliersRoutes from './suppliers/presentation/suppliers-routes.js';
 import conservationRoutes from './conservation/presentation/conservation-routes.js';
 import communicationRoutes from './communication/presentation/communication-routes.js';
+import i18n from './i18n.js';
 
 const routes = [
   {
@@ -20,19 +21,19 @@ const routes = [
     path: '/home',
     name: 'home',
     component: () => import('./shared/presentation/views/dashboard-shell.vue'),
-    meta: { title: 'Dashboard' },
+    meta: { titleKey: 'option.dashboard' },
   },
   {
     path: '/settings',
     name: 'settings',
     component: () => import('./shared/presentation/views/settings.vue'),
-    meta: { title: 'Configuracion' },
+    meta: { titleKey: 'option.settings' },
   },
   {
     path: '/access-denied',
     name: 'access-denied',
     component: () => import('./shared/presentation/views/access-denied.vue'),
-    meta: { title: 'Acceso denegado' },
+    meta: { titleKey: 'page.accessDenied.title' },
   },
   ...iamRoutes,
   ...profilesRoutes,
@@ -57,7 +58,8 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
-  document.title = `MarketGo - ${to.meta.title || 'App'}`;
+  const title = to.meta.titleKey ? i18n.global.t(to.meta.titleKey) : to.meta.title || 'App';
+  document.title = `MarketGo - ${title}`;
 });
 
 export default router;

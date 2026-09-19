@@ -3,7 +3,7 @@ const communicationRoutes = [
     path: '/communication',
     name: 'communication',
     component: () => import('./views/alert-center.vue'),
-    meta: { title: 'Alertas' },
+    meta: { titleKey: 'option.communication' },
   },
 ];
 

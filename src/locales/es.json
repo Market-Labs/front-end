@@ -22,6 +22,72 @@
   "common": {
     "search_placeholder": "Buscar en MarketGo",
     "coming_soon": "Modulo preparado para implementacion",
-    "view_all": "Ver todo"
+    "view_all": "Ver todo",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "status": "Estado",
+    "product": "Producto",
+    "quantity": "Cantidad",
+    "price": "Precio",
+    "description": "Descripcion",
+    "category": "Categoria",
+    "expiration": "Vencimiento",
+    "name": "Nombre"
+  },
+  "page": {
+    "accessDenied": {
+      "title": "Acceso denegado",
+      "description": "No tienes permisos para consultar este recurso.",
+      "backHome": "Volver al inicio"
+    },
+    "dashboard": {
+      "eyebrow": "Resumen de MarketGo",
+      "title": "Control operativo de productos organicos",
+      "description": "Base visual preparada para conectar inventario, abastecimiento, alertas de conservacion y actividad por rol.",
+      "health": "salud operacional",
+      "activity": "Actividad reciente",
+      "summary": "Resumen operativo"
+    },
+    "inventory": {
+      "eyebrow": "Inventario",
+      "title": "Inventario, lotes y vencimientos",
+      "description": "Control de stock, lotes, fechas de vencimiento y estados de riesgo.",
+      "registerStock": "Registrar stock",
+      "lot": "Lote",
+      "minimumStock": "Stock minimo"
+    },
+    "products": {
+      "eyebrow": "Productos",
+      "title": "Catalogo de productos organicos",
+      "description": "Datos de producto, vencimiento, cantidad, precio y disponibilidad.",
+      "newProduct": "Nuevo producto",
+      "available": "Disponible",
+      "unavailable": "No disponible",
+      "units": "unidades",
+      "selectCategory": "Seleccionar categoria"
+    },
+    "analytics": {
+      "eyebrow": "Analitica",
+      "title": "Indicadores y reportes operativos",
+      "description": "Resumen agregado para inventario, mermas, ventas, conservacion y abastecimiento.",
+      "availableReports": "Reportes disponibles",
+      "selectedReport": "Reporte seleccionado",
+      "generate": "Generar {report}",
+      "generated": "Reporte de {report} generado para revision."
+    },
+    "settings": {
+      "eyebrow": "Configuracion",
+      "title": "Preferencias de MarketGo",
+      "description": "Administra idioma, tema visual, notificaciones y sesion de trabajo.",
+      "saveChanges": "Guardar cambios",
+      "saved": "Cambios de configuracion guardados localmente.",
+      "language": "Idioma principal",
+      "theme": "Tema visual",
+      "notifications": "Notificaciones",
+      "session": "Sesion",
+      "lightTheme": "Claro operativo",
+      "notificationsDetail": "Alertas de vencimiento y conservacion activas",
+      "sessionDetail": "Token local de demostracion protegido por IAM"
+    }
   }
 }

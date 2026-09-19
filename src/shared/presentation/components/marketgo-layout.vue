@@ -91,12 +91,12 @@ const menuItems = [
 const routeTitleKeys = {
   home: 'option.dashboard',
   settings: 'option.settings',
-  'access-denied': 'Acceso denegado',
+  'access-denied': 'page.accessDenied.title',
 };
 
 const pageTitle = computed(() => {
-  const key = routeTitleKeys[route.name];
-  return key?.startsWith('option.') ? t(key) : route.meta.title || t('option.dashboard');
+  const key = route.meta.titleKey || routeTitleKeys[route.name];
+  return key ? t(key) : route.meta.title || t('option.dashboard');
 });
 
 const todayDate = computed(() => (

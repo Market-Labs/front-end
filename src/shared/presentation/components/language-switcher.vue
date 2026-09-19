@@ -14,8 +14,10 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
-const { locale } = useI18n();
+const route = useRoute();
+const { locale, t } = useI18n();
 
 const options = [
   { label: 'ES', value: 'es' },
@@ -24,6 +26,8 @@ const options = [
 
 const setLocale = (value) => {
   locale.value = value;
+  const title = route.meta.titleKey ? t(route.meta.titleKey) : route.meta.title || 'App';
+  document.title = `MarketGo - ${title}`;
 };
 </script>
 

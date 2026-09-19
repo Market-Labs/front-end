@@ -2,45 +2,45 @@
   <section class="products-view">
     <div class="view-header">
       <div>
-        <span>Products</span>
-        <h2>Catalogo de productos organicos</h2>
-        <p>Datos de producto, vencimiento, cantidad, precio y disponibilidad.</p>
+        <span>{{ $t('page.products.eyebrow') }}</span>
+        <h2>{{ $t('page.products.title') }}</h2>
+        <p>{{ $t('page.products.description') }}</p>
       </div>
-      <pv-button label="Nuevo producto" icon="pi pi-plus" @click="showProductForm = true" />
+      <pv-button :label="$t('page.products.newProduct')" icon="pi pi-plus" @click="showProductForm = true" />
     </div>
 
-    <pv-dialog v-model:visible="showProductForm" modal header="Nuevo producto" :style="{ width: '520px' }">
+    <pv-dialog v-model:visible="showProductForm" modal :header="$t('page.products.newProduct')" :style="{ width: '520px' }">
       <form class="entity-form" @submit.prevent>
         <label>
-          Nombre
+          {{ $t('common.name') }}
           <pv-input-text v-model="productForm.name" placeholder="Tomate organico" />
         </label>
         <label>
-          Categoria
-          <pv-select v-model="productForm.category" :options="categoryOptions" placeholder="Seleccionar categoria" />
+          {{ $t('common.category') }}
+          <pv-select v-model="productForm.category" :options="categoryOptions" :placeholder="$t('page.products.selectCategory')" />
         </label>
         <label>
-          Fecha de vencimiento
+          {{ $t('common.expiration') }}
           <pv-input-text v-model="productForm.expirationDate" placeholder="2026-10-01" />
         </label>
         <div class="form-row">
           <label>
-            Cantidad
+            {{ $t('common.quantity') }}
             <pv-input-text v-model="productForm.quantity" placeholder="40" />
           </label>
           <label>
-            Precio
+            {{ $t('common.price') }}
             <pv-input-text v-model="productForm.price" placeholder="5.80" />
           </label>
         </div>
         <label>
-          Descripcion
+          {{ $t('common.description') }}
           <pv-input-text v-model="productForm.description" placeholder="Producto organico fresco" />
         </label>
       </form>
       <template #footer>
-        <pv-button label="Cancelar" text @click="showProductForm = false" />
-        <pv-button label="Guardar" icon="pi pi-save" @click="noopSubmit" />
+        <pv-button :label="$t('common.cancel')" text @click="showProductForm = false" />
+        <pv-button :label="$t('common.save')" icon="pi pi-save" @click="noopSubmit" />
       </template>
     </pv-dialog>
 
@@ -53,9 +53,9 @@
         <h3>{{ product.name }}</h3>
         <p>{{ product.description }}</p>
         <footer>
-          <small>{{ product.quantity }} unidades</small>
+          <small>{{ product.quantity }} {{ $t('page.products.units') }}</small>
           <span :class="['status-badge', product.available ? 'status-approved' : 'status-rejected']">
-            {{ product.available ? 'Disponible' : 'No disponible' }}
+            {{ product.available ? $t('page.products.available') : $t('page.products.unavailable') }}
           </span>
         </footer>
       </article>
