@@ -85,12 +85,15 @@ a {
   padding: 5px 10px;
 }
 
-.status-pending {
+.status-pending,
+.status-pending-reception {
   background: var(--marketgo-support);
   color: #8a4300;
 }
 
 .status-approved,
+.status-accepted,
+.status-received,
 .status-healthy {
   background: var(--marketgo-bg);
   color: var(--marketgo-primary-soft);

@@ -38,5 +38,14 @@ export const useInventoryStore = defineStore('inventory', {
         this.loading = false;
       }
     },
+    receiveShipmentItems(shipmentItems = []) {
+      shipmentItems.forEach((shipmentItem) => {
+        const inventoryItem = this.items.find((item) => item.productName === shipmentItem.productName);
+        if (inventoryItem) {
+          inventoryItem.stock += Number(shipmentItem.quantity || 0);
+          inventoryItem.status = inventoryItem.stock <= inventoryItem.minimumStock ? 'risk' : 'healthy';
+        }
+      });
+    },
   },
 });

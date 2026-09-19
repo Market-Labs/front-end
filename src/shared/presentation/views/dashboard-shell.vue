@@ -4,7 +4,7 @@
       <div>
         <span class="eyebrow">{{ $t('page.dashboard.eyebrow') }}</span>
         <h2>{{ $t('page.dashboard.title') }}</h2>
-        <p>{{ $t('page.dashboard.description') }}</p>
+        <p>{{ roleDescription }}</p>
       </div>
       <div class="hero-stat">
         <strong>{{ overviewStore.healthScore }}%</strong>
@@ -62,22 +62,53 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useDashboardOverviewStore } from '../../application/dashboard-overview.store.js';
 import { useSearchFilter } from '../../application/use-search-filter.js';
+import { useIamStore } from '../../../iam/application/iam.store.js';
+import { useRequisitionStore } from '../../../requisition/application/requisition.store.js';
+import { useProcurementsStore } from '../../../procurements/application/procurements.store.js';
 
 const router = useRouter();
+const { t } = useI18n();
 const overviewStore = useDashboardOverviewStore();
+const iamStore = useIamStore();
+const requisitionStore = useRequisitionStore();
+const procurementsStore = useProcurementsStore();
 
-const modules = [
-  { name: 'Productos organicos', description: 'Catalogo actualizado con stock y disponibilidad.', icon: 'pi pi-shopping-bag' },
-  { name: 'Conservacion', description: 'Temperatura y humedad monitoreadas por zona.', icon: 'pi pi-cloud' },
-  { name: 'Abastecimiento', description: 'Ordenes de compra listas para seguimiento.', icon: 'pi pi-truck' },
-];
-const filteredIndicators = useSearchFilter(() => overviewStore.indicators);
+const adminIndicators = computed(() => [
+  { label: t('dashboardRole.inventory'), value: '1,248', detail: t('dashboardRole.availableUnits'), icon: 'pi pi-box', route: '/inventory' },
+  { label: t('dashboardRole.requests'), value: requisitionStore.visibleForUser(iamStore.currentUser).length, detail: t('dashboardRole.createdByMinimarket'), icon: 'pi pi-list-check', route: '/requisition' },
+  { label: t('dashboardRole.shipments'), value: procurementsStore.visibleForUser(iamStore.currentUser).filter((order) => order.status === 'pending-reception').length, detail: t('dashboardRole.pendingReception'), icon: 'pi pi-truck', route: '/procurements' },
+]);
+
+const supplierIndicators = computed(() => [
+  { label: t('dashboardRole.requests'), value: requisitionStore.visibleForUser(iamStore.currentUser).filter((request) => request.status === 'pending').length, detail: t('dashboardRole.toReview'), icon: 'pi pi-list-check', route: '/requisition' },
+  { label: t('dashboardRole.orders'), value: procurementsStore.visibleForUser(iamStore.currentUser).length, detail: t('dashboardRole.shippingOrders'), icon: 'pi pi-truck', route: '/procurements' },
+  { label: t('dashboardRole.catalog'), value: '10', detail: t('dashboardRole.organicProducts'), icon: 'pi pi-shopping-bag', route: '/products' },
+]);
+
+const roleIndicators = computed(() => (iamStore.isSupplier ? supplierIndicators.value : adminIndicators.value));
+
+const modules = computed(() => (iamStore.isSupplier ? [
+  { name: t('dashboardRole.receivedRequests'), description: t('dashboardRole.receivedRequestsDetail'), icon: 'pi pi-list-check' },
+  { name: t('dashboardRole.shippingOrdersModule'), description: t('dashboardRole.shippingOrdersDetail'), icon: 'pi pi-truck' },
+  { name: t('dashboardRole.supplierProfile'), description: t('dashboardRole.supplierProfileDetail'), icon: 'pi pi-id-card' },
+] : [
+  { name: t('dashboardRole.inventory'), description: t('dashboardRole.inventoryDetail'), icon: 'pi pi-box' },
+  { name: t('dashboardRole.supplyRequests'), description: t('dashboardRole.supplyRequestsDetail'), icon: 'pi pi-list-check' },
+  { name: t('dashboardRole.shipmentReception'), description: t('dashboardRole.shipmentReceptionDetail'), icon: 'pi pi-truck' },
+]));
+
+const roleDescription = computed(() => (iamStore.isSupplier
+  ? t('dashboardRole.supplierDescription')
+  : t('dashboardRole.adminDescription')));
+
+const filteredIndicators = useSearchFilter(() => roleIndicators.value);
 const filteredActivity = useSearchFilter(() => overviewStore.activity);
-const filteredModules = useSearchFilter(() => modules);
+const filteredModules = useSearchFilter(() => modules.value);
 
 const goToMetric = (metric) => {
   if (metric.route) router.push(metric.route);
@@ -85,6 +116,8 @@ const goToMetric = (metric) => {
 
 onMounted(() => {
   overviewStore.fetchOverview();
+  requisitionStore.fetchRequisitions();
+  procurementsStore.fetchOrders();
 });
 </script>
 

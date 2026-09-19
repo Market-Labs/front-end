@@ -6,7 +6,12 @@
         <h2>{{ $t('page.procurements.title') }}</h2>
         <p>{{ $t('page.procurements.description') }}</p>
       </div>
-      <pv-button :label="$t('page.procurements.createOrder')" icon="pi pi-plus" @click="showOrderForm = true" />
+      <pv-button
+        v-if="iamStore.isSupplier"
+        :label="$t('page.procurements.createOrder')"
+        icon="pi pi-plus"
+        @click="showOrderForm = true"
+      />
     </div>
 
     <pv-dialog v-model:visible="showOrderForm" modal :header="$t('page.procurements.createOrder')" :style="{ width: '540px' }">
@@ -16,7 +21,7 @@
           <pv-input-text v-model="orderForm.supplier" placeholder="Anita Gamboa" />
         </label>
         <label>
-          Minimarket
+          {{ $t('common.minimarket') }}
           <pv-input-text v-model="orderForm.minimarket" placeholder="Minimarket Verde Sur" />
         </label>
         <label>
@@ -46,10 +51,36 @@
         <pv-column field="supplier" :header="$t('page.procurements.supplier')" />
         <pv-column field="minimarket" :header="$t('common.minimarket')" />
         <pv-column field="itemCount" :header="$t('common.items')" />
+        <pv-column field="shippingDate" :header="$t('page.procurements.shippingDate')" />
         <pv-column field="total" :header="$t('common.total')" />
         <pv-column :header="$t('common.status')">
           <template #body="{ data }">
             <span :class="['status-badge', `status-${data.status}`]">{{ $t(`status.${data.status}`) }}</span>
+          </template>
+        </pv-column>
+        <pv-column :header="$t('common.actions')">
+          <template #body="{ data }">
+            <div class="action-group">
+              <pv-button
+                v-if="iamStore.isMinimarketAdmin && data.canBeReviewed"
+                :label="$t('page.procurements.acceptReception')"
+                size="small"
+                icon="pi pi-check"
+                @click="acceptReception(data)"
+              />
+              <pv-button
+                v-if="iamStore.isMinimarketAdmin && data.canBeReviewed"
+                :label="$t('page.procurements.rejectReception')"
+                size="small"
+                severity="danger"
+                outlined
+                icon="pi pi-times"
+                @click="procurementsStore.rejectReception(data.id)"
+              />
+              <span v-if="!(iamStore.isMinimarketAdmin && data.canBeReviewed)" class="muted-action">
+                {{ $t('common.no_actions') }}
+              </span>
+            </div>
           </template>
         </pv-column>
       </pv-data-table>
@@ -58,14 +89,19 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue';
+import { computed, reactive, ref, onMounted } from 'vue';
 import { useProcurementsStore } from '../../application/procurements.store.js';
+import { useInventoryStore } from '../../../inventory/application/inventory.store.js';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const procurementsStore = useProcurementsStore();
-const filteredOrders = useSearchFilter(() => procurementsStore.orders);
+const inventoryStore = useInventoryStore();
+const iamStore = useIamStore();
+const visibleOrders = computed(() => procurementsStore.visibleForUser(iamStore.currentUser));
+const filteredOrders = useSearchFilter(() => visibleOrders.value);
 const showOrderForm = ref(false);
-const statusOptions = ['pending', 'approved', 'rejected'];
+const statusOptions = ['pending-reception', 'received', 'rejected'];
 const orderForm = reactive({
   supplier: '',
   minimarket: 'Minimarket Verde Sur',
@@ -75,9 +111,14 @@ const orderForm = reactive({
 });
 
 const noopSubmit = () => {};
+const acceptReception = (order) => {
+  procurementsStore.acceptReception(order.id);
+  inventoryStore.receiveShipmentItems(order.items);
+};
 
 onMounted(() => {
   procurementsStore.fetchOrders();
+  inventoryStore.fetchInventory();
 });
 </script>
 
@@ -139,5 +180,17 @@ onMounted(() => {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.muted-action {
+  color: #526780;
+  font-size: 12px;
+  font-weight: 800;
 }
 </style>

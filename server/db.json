@@ -32,10 +32,10 @@
       },
       {
         "title": "Pedidos",
-        "label": "Pedidos",
+        "label": "Envios",
         "type": "procurements",
-        "value": 3,
-        "detail": "en seguimiento",
+        "value": 2,
+        "detail": "pendientes de recepcion",
         "variation": 12,
         "icon": "pi pi-truck",
         "route": "/procurements"
@@ -49,8 +49,8 @@
         "kind": "warning"
       },
       {
-        "title": "Pedido aceptado",
-        "detail": "Proveedor BioAndes confirmado.",
+        "title": "Solicitud aceptada",
+        "detail": "Anita Gamboa acepto abastecer lacteos.",
         "time": "10:45",
         "kind": "success"
       },
@@ -412,68 +412,164 @@
   "requisitions": [
     {
       "id": "req-1",
+      "minimarketId": "min-1",
+      "supplierId": "sup-2",
+      "requesterId": "usr-admin",
       "requester": "Albino Caceres",
+      "supplier": "Anita Gamboa",
       "productName": "Yogurt organico",
       "quantity": 24,
       "reason": "Reposicion por venta rapida",
       "status": "pending",
-      "createdAt": "2026-09-18"
+      "createdAt": "2026-09-18",
+      "reviewedAt": null,
+      "rejectionReason": "",
+      "items": [{ "productName": "Yogurt organico", "quantity": 24 }]
     },
     {
       "id": "req-2",
+      "minimarketId": "min-1",
+      "supplierId": "sup-2",
+      "requesterId": "usr-admin",
       "requester": "Albino Caceres",
+      "supplier": "Anita Gamboa",
       "productName": "Leche organica",
       "quantity": 30,
       "reason": "Demanda semanal de lacteos",
-      "status": "approved",
-      "createdAt": "2026-09-18"
+      "status": "accepted",
+      "createdAt": "2026-09-18",
+      "reviewedAt": "2026-09-18 11:00",
+      "rejectionReason": "",
+      "shippingOrderId": "ship-1001",
+      "items": [
+        { "productName": "Leche organica", "quantity": 30 },
+        { "productName": "Queso organico", "quantity": 12 }
+      ]
     },
     {
       "id": "req-3",
+      "minimarketId": "min-1",
+      "supplierId": "sup-1",
+      "requesterId": "usr-admin",
       "requester": "Albino Caceres",
+      "supplier": "BioAndes Organic",
       "productName": "Tomate organico",
       "quantity": 45,
       "reason": "Reposicion para anaquel principal",
       "status": "pending",
-      "createdAt": "2026-09-17"
+      "createdAt": "2026-09-17",
+      "reviewedAt": null,
+      "rejectionReason": "",
+      "items": [
+        { "productName": "Tomate organico", "quantity": 45 },
+        { "productName": "Pepino organico", "quantity": 20 }
+      ]
     },
     {
       "id": "req-4",
+      "minimarketId": "min-1",
+      "supplierId": "sup-2",
+      "requesterId": "usr-admin",
       "requester": "Albino Caceres",
+      "supplier": "Anita Gamboa",
       "productName": "Queso organico",
       "quantity": 15,
       "reason": "Stock minimo alcanzado",
       "status": "rejected",
-      "createdAt": "2026-09-16"
+      "createdAt": "2026-09-16",
+      "reviewedAt": "2026-09-16 16:20",
+      "rejectionReason": "Produccion diaria agotada",
+      "items": [{ "productName": "Queso organico", "quantity": 15 }]
+    },
+    {
+      "id": "req-5",
+      "minimarketId": "min-1",
+      "supplierId": "sup-2",
+      "requesterId": "usr-admin",
+      "requester": "Albino Caceres",
+      "supplier": "Anita Gamboa",
+      "productName": "Brocoli organico",
+      "quantity": 18,
+      "reason": "Campana de productos frescos",
+      "status": "accepted",
+      "createdAt": "2026-09-15",
+      "reviewedAt": "2026-09-15 12:15",
+      "rejectionReason": "",
+      "shippingOrderId": "ship-1003",
+      "items": [
+        { "productName": "Brocoli organico", "quantity": 18 },
+        { "productName": "Pimientos organicos", "quantity": 24 }
+      ]
     }
   ],
   "purchaseOrders": [
     {
-      "id": "ord-1001",
-      "supplier": "BioAndes Organic",
-      "minimarket": "Minimarket Verde Sur",
-      "status": "pending",
-      "total": 420.5,
-      "createdAt": "2026-09-18",
-      "items": ["Yogurt organico", "Lechugas organicas"]
-    },
-    {
-      "id": "ord-1002",
+      "id": "ship-1001",
+      "supplyRequestId": "req-2",
+      "supplierId": "sup-2",
+      "minimarketId": "min-1",
       "supplier": "Anita Gamboa",
       "minimarket": "Minimarket Verde Sur",
-      "status": "pending",
+      "status": "pending-reception",
       "total": 315.8,
       "createdAt": "2026-09-18",
-      "items": ["Leche organica", "Queso organico"]
+      "shippingDate": "2026-09-19",
+      "observations": "Despacho refrigerado para lacteos.",
+      "items": [
+        { "productName": "Leche organica", "quantity": 30, "unitPrice": 7.2 },
+        { "productName": "Queso organico", "quantity": 12, "unitPrice": 14.5 }
+      ]
     },
     {
-      "id": "ord-1003",
+      "id": "ship-1002",
+      "supplyRequestId": "req-3",
+      "supplierId": "sup-1",
+      "minimarketId": "min-1",
       "supplier": "BioAndes Organic",
       "minimarket": "Minimarket Verde Sur",
-      "status": "approved",
+      "status": "pending-reception",
       "total": 228.4,
       "createdAt": "2026-09-17",
-      "items": ["Tomate organico", "Pepino organico", "Zanahoria organica"]
+      "shippingDate": "2026-09-19",
+      "observations": "Entrega parcial de vegetales frescos.",
+      "items": [
+        { "productName": "Tomate organico", "quantity": 45, "unitPrice": 3.8 },
+        { "productName": "Pepino organico", "quantity": 20, "unitPrice": 2.9 }
+      ]
+    },
+    {
+      "id": "ship-1003",
+      "supplyRequestId": "req-5",
+      "supplierId": "sup-2",
+      "minimarketId": "min-1",
+      "supplier": "Anita Gamboa",
+      "minimarket": "Minimarket Verde Sur",
+      "status": "received",
+      "total": 252.6,
+      "createdAt": "2026-09-15",
+      "shippingDate": "2026-09-16",
+      "receivedAt": "2026-09-16 15:40",
+      "observations": "Recepcion aceptada sin observaciones.",
+      "items": [
+        { "productName": "Brocoli organico", "quantity": 18, "unitPrice": 6.3 },
+        { "productName": "Pimientos organicos", "quantity": 24, "unitPrice": 5.8 }
+      ]
+    },
+    {
+      "id": "ship-1004",
+      "supplyRequestId": "req-4",
+      "supplierId": "sup-2",
+      "minimarketId": "min-1",
+      "supplier": "Anita Gamboa",
+      "minimarket": "Minimarket Verde Sur",
+      "status": "rejected",
+      "total": 217.5,
+      "createdAt": "2026-09-16",
+      "shippingDate": "2026-09-17",
+      "rejectionReason": "Solicitud rechazada por disponibilidad.",
+      "items": [
+        { "productName": "Queso organico", "quantity": 15, "unitPrice": 14.5 }
+      ]
     }
   ],
   "suppliers": [
