@@ -3,7 +3,9 @@
     <aside class="sidebar">
       <div>
         <router-link to="/home" class="brand">
-          <span class="brand-mark">MG</span>
+          <span class="brand-mark">
+            <img src="/logo-marketgo.png" alt="MarketGo" />
+          </span>
           <span>
             <strong>{{ t('app.name') }}</strong>
             <small>{{ t('app.tagline') }}</small>
@@ -136,14 +138,21 @@ const todayDate = computed(() => (
 
 .brand-mark {
   align-items: center;
-  background: #f08a24;
+  background: #ffffff;
   border-radius: 8px;
-  color: #ffffff;
   display: inline-flex;
-  font-weight: 900;
-  height: 42px;
+  flex: 0 0 46px;
+  height: 46px;
   justify-content: center;
-  width: 42px;
+  overflow: hidden;
+  width: 46px;
+}
+
+.brand-mark img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
 }
 
 .brand strong,
