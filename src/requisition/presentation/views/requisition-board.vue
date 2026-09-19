@@ -44,7 +44,7 @@
         <pv-column field="reason" :header="$t('page.requisition.reason')" />
         <pv-column :header="$t('common.status')">
           <template #body="{ data }">
-            <span :class="['status-badge', `status-${data.status}`]">{{ data.status }}</span>
+            <span :class="['status-badge', `status-${data.status}`]">{{ $t(`status.${data.status}`) }}</span>
           </template>
         </pv-column>
       </pv-data-table>

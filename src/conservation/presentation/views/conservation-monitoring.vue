@@ -19,7 +19,7 @@
         <pv-column :header="$t('common.status')">
           <template #body="{ data }">
             <span :class="['status-badge', data.isRisky ? 'status-risk' : 'status-healthy']">
-              {{ data.status }}
+              {{ $t(`status.${data.status}`) }}
             </span>
           </template>
         </pv-column>

@@ -55,7 +55,7 @@
         </pv-column>
         <pv-column :header="$t('common.status')">
           <template #body="{ data }">
-            <span class="status-badge status-approved">{{ data.status }}</span>
+            <span class="status-badge status-approved">{{ $t(`status.${data.status}`) }}</span>
           </template>
         </pv-column>
       </pv-data-table>

@@ -44,12 +44,12 @@
       <pv-data-table :value="filteredOrders" class="marketgo-datatable" responsive-layout="scroll">
         <pv-column field="id" :header="$t('page.procurements.order')" />
         <pv-column field="supplier" :header="$t('page.procurements.supplier')" />
-        <pv-column field="minimarket" header="Minimarket" />
-        <pv-column field="itemCount" header="Items" />
-        <pv-column field="total" header="Total" />
+        <pv-column field="minimarket" :header="$t('common.minimarket')" />
+        <pv-column field="itemCount" :header="$t('common.items')" />
+        <pv-column field="total" :header="$t('common.total')" />
         <pv-column :header="$t('common.status')">
           <template #body="{ data }">
-            <span :class="['status-badge', `status-${data.status}`]">{{ data.status }}</span>
+            <span :class="['status-badge', `status-${data.status}`]">{{ $t(`status.${data.status}`) }}</span>
           </template>
         </pv-column>
       </pv-data-table>

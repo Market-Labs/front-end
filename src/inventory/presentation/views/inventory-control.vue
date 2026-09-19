@@ -46,13 +46,13 @@
       <pv-data-table :value="filteredItems" class="marketgo-datatable" responsive-layout="scroll">
         <pv-column field="productName" :header="$t('common.product')" />
         <pv-column field="lotCode" :header="$t('page.inventory.lot')" />
-        <pv-column field="stock" header="Stock" />
+        <pv-column field="stock" :header="$t('common.stock')" />
         <pv-column field="minimumStock" :header="$t('page.inventory.minimumStock')" />
         <pv-column field="expirationDate" :header="$t('common.expiration')" />
         <pv-column :header="$t('common.status')">
           <template #body="{ data }">
             <span :class="['status-badge', data.status === 'risk' ? 'status-risk' : 'status-healthy']">
-              {{ data.status }}
+              {{ $t(`status.${data.status}`) }}
             </span>
           </template>
         </pv-column>

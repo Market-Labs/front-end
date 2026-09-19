@@ -32,7 +32,20 @@
     "description": "Description",
     "category": "Category",
     "expiration": "Expiration",
-    "name": "Name"
+    "name": "Name",
+    "stock": "Stock",
+    "items": "Items",
+    "total": "Total",
+    "minimarket": "Minimarket"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "approved": "Accepted",
+    "rejected": "Rejected",
+    "healthy": "Normal",
+    "risk": "Risk"
   },
   "page": {
     "accessDenied": {
