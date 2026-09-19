@@ -30,7 +30,7 @@
     <section class="panel-card activity-card">
       <div class="section-header">
         <h2>{{ $t('page.dashboard.activity') }}</h2>
-        <button type="button">{{ $t('common.view_all') }}</button>
+        <button type="button" @click="router.push('/communication')">{{ $t('common.view_all') }}</button>
       </div>
       <div class="timeline">
         <article v-for="event in filteredActivity" :key="event.title">
@@ -49,13 +49,19 @@
         <h2>{{ $t('page.dashboard.summary') }}</h2>
       </div>
       <div class="module-list">
-        <article v-for="module in filteredModules" :key="module.name">
+        <button
+          v-for="module in filteredModules"
+          :key="module.name"
+          type="button"
+          class="module-action"
+          @click="goToMetric(module)"
+        >
           <i :class="module.icon"></i>
           <div>
             <strong>{{ module.name }}</strong>
             <span>{{ module.description }}</span>
           </div>
-        </article>
+        </button>
       </div>
     </section>
   </div>
@@ -93,13 +99,13 @@ const supplierIndicators = computed(() => [
 const roleIndicators = computed(() => (iamStore.isSupplier ? supplierIndicators.value : adminIndicators.value));
 
 const modules = computed(() => (iamStore.isSupplier ? [
-  { name: t('dashboardRole.receivedRequests'), description: t('dashboardRole.receivedRequestsDetail'), icon: 'pi pi-list-check' },
-  { name: t('dashboardRole.shippingOrdersModule'), description: t('dashboardRole.shippingOrdersDetail'), icon: 'pi pi-truck' },
-  { name: t('dashboardRole.supplierProfile'), description: t('dashboardRole.supplierProfileDetail'), icon: 'pi pi-id-card' },
+  { name: t('dashboardRole.receivedRequests'), description: t('dashboardRole.receivedRequestsDetail'), icon: 'pi pi-list-check', route: '/requisition' },
+  { name: t('dashboardRole.shippingOrdersModule'), description: t('dashboardRole.shippingOrdersDetail'), icon: 'pi pi-truck', route: '/procurements' },
+  { name: t('dashboardRole.supplierProfile'), description: t('dashboardRole.supplierProfileDetail'), icon: 'pi pi-id-card', route: '/profiles' },
 ] : [
-  { name: t('dashboardRole.inventory'), description: t('dashboardRole.inventoryDetail'), icon: 'pi pi-box' },
-  { name: t('dashboardRole.supplyRequests'), description: t('dashboardRole.supplyRequestsDetail'), icon: 'pi pi-list-check' },
-  { name: t('dashboardRole.shipmentReception'), description: t('dashboardRole.shipmentReceptionDetail'), icon: 'pi pi-truck' },
+  { name: t('dashboardRole.inventory'), description: t('dashboardRole.inventoryDetail'), icon: 'pi pi-box', route: '/inventory' },
+  { name: t('dashboardRole.supplyRequests'), description: t('dashboardRole.supplyRequestsDetail'), icon: 'pi pi-list-check', route: '/requisition' },
+  { name: t('dashboardRole.shipmentReception'), description: t('dashboardRole.shipmentReceptionDetail'), icon: 'pi pi-truck', route: '/procurements' },
 ]));
 
 const roleDescription = computed(() => (iamStore.isSupplier
@@ -291,19 +297,32 @@ onMounted(() => {
 }
 
 .timeline article,
-.module-list article {
+.module-action {
   align-items: center;
   background: #eff3fa;
   border: 1px solid #d9e5f6;
   border-radius: 8px;
+  color: inherit;
+  cursor: pointer;
   display: flex;
   gap: 14px;
   min-height: 70px;
   padding: 14px;
+  text-align: left;
+  width: 100%;
+}
+
+.module-action {
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.module-action:hover {
+  border-color: #0d8cfb;
+  transform: translateY(-1px);
 }
 
 .timeline article strong,
-.module-list article strong {
+.module-action strong {
   color: #021c45;
   display: block;
   font-size: 14px;
@@ -311,7 +330,7 @@ onMounted(() => {
 }
 
 .timeline article p,
-.module-list article span {
+.module-action span {
   color: #526780;
   display: block;
   font-size: 12px;
