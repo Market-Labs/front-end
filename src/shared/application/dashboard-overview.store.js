@@ -7,7 +7,7 @@ const fallbackOverview = {
   healthScore: 87,
   indicators: [
     { label: 'Inventario', value: '1,248', detail: 'unidades disponibles', icon: 'pi pi-box', route: '/inventory' },
-    { label: 'Alertas', value: '1', detail: 'requiere atencion', icon: 'pi pi-bell', route: '/communication' },
+    { label: 'Alertas', value: '4', detail: 'requieren atencion', icon: 'pi pi-bell', route: '/communication' },
     { label: 'Pedidos', value: '3', detail: 'en seguimiento', icon: 'pi pi-truck', route: '/procurements' },
   ],
   activity: [

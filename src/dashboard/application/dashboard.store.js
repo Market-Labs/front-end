@@ -8,7 +8,7 @@ const demoIndicators = [
   new DashboardIndicator({ title: 'Stock disponible', type: 'inventory', value: 1248, variation: 8 }),
   new DashboardIndicator({ title: 'Requisiciones', type: 'requisition', value: 18, variation: 3 }),
   new DashboardIndicator({ title: 'Abastecimientos', type: 'procurements', value: 32, variation: 12 }),
-  new DashboardIndicator({ title: 'Alertas activas', type: 'alerts', value: 14, variation: -2, severity: 'warning' }),
+  new DashboardIndicator({ title: 'Alertas activas', type: 'alerts', value: 4, variation: -2, severity: 'warning' }),
 ];
 
 export const useDashboardStore = defineStore('dashboard', {

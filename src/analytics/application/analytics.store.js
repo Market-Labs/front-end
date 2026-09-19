@@ -47,7 +47,7 @@ const demoReportSummaries = {
     description: 'Temperatura, humedad y alertas por zona de almacenamiento.',
     metrics: [
       { label: 'Score', value: '92%' },
-      { label: 'Alertas activas', value: '1' },
+      { label: 'Alertas activas', value: '4' },
       { label: 'Zonas monitoreadas', value: '2' },
     ],
     highlights: ['Camara fria A esta dentro del rango.', 'Anaquel fresco presenta humedad elevada.', 'Yogurt organico se mantiene a 4 C.'],

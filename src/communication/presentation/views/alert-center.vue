@@ -2,11 +2,14 @@
   <section class="communication-view">
     <div class="view-header">
       <div>
-        <span>Communication</span>
-        <h2>Mensajes y centro de alertas</h2>
-        <p>Notificaciones, mensajes del sistema y estados leido/destacado.</p>
+        <span>Alertas</span>
+        <h2>Centro de alertas</h2>
+        <p>Alertas de conservacion, vencimiento, stock y abastecimiento.</p>
       </div>
-      <pv-button :label="`${communicationStore.unreadCount} sin leer`" icon="pi pi-bell" />
+      <div class="header-actions">
+        <pv-button label="Ver proveedores" icon="pi pi-truck" severity="secondary" @click="router.push('/suppliers')" />
+        <pv-button :label="`${communicationStore.unreadCount} sin leer`" icon="pi pi-bell" />
+      </div>
     </div>
 
     <div class="message-list">
@@ -27,9 +30,11 @@
 
 <script setup>
 import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useCommunicationStore } from '../../application/communication.store.js';
 
 const communicationStore = useCommunicationStore();
+const router = useRouter();
 
 onMounted(() => {
   communicationStore.fetchMessages();
@@ -55,6 +60,12 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   padding: 24px;
+}
+
+.header-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
 }
 
 .view-header span {

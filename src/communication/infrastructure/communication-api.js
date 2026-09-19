@@ -4,7 +4,7 @@ import { MessageAssembler } from './message.assembler.js';
 
 export class CommunicationApi extends BaseApi {
   async getNotifications() {
-    const response = await this.http.get(apiEndpoints.notifications);
+    const response = await this.http.get(apiEndpoints.conservationAlerts);
     return response.data.map(MessageAssembler.toEntity);
   }
 }

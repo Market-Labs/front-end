@@ -24,8 +24,8 @@
         "title": "Alertas",
         "label": "Alertas",
         "type": "alerts",
-        "value": 1,
-        "detail": "requiere atencion",
+        "value": 4,
+        "detail": "requieren atencion",
         "variation": -2,
         "icon": "pi pi-bell",
         "route": "/communication"
@@ -137,7 +137,7 @@
         "description": "Temperatura, humedad y alertas por zona de almacenamiento.",
         "metrics": [
           { "label": "Score", "value": "92%" },
-          { "label": "Alertas activas", "value": "1" },
+          { "label": "Alertas activas", "value": "4" },
           { "label": "Zonas monitoreadas", "value": "2" }
         ],
         "highlights": [
@@ -526,6 +526,30 @@
       "type": "conservation",
       "read": false,
       "createdAt": "2026-09-18 09:35"
+    },
+    {
+      "id": "alert-2",
+      "title": "Vencimiento cercano",
+      "message": "Yogurt organico vence en 5 dias.",
+      "type": "expiration",
+      "read": false,
+      "createdAt": "2026-09-18 10:05"
+    },
+    {
+      "id": "alert-3",
+      "title": "Stock bajo",
+      "message": "Leche organica se acerca al stock minimo.",
+      "type": "inventory",
+      "read": false,
+      "createdAt": "2026-09-18 10:30"
+    },
+    {
+      "id": "alert-4",
+      "title": "Orden pendiente",
+      "message": "Anita Gamboa tiene una orden por confirmar.",
+      "type": "procurement",
+      "read": true,
+      "createdAt": "2026-09-18 11:20"
     }
   ],
   "notifications": [

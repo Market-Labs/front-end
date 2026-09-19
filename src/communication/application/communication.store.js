@@ -5,9 +5,10 @@ import { Message } from '../domain/model/message.entity.js';
 const communicationApi = new CommunicationApi();
 
 const demoMessages = [
-  new Message({ id: 'msg-1', sender: 'Sistema MarketGo', receiver: 'Ana Mercado', subject: 'Alerta de vencimiento', body: 'Yogurt organico vence pronto.', read: false, starred: true, sentAt: '2026-09-18 09:10' }),
-  new Message({ id: 'msg-2', sender: 'BioAndes Organic', receiver: 'Ana Mercado', subject: 'Pedido enviado', body: 'La orden ORD-1001 fue enviada.', read: true, starred: false, sentAt: '2026-09-18 10:20' }),
-  new Message({ id: 'msg-3', sender: 'Sensor Camara A', receiver: 'Ana Mercado', subject: 'Condicion estable', body: 'Temperatura y humedad dentro del rango.', read: false, starred: false, sentAt: '2026-09-18 11:00' }),
+  new Message({ id: 'alert-1', sender: 'Sistema MarketGo', receiver: 'Minimarket Verde Sur', subject: 'Humedad elevada', body: 'Anaquel fresco supera el rango recomendado.', read: false, starred: true, sentAt: '2026-09-18 09:35' }),
+  new Message({ id: 'alert-2', sender: 'Sistema MarketGo', receiver: 'Minimarket Verde Sur', subject: 'Vencimiento cercano', body: 'Yogurt organico vence en 5 dias.', read: false, starred: false, sentAt: '2026-09-18 10:05' }),
+  new Message({ id: 'alert-3', sender: 'Sistema MarketGo', receiver: 'Minimarket Verde Sur', subject: 'Stock bajo', body: 'Leche organica se acerca al stock minimo.', read: false, starred: false, sentAt: '2026-09-18 10:30' }),
+  new Message({ id: 'alert-4', sender: 'Sistema MarketGo', receiver: 'Minimarket Verde Sur', subject: 'Orden pendiente', body: 'Anita Gamboa tiene una orden por confirmar.', read: true, starred: false, sentAt: '2026-09-18 11:20' }),
 ];
 
 export const useCommunicationStore = defineStore('communication', {
@@ -25,7 +26,7 @@ export const useCommunicationStore = defineStore('communication', {
       try {
         this.messages = await communicationApi.getNotifications();
       } catch (error) {
-        this.error = 'No se pudo cargar comunicacion. Se muestran datos demo.';
+        this.error = 'No se pudo cargar alertas. Se muestran datos demo.';
         this.messages = demoMessages;
       } finally {
         this.loading = false;
