@@ -2,18 +2,24 @@
 @import "primeicons/primeicons.css";
 
 :root {
-  --marketgo-primary: #10261c;
-  --marketgo-primary-soft: #1a3829;
-  --marketgo-accent: #f08a24;
-  --marketgo-success: #3d9f7d;
-  --marketgo-bg: #f5f7f4;
+  --marketgo-primary: #0d8cfb;
+  --marketgo-primary-soft: #023192;
+  --marketgo-navy: #021c45;
+  --marketgo-accent: #fc6910;
+  --marketgo-support: #fbdc91;
+  --marketgo-bg: #eff3fa;
   --marketgo-card: #ffffff;
-  --marketgo-border: #e8ede9;
-  --marketgo-text: #16251d;
-  --marketgo-muted: #66756b;
+  --marketgo-border: #d9e5f6;
+  --marketgo-text: #021c45;
+  --marketgo-muted: #526780;
+  --spacing-xs: 16px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 24px;
+  --spacing-xl: 40px;
   --marketgo-radius: 8px;
   --marketgo-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
-  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: Arimo, Arial, "Segoe UI", sans-serif;
   color: var(--marketgo-text);
   background: var(--marketgo-bg);
   font-synthesis: none;
@@ -34,6 +40,7 @@ body,
 
 body {
   margin: 0;
+  font-size: 16px;
 }
 
 button,
@@ -50,21 +57,21 @@ a {
 .marketgo-datatable .p-datatable-thead > tr > th {
   background: transparent !important;
   border: 0 !important;
-  border-bottom: 1px solid #eef2ef !important;
-  color: #64748b !important;
-  font-size: 11px !important;
+  border-bottom: 1px solid var(--marketgo-border) !important;
+  color: var(--marketgo-muted) !important;
+  font-size: 12px !important;
   font-weight: 900 !important;
-  padding: 14px 20px !important;
+  padding: 12px 24px !important;
   text-transform: uppercase !important;
 }
 
 .marketgo-datatable .p-datatable-tbody > tr > td {
   border: 0 !important;
-  border-bottom: 1px solid #f3f6f4 !important;
-  color: #334155 !important;
-  font-size: 13px !important;
+  border-bottom: 1px solid var(--marketgo-bg) !important;
+  color: var(--marketgo-primary-soft) !important;
+  font-size: 14px !important;
   font-weight: 650 !important;
-  padding: 14px 20px !important;
+  padding: 12px 24px !important;
 }
 
 .status-badge,
@@ -79,14 +86,14 @@ a {
 }
 
 .status-pending {
-  background: #fff7e8;
-  color: #a86409;
+  background: var(--marketgo-support);
+  color: #8a4300;
 }
 
 .status-approved,
 .status-healthy {
-  background: #eaf8f0;
-  color: #247b5d;
+  background: var(--marketgo-bg);
+  color: var(--marketgo-primary-soft);
 }
 
 .status-rejected,
@@ -105,5 +112,17 @@ a {
 
 .p-button {
   border-radius: 8px;
+  font-size: 14px;
   font-weight: 800;
+  padding: 12px 24px;
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined) {
+  background: var(--marketgo-primary);
+  border-color: var(--marketgo-primary);
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined):hover {
+  background: var(--marketgo-primary-soft);
+  border-color: var(--marketgo-primary-soft);
 }

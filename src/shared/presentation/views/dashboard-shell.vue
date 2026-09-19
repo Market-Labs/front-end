@@ -2,21 +2,18 @@
   <div class="dashboard-grid">
     <section class="metric-card hero-card">
       <div>
-        <span class="eyebrow">MarketGo overview</span>
-        <h2>Control operativo de productos organicos</h2>
-        <p>
-          Base visual preparada para conectar inventario, abastecimiento,
-          alertas de conservacion y actividad por rol.
-        </p>
+        <span class="eyebrow">{{ $t('page.dashboard.eyebrow') }}</span>
+        <h2>{{ $t('page.dashboard.title') }}</h2>
+        <p>{{ $t('page.dashboard.description') }}</p>
       </div>
       <div class="hero-stat">
         <strong>{{ overviewStore.healthScore }}%</strong>
-        <span>salud operacional</span>
+        <span>{{ $t('page.dashboard.health') }}</span>
       </div>
     </section>
 
     <button
-      v-for="metric in overviewStore.indicators"
+      v-for="metric in filteredIndicators"
       :key="metric.label"
       type="button"
       class="metric-card compact"
@@ -32,11 +29,11 @@
 
     <section class="panel-card activity-card">
       <div class="section-header">
-        <h2>Actividad reciente</h2>
+        <h2>{{ $t('page.dashboard.activity') }}</h2>
         <button type="button">{{ $t('common.view_all') }}</button>
       </div>
       <div class="timeline">
-        <article v-for="event in overviewStore.activity" :key="event.title">
+        <article v-for="event in filteredActivity" :key="event.title">
           <span :class="['status-dot', event.kind]"></span>
           <div>
             <strong>{{ event.title }}</strong>
@@ -49,10 +46,10 @@
 
     <section class="panel-card modules-card">
       <div class="section-header">
-        <h2>Resumen operativo</h2>
+        <h2>{{ $t('page.dashboard.summary') }}</h2>
       </div>
       <div class="module-list">
-        <article v-for="module in modules" :key="module.name">
+        <article v-for="module in filteredModules" :key="module.name">
           <i :class="module.icon"></i>
           <div>
             <strong>{{ module.name }}</strong>
@@ -68,6 +65,7 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDashboardOverviewStore } from '../../application/dashboard-overview.store.js';
+import { useSearchFilter } from '../../application/use-search-filter.js';
 
 const router = useRouter();
 const overviewStore = useDashboardOverviewStore();
@@ -77,6 +75,9 @@ const modules = [
   { name: 'Conservacion', description: 'Temperatura y humedad monitoreadas por zona.', icon: 'pi pi-cloud' },
   { name: 'Abastecimiento', description: 'Ordenes de compra listas para seguimiento.', icon: 'pi pi-truck' },
 ];
+const filteredIndicators = useSearchFilter(() => overviewStore.indicators);
+const filteredActivity = useSearchFilter(() => overviewStore.activity);
+const filteredModules = useSearchFilter(() => modules);
 
 const goToMetric = (metric) => {
   if (metric.route) router.push(metric.route);
@@ -97,14 +98,14 @@ onMounted(() => {
 .metric-card,
 .panel-card {
   background: #ffffff;
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
 }
 
 .hero-card {
   align-items: center;
-  background: linear-gradient(135deg, #ffffff 0%, #eef8f0 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #eff3fa 100%);
   display: flex;
   grid-column: span 6;
   justify-content: space-between;
@@ -113,7 +114,7 @@ onMounted(() => {
 }
 
 .eyebrow {
-  color: #3d9f7d;
+  color: #0d8cfb;
   display: block;
   font-size: 12px;
   font-weight: 900;
@@ -123,7 +124,7 @@ onMounted(() => {
 }
 
 .hero-card h2 {
-  color: #16251d;
+  color: #021c45;
   font-size: 30px;
   line-height: 1.08;
   margin: 0;
@@ -131,7 +132,7 @@ onMounted(() => {
 }
 
 .hero-card p {
-  color: #66756b;
+  color: #526780;
   font-size: 14px;
   font-weight: 650;
   line-height: 1.6;
@@ -141,7 +142,7 @@ onMounted(() => {
 
 .hero-stat {
   align-items: center;
-  background: #10261c;
+  background: #021c45;
   border-radius: 8px;
   color: #ffffff;
   display: flex;
@@ -152,19 +153,19 @@ onMounted(() => {
 }
 
 .hero-stat strong {
-  color: #f08a24;
+  color: #fc6910;
   font-size: 34px;
   font-weight: 950;
 }
 
 .hero-stat span {
-  color: #c8d3cd;
+  color: #eff3fa;
   font-size: 12px;
   font-weight: 800;
 }
 
 .metric-card.compact {
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -176,15 +177,15 @@ onMounted(() => {
 }
 
 .metric-card.compact:hover {
-  border-color: #3d9f7d;
+  border-color: #0d8cfb;
   transform: translateY(-2px);
 }
 
 .metric-icon {
   align-items: center;
-  background: #f5f7f4;
+  background: #eff3fa;
   border-radius: 8px;
-  color: #3d9f7d;
+  color: #0d8cfb;
   display: inline-flex;
   height: 44px;
   justify-content: center;
@@ -193,14 +194,14 @@ onMounted(() => {
 }
 
 .metric-card.compact span {
-  color: #78877f;
+  color: #526780;
   font-size: 13px;
   font-weight: 800;
   margin-top: 24px;
 }
 
 .metric-card.compact strong {
-  color: #16251d;
+  color: #021c45;
   font-size: 32px;
   font-weight: 950;
   line-height: 1;
@@ -208,7 +209,7 @@ onMounted(() => {
 }
 
 .metric-card.compact small {
-  color: #91a099;
+  color: #526780;
   font-size: 12px;
   font-weight: 800;
   margin-top: 8px;
@@ -232,17 +233,17 @@ onMounted(() => {
 }
 
 .section-header h2 {
-  color: #16251d;
+  color: #021c45;
   font-size: 18px;
   font-weight: 900;
   margin: 0;
 }
 
 .section-header button {
-  background: #f5f7f4;
-  border: 1px solid #e3e8e4;
+  background: #eff3fa;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
-  color: #3d9f7d;
+  color: #0d8cfb;
   cursor: pointer;
   font-size: 12px;
   font-weight: 900;
@@ -259,8 +260,8 @@ onMounted(() => {
 .timeline article,
 .module-list article {
   align-items: center;
-  background: #f9fbf8;
-  border: 1px solid #edf1ee;
+  background: #eff3fa;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   display: flex;
   gap: 14px;
@@ -270,7 +271,7 @@ onMounted(() => {
 
 .timeline article strong,
 .module-list article strong {
-  color: #26362c;
+  color: #021c45;
   display: block;
   font-size: 14px;
   font-weight: 900;
@@ -278,7 +279,7 @@ onMounted(() => {
 
 .timeline article p,
 .module-list article span {
-  color: #75847b;
+  color: #526780;
   display: block;
   font-size: 12px;
   font-weight: 700;
@@ -286,7 +287,7 @@ onMounted(() => {
 }
 
 .timeline time {
-  color: #92a099;
+  color: #526780;
   font-size: 12px;
   font-weight: 900;
   margin-left: auto;
@@ -300,20 +301,20 @@ onMounted(() => {
 }
 
 .status-dot.warning {
-  background: #f08a24;
+  background: #fc6910;
 }
 
 .status-dot.success {
-  background: #3d9f7d;
+  background: #0d8cfb;
 }
 
 .status-dot.info {
-  background: #4f80c7;
+  background: #0d8cfb;
 }
 
 .module-list .pi {
   align-items: center;
-  background: #10261c;
+  background: #021c45;
   border-radius: 8px;
   color: #ffffff;
   display: inline-flex;

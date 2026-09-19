@@ -2,40 +2,40 @@
   <section class="settings-view">
     <div class="settings-header">
       <div>
-        <span>Configuracion</span>
-        <h2>Preferencias de MarketGo</h2>
-        <p>Administra idioma, tema visual, notificaciones y sesion de trabajo.</p>
+        <span>{{ $t('page.settings.eyebrow') }}</span>
+        <h2>{{ $t('page.settings.title') }}</h2>
+        <p>{{ $t('page.settings.description') }}</p>
       </div>
-      <pv-button label="Guardar cambios" icon="pi pi-save" @click="saveSettings()" />
+      <pv-button :label="$t('page.settings.saveChanges')" icon="pi pi-save" @click="saveSettings()" />
     </div>
 
     <div class="settings-grid">
       <article>
         <i class="pi pi-language"></i>
         <div>
-          <strong>Idioma principal</strong>
-          <p>ES - Espanol</p>
+          <strong>{{ $t('page.settings.language') }}</strong>
+          <p>{{ localeLabel }}</p>
         </div>
       </article>
       <article>
         <i class="pi pi-moon"></i>
         <div>
-          <strong>Tema visual</strong>
-          <p>Claro operativo</p>
+          <strong>{{ $t('page.settings.theme') }}</strong>
+          <p>{{ $t('page.settings.lightTheme') }}</p>
         </div>
       </article>
       <article>
         <i class="pi pi-bell"></i>
         <div>
-          <strong>Notificaciones</strong>
-          <p>Alertas de vencimiento y conservacion activas</p>
+          <strong>{{ $t('page.settings.notifications') }}</strong>
+          <p>{{ $t('page.settings.notificationsDetail') }}</p>
         </div>
       </article>
       <article>
         <i class="pi pi-shield"></i>
         <div>
-          <strong>Sesion</strong>
-          <p>Token local de demostracion protegido por IAM</p>
+          <strong>{{ $t('page.settings.session') }}</strong>
+          <p>{{ $t('page.settings.sessionDetail') }}</p>
         </div>
       </article>
     </div>
@@ -45,12 +45,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const savedMessage = ref('');
+const { locale, t } = useI18n();
+const localeLabel = computed(() => (locale.value === 'es' ? 'ES - Espanol' : 'EN - English'));
 
 const saveSettings = () => {
-  savedMessage.value = 'Cambios de configuracion guardados localmente.';
+  savedMessage.value = t('page.settings.saved');
 };
 </script>
 
@@ -64,7 +67,7 @@ const saveSettings = () => {
 .settings-grid article,
 .saved-message {
   background: #ffffff;
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
 }
@@ -77,14 +80,14 @@ const saveSettings = () => {
 }
 
 .settings-header span {
-  color: #3d9f7d;
+  color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
 }
 
 .settings-header h2 {
-  color: #16251d;
+  color: #021c45;
   font-size: 26px;
   font-weight: 950;
   margin: 6px 0;
@@ -92,7 +95,7 @@ const saveSettings = () => {
 
 .settings-header p,
 .settings-grid p {
-  color: #66756b;
+  color: #526780;
   font-weight: 700;
   margin: 0;
 }
@@ -112,7 +115,7 @@ const saveSettings = () => {
 
 .settings-grid i {
   align-items: center;
-  background: #10261c;
+  background: #021c45;
   border-radius: 8px;
   color: #ffffff;
   display: inline-flex;
@@ -122,14 +125,14 @@ const saveSettings = () => {
 }
 
 .settings-grid strong {
-  color: #16251d;
+  color: #021c45;
   display: block;
   font-weight: 950;
   margin-bottom: 4px;
 }
 
 .saved-message {
-  color: #247b5d;
+  color: #023192;
   font-weight: 900;
   padding: 16px 20px;
 }

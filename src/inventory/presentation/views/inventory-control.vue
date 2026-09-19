@@ -2,26 +2,26 @@
   <section class="inventory-view">
     <div class="view-header">
       <div>
-        <span>Inventory</span>
-        <h2>Inventario, lotes y vencimientos</h2>
-        <p>Control de stock, lotes, fechas de vencimiento y estados de riesgo.</p>
+        <span>{{ $t('page.inventory.eyebrow') }}</span>
+        <h2>{{ $t('page.inventory.title') }}</h2>
+        <p>{{ $t('page.inventory.description') }}</p>
       </div>
-      <pv-button label="Registrar stock" icon="pi pi-plus" @click="showStockForm = true" />
+      <pv-button :label="$t('page.inventory.registerStock')" icon="pi pi-plus" @click="showStockForm = true" />
     </div>
 
-    <pv-dialog v-model:visible="showStockForm" modal header="Registrar stock" :style="{ width: '520px' }">
+    <pv-dialog v-model:visible="showStockForm" modal :header="$t('page.inventory.registerStock')" :style="{ width: '520px' }">
       <form class="entity-form" @submit.prevent>
         <label>
-          Producto
+          {{ $t('common.product') }}
           <pv-input-text v-model="stockForm.productName" placeholder="Tomate organico" />
         </label>
         <div class="form-row">
           <label>
-            Lote
+            {{ $t('page.inventory.lot') }}
             <pv-input-text v-model="stockForm.lotCode" placeholder="LOT-025" />
           </label>
           <label>
-            Vencimiento
+            {{ $t('common.expiration') }}
             <pv-input-text v-model="stockForm.expirationDate" placeholder="2026-10-01" />
           </label>
         </div>
@@ -31,28 +31,28 @@
             <pv-input-text v-model="stockForm.stock" placeholder="50" />
           </label>
           <label>
-            Stock minimo
+            {{ $t('page.inventory.minimumStock') }}
             <pv-input-text v-model="stockForm.minimumStock" placeholder="20" />
           </label>
         </div>
       </form>
       <template #footer>
-        <pv-button label="Cancelar" text @click="showStockForm = false" />
-        <pv-button label="Guardar" icon="pi pi-save" @click="noopSubmit" />
+        <pv-button :label="$t('common.cancel')" text @click="showStockForm = false" />
+        <pv-button :label="$t('common.save')" icon="pi pi-save" @click="noopSubmit" />
       </template>
     </pv-dialog>
 
     <div class="table-card">
-      <pv-data-table :value="inventoryStore.items" class="marketgo-datatable" responsive-layout="scroll">
-        <pv-column field="productName" header="Producto" />
-        <pv-column field="lotCode" header="Lote" />
-        <pv-column field="stock" header="Stock" />
-        <pv-column field="minimumStock" header="Minimo" />
-        <pv-column field="expirationDate" header="Vencimiento" />
-        <pv-column header="Estado">
+      <pv-data-table :value="filteredItems" class="marketgo-datatable" responsive-layout="scroll">
+        <pv-column field="productName" :header="$t('common.product')" />
+        <pv-column field="lotCode" :header="$t('page.inventory.lot')" />
+        <pv-column field="stock" :header="$t('common.stock')" />
+        <pv-column field="minimumStock" :header="$t('page.inventory.minimumStock')" />
+        <pv-column field="expirationDate" :header="$t('common.expiration')" />
+        <pv-column :header="$t('common.status')">
           <template #body="{ data }">
             <span :class="['status-badge', data.status === 'risk' ? 'status-risk' : 'status-healthy']">
-              {{ data.status }}
+              {{ $t(`status.${data.status}`) }}
             </span>
           </template>
         </pv-column>
@@ -64,8 +64,10 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import { useInventoryStore } from '../../application/inventory.store.js';
+import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const inventoryStore = useInventoryStore();
+const filteredItems = useSearchFilter(() => inventoryStore.items);
 const showStockForm = ref(false);
 const stockForm = reactive({
   productName: '',
@@ -91,7 +93,7 @@ onMounted(() => {
 .view-header,
 .table-card {
   background: #ffffff;
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
 }
@@ -104,21 +106,21 @@ onMounted(() => {
 }
 
 .view-header span {
-  color: #3d9f7d;
+  color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
 }
 
 .view-header h2 {
-  color: #16251d;
+  color: #021c45;
   font-size: 26px;
   font-weight: 950;
   margin: 6px 0;
 }
 
 .view-header p {
-  color: #66756b;
+  color: #526780;
   font-weight: 700;
   margin: 0;
 }
@@ -129,7 +131,7 @@ onMounted(() => {
 }
 
 .entity-form label {
-  color: #33423a;
+  color: #023192;
   display: grid;
   font-size: 13px;
   font-weight: 800;

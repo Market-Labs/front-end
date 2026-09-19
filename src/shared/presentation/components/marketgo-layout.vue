@@ -3,7 +3,9 @@
     <aside class="sidebar">
       <div>
         <router-link to="/home" class="brand">
-          <span class="brand-mark">MG</span>
+          <span class="brand-mark">
+            <img src="/logo-marketgo.png" alt="MarketGo" />
+          </span>
           <span>
             <strong>{{ t('app.name') }}</strong>
             <small>{{ t('app.tagline') }}</small>
@@ -44,7 +46,7 @@
         <div class="topbar-actions">
           <div class="search-box">
             <i class="pi pi-search"></i>
-            <input :placeholder="t('common.search_placeholder')" type="search" />
+            <input v-model="searchQuery" :placeholder="t('common.search_placeholder')" type="search" />
           </div>
           <button type="button" class="icon-button" aria-label="Notifications">
             <i class="pi pi-bell"></i>
@@ -62,7 +64,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import LanguageSwitcher from './language-switcher.vue';
@@ -70,6 +72,13 @@ import LanguageSwitcher from './language-switcher.vue';
 const route = useRoute();
 const router = useRouter();
 const { locale, t } = useI18n();
+const searchQuery = ref('');
+
+provide('marketgoSearchQuery', searchQuery);
+
+watch(() => route.fullPath, () => {
+  searchQuery.value = '';
+});
 
 const menuItems = [
   { to: '/home', icon: 'pi pi-microsoft', labelKey: 'option.dashboard' },
@@ -89,12 +98,12 @@ const menuItems = [
 const routeTitleKeys = {
   home: 'option.dashboard',
   settings: 'option.settings',
-  'access-denied': 'Acceso denegado',
+  'access-denied': 'page.accessDenied.title',
 };
 
 const pageTitle = computed(() => {
-  const key = routeTitleKeys[route.name];
-  return key?.startsWith('option.') ? t(key) : route.meta.title || t('option.dashboard');
+  const key = route.meta.titleKey || routeTitleKeys[route.name];
+  return key ? t(key) : route.meta.title || t('option.dashboard');
 });
 
 const todayDate = computed(() => (
@@ -110,12 +119,12 @@ const todayDate = computed(() => (
 .marketgo-layout {
   display: flex;
   min-height: 100vh;
-  background: #f5f7f4;
+  background: #eff3fa;
 }
 
 .sidebar {
   align-self: stretch;
-  background: #10261c;
+  background: #021c45;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -136,14 +145,21 @@ const todayDate = computed(() => (
 
 .brand-mark {
   align-items: center;
-  background: #f08a24;
+  background: #ffffff;
   border-radius: 8px;
-  color: #ffffff;
   display: inline-flex;
-  font-weight: 900;
-  height: 42px;
+  flex: 0 0 46px;
+  height: 46px;
   justify-content: center;
-  width: 42px;
+  overflow: hidden;
+  width: 46px;
+}
+
+.brand-mark img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
 }
 
 .brand strong,
@@ -154,7 +170,7 @@ const todayDate = computed(() => (
 
 .brand small,
 .profile-button small {
-  color: #9fb0a6;
+  color: #b8c9e8;
   display: block;
   font-size: 11px;
   font-weight: 700;
@@ -170,7 +186,7 @@ const todayDate = computed(() => (
 .menu-item {
   align-items: center;
   border-radius: 8px;
-  color: #a8b8ae;
+  color: #b8c9e8;
   display: flex;
   font-size: 14px;
   font-weight: 800;
@@ -188,7 +204,7 @@ const todayDate = computed(() => (
 }
 
 .menu-item.router-link-active {
-  background: #f08a24;
+  background: #0d8cfb;
   color: #ffffff;
 }
 
@@ -213,8 +229,8 @@ const todayDate = computed(() => (
 }
 
 .logout-button {
-  background: #1a3829;
-  color: #d4ded8;
+  background: #023192;
+  color: #eff3fa;
   font-weight: 800;
 }
 
@@ -225,7 +241,7 @@ const todayDate = computed(() => (
 
 .avatar {
   align-items: center;
-  background: #3d9f7d;
+  background: #0d8cfb;
   border-radius: 50%;
   color: #ffffff;
   display: inline-flex;
@@ -252,11 +268,11 @@ const todayDate = computed(() => (
   display: flex;
   justify-content: space-between;
   min-height: 86px;
-  padding: 18px 28px 12px;
+  padding: 24px 40px 16px;
 }
 
 .topbar h1 {
-  color: #16251d;
+  color: #021c45;
   font-size: 26px;
   font-weight: 900;
   line-height: 1.1;
@@ -264,7 +280,7 @@ const todayDate = computed(() => (
 }
 
 .topbar p {
-  color: #7a887f;
+  color: #526780;
   font-size: 13px;
   font-weight: 700;
   margin: 6px 0 0;
@@ -279,7 +295,7 @@ const todayDate = computed(() => (
 .search-box {
   align-items: center;
   background: #ffffff;
-  border: 1px solid #e7ece8;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
   display: flex;
@@ -291,7 +307,7 @@ const todayDate = computed(() => (
 
 .search-box input {
   border: 0;
-  color: #334155;
+  color: #023192;
   font: inherit;
   font-size: 14px;
   font-weight: 700;
@@ -300,13 +316,13 @@ const todayDate = computed(() => (
 }
 
 .search-box .pi {
-  color: #94a3b8;
+  color: #526780;
 }
 
 .icon-button {
   align-items: center;
   background: #ffffff;
-  border: 1px solid #e7ece8;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   color: #475569;
   cursor: pointer;
@@ -318,7 +334,7 @@ const todayDate = computed(() => (
 }
 
 .notification-dot {
-  background: #e9592c;
+  background: #fc6910;
   border: 2px solid #ffffff;
   border-radius: 50%;
   height: 10px;
@@ -332,7 +348,7 @@ const todayDate = computed(() => (
   flex: 1;
   min-width: 0;
   overflow: auto;
-  padding: 0 28px 28px;
+  padding: 0 40px 40px;
 }
 
 @media (max-width: 1000px) {
@@ -360,6 +376,14 @@ const todayDate = computed(() => (
 
   .search-box {
     width: 100%;
+  }
+
+  .topbar {
+    padding: 16px;
+  }
+
+  .content {
+    padding: 0 16px 16px;
   }
 }
 </style>

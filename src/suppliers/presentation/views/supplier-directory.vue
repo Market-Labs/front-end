@@ -2,17 +2,17 @@
   <section class="suppliers-view">
     <div class="view-header">
       <div>
-        <span>Suppliers</span>
-        <h2>Directorio de proveedores</h2>
-        <p>Gestion de datos comerciales, especialidad y cobertura de proveedores.</p>
+        <span>{{ $t('page.suppliers.eyebrow') }}</span>
+        <h2>{{ $t('page.suppliers.title') }}</h2>
+        <p>{{ $t('page.suppliers.description') }}</p>
       </div>
-      <pv-button label="Nuevo proveedor" icon="pi pi-plus" @click="showSupplierForm = true" />
+      <pv-button :label="$t('page.suppliers.newSupplier')" icon="pi pi-plus" @click="showSupplierForm = true" />
     </div>
 
-    <pv-dialog v-model:visible="showSupplierForm" modal header="Nuevo proveedor" :style="{ width: '540px' }">
+    <pv-dialog v-model:visible="showSupplierForm" modal :header="$t('page.suppliers.newSupplier')" :style="{ width: '540px' }">
       <form class="entity-form" @submit.prevent>
         <label>
-          Nombre comercial
+          {{ $t('page.suppliers.businessName') }}
           <pv-input-text v-model="supplierForm.businessName" placeholder="Anita Gamboa" />
         </label>
         <div class="form-row">
@@ -21,37 +21,37 @@
             <pv-input-text v-model="supplierForm.ruc" placeholder="10456789012" />
           </label>
           <label>
-            Telefono
+            {{ $t('page.suppliers.phone') }}
             <pv-input-text v-model="supplierForm.phone" placeholder="+51 959 404 210" />
           </label>
         </div>
         <label>
-          Correo
+          {{ $t('page.suppliers.email') }}
           <pv-input-text v-model="supplierForm.email" placeholder="anitaG@bioandes.pe" />
         </label>
         <label>
-          Direccion
+          {{ $t('page.suppliers.address') }}
           <pv-input-text v-model="supplierForm.address" placeholder="Cerro Colorado, Arequipa" />
         </label>
         <div class="form-row">
           <label>
-            Especialidad
+            {{ $t('page.suppliers.specialty') }}
             <pv-input-text v-model="supplierForm.specialty" placeholder="Lacteos y derivados" />
           </label>
           <label>
-            Cobertura
+            {{ $t('page.suppliers.coverage') }}
             <pv-input-text v-model="supplierForm.coverageArea" placeholder="Cerro Colorado - Arequipa" />
           </label>
         </div>
       </form>
       <template #footer>
-        <pv-button label="Cancelar" text @click="showSupplierForm = false" />
-        <pv-button label="Guardar" icon="pi pi-save" @click="noopSubmit" />
+        <pv-button :label="$t('common.cancel')" text @click="showSupplierForm = false" />
+        <pv-button :label="$t('common.save')" icon="pi pi-save" @click="noopSubmit" />
       </template>
     </pv-dialog>
 
     <div class="supplier-grid">
-      <article v-for="supplier in suppliersStore.suppliers" :key="supplier.id">
+      <article v-for="supplier in filteredSuppliers" :key="supplier.id">
         <span>{{ supplier.ruc }}</span>
         <h3>{{ supplier.businessName }}</h3>
         <p>{{ supplier.specialty }}</p>
@@ -67,8 +67,10 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import { useSuppliersStore } from '../../application/suppliers.store.js';
+import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const suppliersStore = useSuppliersStore();
+const filteredSuppliers = useSearchFilter(() => suppliersStore.suppliers);
 const showSupplierForm = ref(false);
 const supplierForm = reactive({
   businessName: '',
@@ -96,7 +98,7 @@ onMounted(() => {
 .view-header,
 .supplier-grid article {
   background: #ffffff;
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
 }
@@ -110,7 +112,7 @@ onMounted(() => {
 
 .view-header span,
 .supplier-grid span {
-  color: #3d9f7d;
+  color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
@@ -118,7 +120,7 @@ onMounted(() => {
 
 .view-header h2,
 .supplier-grid h3 {
-  color: #16251d;
+  color: #021c45;
   font-weight: 950;
   margin: 6px 0;
 }
@@ -126,7 +128,7 @@ onMounted(() => {
 .view-header p,
 .supplier-grid p,
 footer small {
-  color: #66756b;
+  color: #526780;
   font-weight: 700;
 }
 
@@ -148,7 +150,7 @@ footer {
 }
 
 footer strong {
-  color: #f08a24;
+  color: #fc6910;
 }
 
 .entity-form {
@@ -157,7 +159,7 @@ footer strong {
 }
 
 .entity-form label {
-  color: #33423a;
+  color: #023192;
   display: grid;
   font-size: 13px;
   font-weight: 800;

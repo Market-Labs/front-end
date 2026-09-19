@@ -2,15 +2,15 @@
   <section class="analytics-view">
     <div class="view-header">
       <div>
-        <span>Analytics</span>
-        <h2>Indicadores y reportes operativos</h2>
-        <p>Resumen agregado para inventario, mermas, ventas, conservacion y abastecimiento.</p>
+        <span>{{ $t('page.analytics.eyebrow') }}</span>
+        <h2>{{ $t('page.analytics.title') }}</h2>
+        <p>{{ $t('page.analytics.description') }}</p>
       </div>
       <pv-button :label="reportButtonLabel" icon="pi pi-file-pdf" @click="generateReport()" />
     </div>
 
     <div class="analytics-grid">
-      <article v-for="indicator in analyticsStore.indicators" :key="indicator.label">
+      <article v-for="indicator in filteredIndicators" :key="indicator.label">
         <span>{{ indicator.label }}</span>
         <strong>{{ indicator.currentValue }}{{ indicator.unit }}</strong>
         <small :class="indicator.variation >= 0 ? 'up' : 'down'">
@@ -20,10 +20,10 @@
     </div>
 
     <div class="reports-card">
-      <h3>Reportes disponibles</h3>
+      <h3>{{ $t('page.analytics.availableReports') }}</h3>
       <div>
         <button
-          v-for="report in analyticsStore.reports"
+          v-for="report in filteredReports"
           :key="report"
           type="button"
           :class="{ active: selectedReport === report }"
@@ -38,7 +38,7 @@
 
     <section v-if="selectedReportSummary" class="report-detail">
       <div>
-        <span>Reporte seleccionado</span>
+        <span>{{ $t('page.analytics.selectedReport') }}</span>
         <h3>{{ selectedReportSummary.title }}</h3>
         <p>{{ selectedReportSummary.description }}</p>
       </div>
@@ -62,17 +62,22 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAnalyticsStore } from '../../application/analytics.store.js';
+import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const analyticsStore = useAnalyticsStore();
+const { t } = useI18n();
 const selectedReport = ref('Inventario');
 const generatedReport = ref('');
+const filteredIndicators = useSearchFilter(() => analyticsStore.indicators);
+const filteredReports = useSearchFilter(() => analyticsStore.reports);
 
-const reportButtonLabel = computed(() => `Generar ${selectedReport.value}`);
+const reportButtonLabel = computed(() => t('page.analytics.generate', { report: selectedReport.value }));
 const selectedReportSummary = computed(() => analyticsStore.reportSummaries[selectedReport.value]);
 
 const generateReport = () => {
-  generatedReport.value = `Reporte de ${selectedReport.value} generado para revision.`;
+  generatedReport.value = t('page.analytics.generated', { report: selectedReport.value });
 };
 
 onMounted(() => {
@@ -92,7 +97,7 @@ onMounted(() => {
 .report-detail,
 .report-metrics article {
   background: #ffffff;
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
 }
@@ -105,7 +110,7 @@ onMounted(() => {
 }
 
 .view-header span {
-  color: #3d9f7d;
+  color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
@@ -114,14 +119,14 @@ onMounted(() => {
 .view-header h2,
 .reports-card h3,
 .report-detail h3 {
-  color: #16251d;
+  color: #021c45;
   font-weight: 950;
   margin: 6px 0;
 }
 
 .view-header p,
 .report-detail p {
-  color: #66756b;
+  color: #526780;
   font-weight: 700;
   margin: 0;
 }
@@ -140,18 +145,18 @@ onMounted(() => {
 
 .analytics-grid span,
 .reports-card button {
-  color: #66756b;
+  color: #526780;
   font-weight: 850;
 }
 
 .analytics-grid strong {
-  color: #16251d;
+  color: #021c45;
   font-size: 30px;
   font-weight: 950;
 }
 
 .up {
-  color: #247b5d;
+  color: #023192;
 }
 
 .down {
@@ -170,8 +175,8 @@ onMounted(() => {
 
 .reports-card button {
   align-items: center;
-  background: #f9fbf8;
-  border: 1px solid #e8ede9;
+  background: #eff3fa;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
@@ -181,12 +186,12 @@ onMounted(() => {
 }
 
 .reports-card button.active {
-  background: #10261c;
+  background: #021c45;
   color: #ffffff;
 }
 
 .report-feedback {
-  color: #247b5d;
+  color: #023192;
   font-size: 13px;
   font-weight: 900;
   margin: 16px 0 0;
@@ -199,7 +204,7 @@ onMounted(() => {
 }
 
 .report-detail > div:first-child span {
-  color: #3d9f7d;
+  color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
@@ -219,13 +224,13 @@ onMounted(() => {
 }
 
 .report-metrics span {
-  color: #66756b;
+  color: #526780;
   font-size: 13px;
   font-weight: 850;
 }
 
 .report-metrics strong {
-  color: #16251d;
+  color: #021c45;
   font-size: 24px;
   font-weight: 950;
 }
@@ -240,13 +245,13 @@ onMounted(() => {
 
 .report-detail li {
   align-items: center;
-  color: #33423a;
+  color: #023192;
   display: flex;
   font-weight: 750;
   gap: 8px;
 }
 
 .report-detail li i {
-  color: #3d9f7d;
+  color: #0d8cfb;
 }
 </style>

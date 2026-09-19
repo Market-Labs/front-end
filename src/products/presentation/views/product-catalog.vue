@@ -2,50 +2,50 @@
   <section class="products-view">
     <div class="view-header">
       <div>
-        <span>Products</span>
-        <h2>Catalogo de productos organicos</h2>
-        <p>Datos de producto, vencimiento, cantidad, precio y disponibilidad.</p>
+        <span>{{ $t('page.products.eyebrow') }}</span>
+        <h2>{{ $t('page.products.title') }}</h2>
+        <p>{{ $t('page.products.description') }}</p>
       </div>
-      <pv-button label="Nuevo producto" icon="pi pi-plus" @click="showProductForm = true" />
+      <pv-button :label="$t('page.products.newProduct')" icon="pi pi-plus" @click="showProductForm = true" />
     </div>
 
-    <pv-dialog v-model:visible="showProductForm" modal header="Nuevo producto" :style="{ width: '520px' }">
+    <pv-dialog v-model:visible="showProductForm" modal :header="$t('page.products.newProduct')" :style="{ width: '520px' }">
       <form class="entity-form" @submit.prevent>
         <label>
-          Nombre
+          {{ $t('common.name') }}
           <pv-input-text v-model="productForm.name" placeholder="Tomate organico" />
         </label>
         <label>
-          Categoria
-          <pv-select v-model="productForm.category" :options="categoryOptions" placeholder="Seleccionar categoria" />
+          {{ $t('common.category') }}
+          <pv-select v-model="productForm.category" :options="categoryOptions" :placeholder="$t('page.products.selectCategory')" />
         </label>
         <label>
-          Fecha de vencimiento
+          {{ $t('common.expiration') }}
           <pv-input-text v-model="productForm.expirationDate" placeholder="2026-10-01" />
         </label>
         <div class="form-row">
           <label>
-            Cantidad
+            {{ $t('common.quantity') }}
             <pv-input-text v-model="productForm.quantity" placeholder="40" />
           </label>
           <label>
-            Precio
+            {{ $t('common.price') }}
             <pv-input-text v-model="productForm.price" placeholder="5.80" />
           </label>
         </div>
         <label>
-          Descripcion
+          {{ $t('common.description') }}
           <pv-input-text v-model="productForm.description" placeholder="Producto organico fresco" />
         </label>
       </form>
       <template #footer>
-        <pv-button label="Cancelar" text @click="showProductForm = false" />
-        <pv-button label="Guardar" icon="pi pi-save" @click="noopSubmit" />
+        <pv-button :label="$t('common.cancel')" text @click="showProductForm = false" />
+        <pv-button :label="$t('common.save')" icon="pi pi-save" @click="noopSubmit" />
       </template>
     </pv-dialog>
 
     <div class="products-grid">
-      <article v-for="product in productsStore.products" :key="product.id">
+      <article v-for="product in filteredProducts" :key="product.id">
         <div class="card-top">
           <span>{{ product.category }}</span>
           <strong>{{ product.formattedPrice }}</strong>
@@ -53,9 +53,9 @@
         <h3>{{ product.name }}</h3>
         <p>{{ product.description }}</p>
         <footer>
-          <small>{{ product.quantity }} unidades</small>
+          <small>{{ product.quantity }} {{ $t('page.products.units') }}</small>
           <span :class="['status-badge', product.available ? 'status-approved' : 'status-rejected']">
-            {{ product.available ? 'Disponible' : 'No disponible' }}
+            {{ product.available ? $t('page.products.available') : $t('page.products.unavailable') }}
           </span>
         </footer>
       </article>
@@ -66,8 +66,10 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import { useProductsStore } from '../../application/products.store.js';
+import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const productsStore = useProductsStore();
+const filteredProducts = useSearchFilter(() => productsStore.products);
 const showProductForm = ref(false);
 const categoryOptions = ['Vegetales', 'Frutas', 'Lacteos', 'Organicos'];
 const productForm = reactive({
@@ -95,7 +97,7 @@ onMounted(() => {
 .view-header,
 .products-grid article {
   background: #ffffff;
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
 }
@@ -109,7 +111,7 @@ onMounted(() => {
 
 .view-header span,
 .card-top span {
-  color: #3d9f7d;
+  color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
@@ -117,7 +119,7 @@ onMounted(() => {
 
 .view-header h2,
 .products-grid h3 {
-  color: #16251d;
+  color: #021c45;
   font-weight: 950;
   margin: 6px 0;
 }
@@ -125,7 +127,7 @@ onMounted(() => {
 .view-header p,
 .products-grid p,
 footer small {
-  color: #66756b;
+  color: #526780;
   font-weight: 700;
 }
 
@@ -149,7 +151,7 @@ footer {
 }
 
 .card-top strong {
-  color: #f08a24;
+  color: #fc6910;
   font-size: 18px;
   font-weight: 950;
 }
@@ -160,7 +162,7 @@ footer {
 }
 
 .entity-form label {
-  color: #33423a;
+  color: #023192;
   display: grid;
   font-size: 13px;
   font-weight: 800;

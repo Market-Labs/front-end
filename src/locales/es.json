@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "MarketGo",
-    "tagline": "Gestion organica para minimarkets"
+    "tagline": "Gestión de productos orgánicos"
   },
   "option": {
     "home": "Inicio",
@@ -22,6 +22,163 @@
   "common": {
     "search_placeholder": "Buscar en MarketGo",
     "coming_soon": "Modulo preparado para implementacion",
-    "view_all": "Ver todo"
+    "view_all": "Ver todo",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "status": "Estado",
+    "product": "Producto",
+    "quantity": "Cantidad",
+    "price": "Precio",
+    "description": "Descripcion",
+    "category": "Categoria",
+    "expiration": "Vencimiento",
+    "name": "Nombre",
+    "stock": "Stock",
+    "items": "Items",
+    "total": "Total",
+    "minimarket": "Minimarket"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "pending": "Pendiente",
+    "approved": "Aceptado",
+    "rejected": "Rechazado",
+    "healthy": "Normal",
+    "risk": "Riesgoso"
+  },
+  "page": {
+    "accessDenied": {
+      "title": "Acceso denegado",
+      "description": "No tienes permisos para consultar este recurso.",
+      "backHome": "Volver al inicio"
+    },
+    "dashboard": {
+      "eyebrow": "Resumen de MarketGo",
+      "title": "Control operativo de productos organicos",
+      "description": "Base visual preparada para conectar inventario, abastecimiento, alertas de conservacion y actividad por rol.",
+      "health": "salud operacional",
+      "activity": "Actividad reciente",
+      "summary": "Resumen operativo"
+    },
+    "inventory": {
+      "eyebrow": "Inventario",
+      "title": "Inventario, lotes y vencimientos",
+      "description": "Control de stock, lotes, fechas de vencimiento y estados de riesgo.",
+      "registerStock": "Registrar stock",
+      "lot": "Lote",
+      "minimumStock": "Stock minimo"
+    },
+    "products": {
+      "eyebrow": "Productos",
+      "title": "Catalogo de productos organicos",
+      "description": "Datos de producto, vencimiento, cantidad, precio y disponibilidad.",
+      "newProduct": "Nuevo producto",
+      "available": "Disponible",
+      "unavailable": "No disponible",
+      "units": "unidades",
+      "selectCategory": "Seleccionar categoria"
+    },
+    "requisition": {
+      "eyebrow": "Requisiciones",
+      "title": "Solicitudes internas de productos",
+      "description": "Creacion, revision, aprobacion/rechazo y conversion a abastecimiento.",
+      "newRequest": "Nueva solicitud",
+      "requester": "Solicitante",
+      "reason": "Motivo"
+    },
+    "procurements": {
+      "eyebrow": "Abastecimiento",
+      "title": "Ordenes de abastecimiento",
+      "description": "Creacion, visualizacion, filtrado, aceptacion, rechazo y seguimiento de estado.",
+      "createOrder": "Crear orden",
+      "order": "Orden",
+      "supplier": "Proveedor",
+      "estimatedTotal": "Total estimado",
+      "selectStatus": "Seleccionar estado"
+    },
+    "suppliers": {
+      "eyebrow": "Proveedores",
+      "title": "Directorio de proveedores",
+      "description": "Gestion de datos comerciales, especialidad y cobertura de proveedores.",
+      "newSupplier": "Nuevo proveedor",
+      "businessName": "Nombre comercial",
+      "phone": "Telefono",
+      "email": "Correo",
+      "address": "Direccion",
+      "specialty": "Especialidad",
+      "coverage": "Cobertura"
+    },
+    "profiles": {
+      "eyebrow": "Perfiles",
+      "title": "Perfiles de minimarket y proveedor",
+      "description": "Consulta y actualizacion de datos comerciales, contacto y cobertura.",
+      "updateProfile": "Actualizar perfil",
+      "phone": "Telefono",
+      "zone": "Zona",
+      "specialty": "Especialidad"
+    },
+    "iam": {
+      "eyebrow": "IAM",
+      "title": "Usuarios, roles y permisos",
+      "description": "Control de acceso para administradores de minimarket y proveedores organicos.",
+      "newUser": "Nuevo usuario",
+      "user": "Usuario",
+      "email": "Correo",
+      "role": "Rol",
+      "selectRole": "Seleccionar rol",
+      "selectStatus": "Seleccionar estado",
+      "activeUsers": "Usuarios activos",
+      "definedRoles": "Roles definidos",
+      "keyPermissions": "Permisos clave"
+    },
+    "conservation": {
+      "eyebrow": "Conservacion",
+      "title": "Monitoreo de temperatura y humedad",
+      "description": "Control de condiciones para conservacion de productos organicos.",
+      "viewAlerts": "Ver alertas",
+      "zone": "Zona",
+      "temperature": "Temp C",
+      "humidity": "Humedad %",
+      "record": "Registro"
+    },
+    "alerts": {
+      "eyebrow": "Alertas",
+      "title": "Centro de alertas",
+      "description": "Alertas de conservacion, vencimiento, stock y abastecimiento.",
+      "viewSuppliers": "Ver proveedores",
+      "unread": "{count} sin leer",
+      "markRead": "Marcar leido"
+    },
+    "roleDashboard": {
+      "eyebrow": "Dashboard",
+      "title": "Indicadores por rol",
+      "description": "Vista operativa para inventario, requisiciones, abastecimiento, alertas y actividad.",
+      "refresh": "Refrescar",
+      "periodComparison": "vs periodo anterior"
+    },
+    "analytics": {
+      "eyebrow": "Analitica",
+      "title": "Indicadores y reportes operativos",
+      "description": "Resumen agregado para inventario, mermas, ventas, conservacion y abastecimiento.",
+      "availableReports": "Reportes disponibles",
+      "selectedReport": "Reporte seleccionado",
+      "generate": "Generar {report}",
+      "generated": "Reporte de {report} generado para revision."
+    },
+    "settings": {
+      "eyebrow": "Configuracion",
+      "title": "Preferencias de MarketGo",
+      "description": "Administra idioma, tema visual, notificaciones y sesion de trabajo.",
+      "saveChanges": "Guardar cambios",
+      "saved": "Cambios de configuracion guardados localmente.",
+      "language": "Idioma principal",
+      "theme": "Tema visual",
+      "notifications": "Notificaciones",
+      "session": "Sesion",
+      "lightTheme": "Claro operativo",
+      "notificationsDetail": "Alertas de vencimiento y conservacion activas",
+      "sessionDetail": "Token local de demostracion protegido por IAM"
+    }
   }
 }

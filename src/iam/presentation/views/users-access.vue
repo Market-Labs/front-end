@@ -2,60 +2,60 @@
   <section class="iam-view">
     <div class="view-header">
       <div>
-        <span>IAM</span>
-        <h2>Usuarios, roles y permisos</h2>
-        <p>Control de acceso para administradores de minimarket y proveedores organicos.</p>
+        <span>{{ $t('page.iam.eyebrow') }}</span>
+        <h2>{{ $t('page.iam.title') }}</h2>
+        <p>{{ $t('page.iam.description') }}</p>
       </div>
-      <pv-button label="Nuevo usuario" icon="pi pi-user-plus" @click="showUserForm = true" />
+      <pv-button :label="$t('page.iam.newUser')" icon="pi pi-user-plus" @click="showUserForm = true" />
     </div>
 
-    <pv-dialog v-model:visible="showUserForm" modal header="Nuevo usuario" :style="{ width: '520px' }">
+    <pv-dialog v-model:visible="showUserForm" modal :header="$t('page.iam.newUser')" :style="{ width: '520px' }">
       <form class="entity-form" @submit.prevent>
         <label>
-          Nombre
+          {{ $t('common.name') }}
           <pv-input-text v-model="userForm.name" placeholder="Albino Caceres" />
         </label>
         <label>
-          Correo
+          {{ $t('page.iam.email') }}
           <pv-input-text v-model="userForm.email" placeholder="usuario@marketgo.pe" />
         </label>
         <div class="form-row">
           <label>
-            Rol
-            <pv-select v-model="userForm.role" :options="roleOptions" placeholder="Seleccionar rol" />
+            {{ $t('page.iam.role') }}
+            <pv-select v-model="userForm.role" :options="roleOptions" :placeholder="$t('page.iam.selectRole')" />
           </label>
           <label>
-            Estado
-            <pv-select v-model="userForm.status" :options="statusOptions" placeholder="Seleccionar estado" />
+            {{ $t('common.status') }}
+            <pv-select v-model="userForm.status" :options="statusOptions" :placeholder="$t('page.iam.selectStatus')" />
           </label>
         </div>
       </form>
       <template #footer>
-        <pv-button label="Cancelar" text @click="showUserForm = false" />
-        <pv-button label="Guardar" icon="pi pi-save" @click="noopSubmit" />
+        <pv-button :label="$t('common.cancel')" text @click="showUserForm = false" />
+        <pv-button :label="$t('common.save')" icon="pi pi-save" @click="noopSubmit" />
       </template>
     </pv-dialog>
 
     <div class="summary-grid">
       <article v-for="card in summaryCards" :key="card.label">
         <i :class="card.icon"></i>
-        <span>{{ card.label }}</span>
+        <span>{{ $t(card.label) }}</span>
         <strong>{{ card.value }}</strong>
       </article>
     </div>
 
     <div class="table-card">
-      <pv-data-table :value="iamStore.users" class="marketgo-datatable" responsive-layout="scroll">
-        <pv-column field="name" header="Usuario" />
-        <pv-column field="email" header="Correo" />
-        <pv-column header="Rol">
+      <pv-data-table :value="filteredUsers" class="marketgo-datatable" responsive-layout="scroll">
+        <pv-column field="name" :header="$t('page.iam.user')" />
+        <pv-column field="email" :header="$t('page.iam.email')" />
+        <pv-column :header="$t('page.iam.role')">
           <template #body="{ data }">
             {{ data.roles[0] }}
           </template>
         </pv-column>
-        <pv-column header="Estado">
+        <pv-column :header="$t('common.status')">
           <template #body="{ data }">
-            <span class="status-badge status-approved">{{ data.status }}</span>
+            <span class="status-badge status-approved">{{ $t(`status.${data.status}`) }}</span>
           </template>
         </pv-column>
       </pv-data-table>
@@ -66,8 +66,10 @@
 <script setup>
 import { computed, reactive, ref, onMounted } from 'vue';
 import { useIamStore } from '../../application/iam.store.js';
+import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 
 const iamStore = useIamStore();
+const filteredUsers = useSearchFilter(() => iamStore.users);
 const showUserForm = ref(false);
 const roleOptions = ['Administrador de Minimarket', 'Proveedor Organico', 'Operador de Minimarket'];
 const statusOptions = ['active', 'inactive'];
@@ -81,9 +83,9 @@ const userForm = reactive({
 const noopSubmit = () => {};
 
 const summaryCards = computed(() => [
-  { label: 'Usuarios activos', value: iamStore.users.length, icon: 'pi pi-users' },
-  { label: 'Roles definidos', value: 2, icon: 'pi pi-id-card' },
-  { label: 'Permisos clave', value: 5, icon: 'pi pi-shield' },
+  { label: 'page.iam.activeUsers', value: iamStore.users.length, icon: 'pi pi-users' },
+  { label: 'page.iam.definedRoles', value: 2, icon: 'pi pi-id-card' },
+  { label: 'page.iam.keyPermissions', value: 5, icon: 'pi pi-shield' },
 ]);
 
 onMounted(() => {
@@ -101,7 +103,7 @@ onMounted(() => {
 .summary-grid article,
 .table-card {
   background: #ffffff;
-  border: 1px solid #e8ede9;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
 }
@@ -114,20 +116,20 @@ onMounted(() => {
 }
 
 .view-header span {
-  color: #3d9f7d;
+  color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
 }
 
 .view-header h2 {
-  color: #16251d;
+  color: #021c45;
   font-size: 26px;
   font-weight: 950;
   margin: 6px 0;
 }
 
 .view-header p {
-  color: #66756b;
+  color: #526780;
   font-weight: 700;
   margin: 0;
 }
@@ -145,18 +147,18 @@ onMounted(() => {
 }
 
 .summary-grid i {
-  color: #f08a24;
+  color: #fc6910;
   font-size: 22px;
 }
 
 .summary-grid span {
-  color: #66756b;
+  color: #526780;
   font-size: 13px;
   font-weight: 800;
 }
 
 .summary-grid strong {
-  color: #16251d;
+  color: #021c45;
   font-size: 30px;
   font-weight: 950;
 }
@@ -167,7 +169,7 @@ onMounted(() => {
 }
 
 .entity-form label {
-  color: #33423a;
+  color: #023192;
   display: grid;
   font-size: 13px;
   font-weight: 800;

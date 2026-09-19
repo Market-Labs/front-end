@@ -3,7 +3,7 @@ const productsRoutes = [
     path: '/products',
     name: 'products',
     component: () => import('./views/product-catalog.vue'),
-    meta: { title: 'Productos' },
+    meta: { titleKey: 'option.products' },
   },
 ];
 
