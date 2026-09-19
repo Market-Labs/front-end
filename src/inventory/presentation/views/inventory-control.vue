@@ -6,8 +6,41 @@
         <h2>Inventario, lotes y vencimientos</h2>
         <p>Control de stock, lotes, fechas de vencimiento y estados de riesgo.</p>
       </div>
-      <pv-button label="Registrar stock" icon="pi pi-plus" />
+      <pv-button label="Registrar stock" icon="pi pi-plus" @click="showStockForm = true" />
     </div>
+
+    <pv-dialog v-model:visible="showStockForm" modal header="Registrar stock" :style="{ width: '520px' }">
+      <form class="entity-form" @submit.prevent>
+        <label>
+          Producto
+          <pv-input-text v-model="stockForm.productName" placeholder="Tomate organico" />
+        </label>
+        <div class="form-row">
+          <label>
+            Lote
+            <pv-input-text v-model="stockForm.lotCode" placeholder="LOT-025" />
+          </label>
+          <label>
+            Vencimiento
+            <pv-input-text v-model="stockForm.expirationDate" placeholder="2026-10-01" />
+          </label>
+        </div>
+        <div class="form-row">
+          <label>
+            Stock
+            <pv-input-text v-model="stockForm.stock" placeholder="50" />
+          </label>
+          <label>
+            Stock minimo
+            <pv-input-text v-model="stockForm.minimumStock" placeholder="20" />
+          </label>
+        </div>
+      </form>
+      <template #footer>
+        <pv-button label="Cancelar" text @click="showStockForm = false" />
+        <pv-button label="Guardar" icon="pi pi-save" @click="noopSubmit" />
+      </template>
+    </pv-dialog>
 
     <div class="table-card">
       <pv-data-table :value="inventoryStore.items" class="marketgo-datatable" responsive-layout="scroll">
@@ -29,10 +62,20 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { useInventoryStore } from '../../application/inventory.store.js';
 
 const inventoryStore = useInventoryStore();
+const showStockForm = ref(false);
+const stockForm = reactive({
+  productName: '',
+  lotCode: '',
+  expirationDate: '',
+  stock: '',
+  minimumStock: '',
+});
+
+const noopSubmit = () => {};
 
 onMounted(() => {
   inventoryStore.fetchInventory();
@@ -78,5 +121,24 @@ onMounted(() => {
   color: #66756b;
   font-weight: 700;
   margin: 0;
+}
+
+.entity-form {
+  display: grid;
+  gap: 14px;
+}
+
+.entity-form label {
+  color: #33423a;
+  display: grid;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.form-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 </style>

@@ -3,6 +3,10 @@
     "status": "ok",
     "service": "marketgo-fake-api"
   },
+  "auth": {
+    "token": "fake-marketgo-token",
+    "expiresAt": "2026-09-18T23:59:59"
+  },
   "dashboard": {
     "healthScore": 87,
     "indicators": [
@@ -13,25 +17,28 @@
         "value": 1248,
         "detail": "unidades disponibles",
         "variation": 8,
-        "icon": "pi pi-box"
+        "icon": "pi pi-box",
+        "route": "/inventory"
       },
       {
         "title": "Alertas",
         "label": "Alertas",
         "type": "alerts",
-        "value": 14,
+        "value": 4,
         "detail": "requieren atencion",
         "variation": -2,
-        "icon": "pi pi-bell"
+        "icon": "pi pi-bell",
+        "route": "/communication"
       },
       {
         "title": "Pedidos",
         "label": "Pedidos",
         "type": "procurements",
-        "value": 32,
+        "value": 3,
         "detail": "en seguimiento",
         "variation": 12,
-        "icon": "pi pi-truck"
+        "icon": "pi pi-truck",
+        "route": "/procurements"
       }
     ],
     "activity": [
@@ -81,23 +88,109 @@
         "previousValue": 88,
         "unit": "%"
       }
-    ]
+    ],
+    "reportSummaries": {
+      "Inventario": {
+        "title": "Inventario",
+        "description": "Stock disponible, productos en riesgo y vencimientos cercanos.",
+        "metrics": [
+          { "label": "Productos en stock", "value": "10" },
+          { "label": "Unidades disponibles", "value": "1,248" },
+          { "label": "Lotes en riesgo", "value": "1" }
+        ],
+        "highlights": [
+          "Yogurt organico requiere reposicion.",
+          "Leche organica vence el 24 de setiembre.",
+          "Lechugas organicas mantienen stock saludable."
+        ]
+      },
+      "Abastecimiento": {
+        "title": "Abastecimiento",
+        "description": "Ordenes de compra y seguimiento de proveedores.",
+        "metrics": [
+          { "label": "Ordenes activas", "value": "3" },
+          { "label": "Pendientes", "value": "2" },
+          { "label": "Monto total", "value": "S/ 964.70" }
+        ],
+        "highlights": [
+          "Anita Gamboa tiene orden pendiente.",
+          "BioAndes Organic confirmo una orden.",
+          "Lacteos concentran la mayor demanda."
+        ]
+      },
+      "Mermas": {
+        "title": "Mermas",
+        "description": "Perdidas registradas por vencimiento, conservacion y manipulacion.",
+        "metrics": [
+          { "label": "Merma total", "value": "21 kg" },
+          { "label": "Reduccion mensual", "value": "25%" },
+          { "label": "Producto critico", "value": "Yogurt" }
+        ],
+        "highlights": [
+          "La merma bajo frente al periodo anterior.",
+          "Los lacteos concentran mayor riesgo.",
+          "Se recomienda rotacion FEFO diaria."
+        ]
+      },
+      "Conservacion": {
+        "title": "Conservacion",
+        "description": "Temperatura, humedad y alertas por zona de almacenamiento.",
+        "metrics": [
+          { "label": "Score", "value": "92%" },
+          { "label": "Alertas activas", "value": "4" },
+          { "label": "Zonas monitoreadas", "value": "2" }
+        ],
+        "highlights": [
+          "Camara fria A esta dentro del rango.",
+          "Anaquel fresco presenta humedad elevada.",
+          "Yogurt organico se mantiene a 4 C."
+        ]
+      },
+      "Proveedores": {
+        "title": "Proveedores",
+        "description": "Directorio, cobertura y participacion en ordenes.",
+        "metrics": [
+          { "label": "Proveedores activos", "value": "2" },
+          { "label": "Zona destacada", "value": "Arequipa" },
+          { "label": "Especialidad lider", "value": "Lacteos" }
+        ],
+        "highlights": [
+          "Anita Gamboa cubre Cerro Colorado - Arequipa.",
+          "BioAndes Organic atiende lacteos y vegetales.",
+          "Hay proveedores con ordenes pendientes."
+        ]
+      },
+      "Ventas": {
+        "title": "Ventas",
+        "description": "Operaciones por oferta y productos con mayor movimiento.",
+        "metrics": [
+          { "label": "Ventas por oferta", "value": "86 ops" },
+          { "label": "Crecimiento", "value": "34%" },
+          { "label": "Categoria fuerte", "value": "Vegetales" }
+        ],
+        "highlights": [
+          "Tomate y lechugas tienen alta rotacion.",
+          "Las ofertas organicas elevan operaciones.",
+          "Manzanas mantienen disponibilidad saludable."
+        ]
+      }
+    }
   },
   "users": [
     {
       "id": "usr-admin",
-      "name": "Ana Mercado",
-      "email": "ana@marketgo.pe",
+      "name": "Albino Caceres",
+      "email": "albinoca@marketgo.pe",
       "status": "active",
-      "roles": ["Administrador minimarket"],
+      "roles": ["Administrador de Minimarket"],
       "permissions": ["inventory:write", "procurements:approve", "users:manage"]
     },
     {
       "id": "usr-provider",
-      "name": "Luis Proveedor",
-      "email": "luis@bioandes.pe",
+      "name": "Anita Gamboa",
+      "email": "anitaG@bioandes.pe",
       "status": "active",
-      "roles": ["Proveedor organico"],
+      "roles": ["Proveedor Organico"],
       "permissions": ["products:write", "procurements:track"]
     }
   ],
@@ -125,8 +218,18 @@
   "products": [
     {
       "id": "prod-1",
-      "name": "Lechuga hidroponica",
-      "description": "Hojas frescas certificadas.",
+      "name": "Tomate organico",
+      "description": "Tomates frescos de cultivo organico.",
+      "category": "Vegetales",
+      "expirationDate": "2026-09-28",
+      "quantity": 60,
+      "price": 3.8,
+      "available": true
+    },
+    {
+      "id": "prod-2",
+      "name": "Lechugas organicas",
+      "description": "Lechugas frescas seleccionadas.",
       "category": "Vegetales",
       "expirationDate": "2026-09-25",
       "quantity": 42,
@@ -134,20 +237,90 @@
       "available": true
     },
     {
-      "id": "prod-2",
+      "id": "prod-3",
       "name": "Yogurt organico",
-      "description": "Lacteo artesanal sin preservantes.",
+      "description": "Yogurt artesanal sin preservantes.",
       "category": "Lacteos",
       "expirationDate": "2026-09-22",
       "quantity": 12,
       "price": 8.9,
+      "available": true
+    },
+    {
+      "id": "prod-4",
+      "name": "Manzanas organicas",
+      "description": "Manzanas dulces de cosecha natural.",
+      "category": "Frutas",
+      "expirationDate": "2026-10-05",
+      "quantity": 75,
+      "price": 5.2,
+      "available": true
+    },
+    {
+      "id": "prod-5",
+      "name": "Pepino organico",
+      "description": "Pepinos frescos para consumo saludable.",
+      "category": "Vegetales",
+      "expirationDate": "2026-09-27",
+      "quantity": 38,
+      "price": 2.9,
+      "available": true
+    },
+    {
+      "id": "prod-6",
+      "name": "Zanahoria organica",
+      "description": "Zanahorias seleccionadas de cultivo natural.",
+      "category": "Vegetales",
+      "expirationDate": "2026-10-02",
+      "quantity": 54,
+      "price": 3.4,
+      "available": true
+    },
+    {
+      "id": "prod-7",
+      "name": "Brocoli organico",
+      "description": "Brocoli fresco rico en nutrientes.",
+      "category": "Vegetales",
+      "expirationDate": "2026-09-29",
+      "quantity": 31,
+      "price": 6.3,
+      "available": true
+    },
+    {
+      "id": "prod-8",
+      "name": "Pimientos organicos",
+      "description": "Pimientos organicos variados.",
+      "category": "Vegetales",
+      "expirationDate": "2026-10-01",
+      "quantity": 44,
+      "price": 5.8,
+      "available": true
+    },
+    {
+      "id": "prod-9",
+      "name": "Queso organico",
+      "description": "Queso fresco de produccion artesanal.",
+      "category": "Lacteos",
+      "expirationDate": "2026-09-30",
+      "quantity": 20,
+      "price": 14.5,
+      "available": true
+    },
+    {
+      "id": "prod-10",
+      "name": "Leche organica",
+      "description": "Leche fresca de proveedor local.",
+      "category": "Lacteos",
+      "expirationDate": "2026-09-24",
+      "quantity": 36,
+      "price": 7.2,
       "available": true
     }
   ],
   "inventory": [
     {
       "id": "inv-1",
-      "productName": "Lechuga hidroponica",
+      "productName": "Lechugas organicas",
       "stock": 42,
       "minimumStock": 20,
       "lotCode": "LOT-001",
@@ -162,20 +335,119 @@
       "lotCode": "LOT-014",
       "expirationDate": "2026-09-22",
       "status": "risk"
+    },
+    {
+      "id": "inv-3",
+      "productName": "Tomate organico",
+      "stock": 60,
+      "minimumStock": 25,
+      "lotCode": "LOT-021",
+      "expirationDate": "2026-09-28",
+      "status": "healthy"
+    },
+    {
+      "id": "inv-4",
+      "productName": "Manzanas organicas",
+      "stock": 75,
+      "minimumStock": 30,
+      "lotCode": "LOT-022",
+      "expirationDate": "2026-10-05",
+      "status": "healthy"
+    },
+    {
+      "id": "inv-5",
+      "productName": "Pepino organico",
+      "stock": 38,
+      "minimumStock": 18,
+      "lotCode": "LOT-023",
+      "expirationDate": "2026-09-27",
+      "status": "healthy"
+    },
+    {
+      "id": "inv-6",
+      "productName": "Zanahoria organica",
+      "stock": 54,
+      "minimumStock": 22,
+      "lotCode": "LOT-024",
+      "expirationDate": "2026-10-02",
+      "status": "healthy"
+    },
+    {
+      "id": "inv-7",
+      "productName": "Brocoli organico",
+      "stock": 31,
+      "minimumStock": 16,
+      "lotCode": "LOT-025",
+      "expirationDate": "2026-09-29",
+      "status": "healthy"
+    },
+    {
+      "id": "inv-8",
+      "productName": "Pimientos organicos",
+      "stock": 44,
+      "minimumStock": 20,
+      "lotCode": "LOT-026",
+      "expirationDate": "2026-10-01",
+      "status": "healthy"
+    },
+    {
+      "id": "inv-9",
+      "productName": "Queso organico",
+      "stock": 20,
+      "minimumStock": 14,
+      "lotCode": "LOT-027",
+      "expirationDate": "2026-09-30",
+      "status": "healthy"
+    },
+    {
+      "id": "inv-10",
+      "productName": "Leche organica",
+      "stock": 36,
+      "minimumStock": 24,
+      "lotCode": "LOT-028",
+      "expirationDate": "2026-09-24",
+      "status": "healthy"
     }
   ],
   "requisitions": [
     {
       "id": "req-1",
-      "requester": "Ana Mercado",
+      "requester": "Albino Caceres",
       "productName": "Yogurt organico",
       "quantity": 24,
       "reason": "Reposicion por venta rapida",
       "status": "pending",
       "createdAt": "2026-09-18"
+    },
+    {
+      "id": "req-2",
+      "requester": "Albino Caceres",
+      "productName": "Leche organica",
+      "quantity": 30,
+      "reason": "Demanda semanal de lacteos",
+      "status": "approved",
+      "createdAt": "2026-09-18"
+    },
+    {
+      "id": "req-3",
+      "requester": "Albino Caceres",
+      "productName": "Tomate organico",
+      "quantity": 45,
+      "reason": "Reposicion para anaquel principal",
+      "status": "pending",
+      "createdAt": "2026-09-17"
+    },
+    {
+      "id": "req-4",
+      "requester": "Albino Caceres",
+      "productName": "Queso organico",
+      "quantity": 15,
+      "reason": "Stock minimo alcanzado",
+      "status": "rejected",
+      "createdAt": "2026-09-16"
     }
   ],
-  "orders": [
+  "purchaseOrders": [
     {
       "id": "ord-1001",
       "supplier": "BioAndes Organic",
@@ -183,7 +455,25 @@
       "status": "pending",
       "total": 420.5,
       "createdAt": "2026-09-18",
-      "items": ["Yogurt organico", "Lechuga hidroponica"]
+      "items": ["Yogurt organico", "Lechugas organicas"]
+    },
+    {
+      "id": "ord-1002",
+      "supplier": "Anita Gamboa",
+      "minimarket": "Minimarket Verde Sur",
+      "status": "pending",
+      "total": 315.8,
+      "createdAt": "2026-09-18",
+      "items": ["Leche organica", "Queso organico"]
+    },
+    {
+      "id": "ord-1003",
+      "supplier": "BioAndes Organic",
+      "minimarket": "Minimarket Verde Sur",
+      "status": "approved",
+      "total": 228.4,
+      "createdAt": "2026-09-17",
+      "items": ["Tomate organico", "Pepino organico", "Zanahoria organica"]
     }
   ],
   "suppliers": [
@@ -196,6 +486,16 @@
       "address": "Ruta Agricola 45",
       "specialty": "Lacteos y vegetales",
       "coverageArea": "Lima"
+    },
+    {
+      "id": "sup-2",
+      "businessName": "Anita Gamboa",
+      "ruc": "10456789012",
+      "email": "anita.gamboa@marketgo.pe",
+      "phone": "+51 959 404 210",
+      "address": "Cerro Colorado, Arequipa",
+      "specialty": "Lacteos y derivados",
+      "coverageArea": "Cerro Colorado - Arequipa"
     }
   ],
   "conservationMonitoring": [
@@ -226,6 +526,30 @@
       "type": "conservation",
       "read": false,
       "createdAt": "2026-09-18 09:35"
+    },
+    {
+      "id": "alert-2",
+      "title": "Vencimiento cercano",
+      "message": "Yogurt organico vence en 5 dias.",
+      "type": "expiration",
+      "read": false,
+      "createdAt": "2026-09-18 10:05"
+    },
+    {
+      "id": "alert-3",
+      "title": "Stock bajo",
+      "message": "Leche organica se acerca al stock minimo.",
+      "type": "inventory",
+      "read": false,
+      "createdAt": "2026-09-18 10:30"
+    },
+    {
+      "id": "alert-4",
+      "title": "Orden pendiente",
+      "message": "Anita Gamboa tiene una orden por confirmar.",
+      "type": "procurement",
+      "read": true,
+      "createdAt": "2026-09-18 11:20"
     }
   ],
   "notifications": [

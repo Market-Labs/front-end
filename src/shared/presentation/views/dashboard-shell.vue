@@ -15,14 +15,20 @@
       </div>
     </section>
 
-    <section v-for="metric in overviewStore.indicators" :key="metric.label" class="metric-card compact">
+    <button
+      v-for="metric in overviewStore.indicators"
+      :key="metric.label"
+      type="button"
+      class="metric-card compact"
+      @click="goToMetric(metric)"
+    >
       <div class="metric-icon">
         <i :class="metric.icon"></i>
       </div>
       <span>{{ metric.label }}</span>
       <strong>{{ metric.value }}</strong>
       <small>{{ metric.detail }}</small>
-    </section>
+    </button>
 
     <section class="panel-card activity-card">
       <div class="section-header">
@@ -43,7 +49,7 @@
 
     <section class="panel-card modules-card">
       <div class="section-header">
-        <h2>Modulos listos</h2>
+        <h2>Resumen operativo</h2>
       </div>
       <div class="module-list">
         <article v-for="module in modules" :key="module.name">
@@ -60,15 +66,21 @@
 
 <script setup>
 import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useDashboardOverviewStore } from '../../application/dashboard-overview.store.js';
 
+const router = useRouter();
 const overviewStore = useDashboardOverviewStore();
 
 const modules = [
-  { name: 'Shared', description: 'Layout, router, estilos e infraestructura base.', icon: 'pi pi-th-large' },
-  { name: 'Features DDD', description: 'Cada bounded context mantiene sus capas.', icon: 'pi pi-sitemap' },
-  { name: 'API base', description: 'Cliente HTTP comun para adapters.', icon: 'pi pi-server' },
+  { name: 'Productos organicos', description: 'Catalogo actualizado con stock y disponibilidad.', icon: 'pi pi-shopping-bag' },
+  { name: 'Conservacion', description: 'Temperatura y humedad monitoreadas por zona.', icon: 'pi pi-cloud' },
+  { name: 'Abastecimiento', description: 'Ordenes de compra listas para seguimiento.', icon: 'pi pi-truck' },
 ];
+
+const goToMetric = (metric) => {
+  if (metric.route) router.push(metric.route);
+};
 
 onMounted(() => {
   overviewStore.fetchOverview();
@@ -152,11 +164,20 @@ onMounted(() => {
 }
 
 .metric-card.compact {
+  border: 1px solid #e8ede9;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   grid-column: span 2;
   min-height: 220px;
   padding: 22px;
+  text-align: left;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.metric-card.compact:hover {
+  border-color: #3d9f7d;
+  transform: translateY(-2px);
 }
 
 .metric-icon {

@@ -6,8 +6,49 @@
         <h2>Directorio de proveedores</h2>
         <p>Gestion de datos comerciales, especialidad y cobertura de proveedores.</p>
       </div>
-      <pv-button label="Nuevo proveedor" icon="pi pi-plus" />
+      <pv-button label="Nuevo proveedor" icon="pi pi-plus" @click="showSupplierForm = true" />
     </div>
+
+    <pv-dialog v-model:visible="showSupplierForm" modal header="Nuevo proveedor" :style="{ width: '540px' }">
+      <form class="entity-form" @submit.prevent>
+        <label>
+          Nombre comercial
+          <pv-input-text v-model="supplierForm.businessName" placeholder="Anita Gamboa" />
+        </label>
+        <div class="form-row">
+          <label>
+            RUC
+            <pv-input-text v-model="supplierForm.ruc" placeholder="10456789012" />
+          </label>
+          <label>
+            Telefono
+            <pv-input-text v-model="supplierForm.phone" placeholder="+51 959 404 210" />
+          </label>
+        </div>
+        <label>
+          Correo
+          <pv-input-text v-model="supplierForm.email" placeholder="anitaG@bioandes.pe" />
+        </label>
+        <label>
+          Direccion
+          <pv-input-text v-model="supplierForm.address" placeholder="Cerro Colorado, Arequipa" />
+        </label>
+        <div class="form-row">
+          <label>
+            Especialidad
+            <pv-input-text v-model="supplierForm.specialty" placeholder="Lacteos y derivados" />
+          </label>
+          <label>
+            Cobertura
+            <pv-input-text v-model="supplierForm.coverageArea" placeholder="Cerro Colorado - Arequipa" />
+          </label>
+        </div>
+      </form>
+      <template #footer>
+        <pv-button label="Cancelar" text @click="showSupplierForm = false" />
+        <pv-button label="Guardar" icon="pi pi-save" @click="noopSubmit" />
+      </template>
+    </pv-dialog>
 
     <div class="supplier-grid">
       <article v-for="supplier in suppliersStore.suppliers" :key="supplier.id">
@@ -24,10 +65,22 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { useSuppliersStore } from '../../application/suppliers.store.js';
 
 const suppliersStore = useSuppliersStore();
+const showSupplierForm = ref(false);
+const supplierForm = reactive({
+  businessName: '',
+  ruc: '',
+  email: '',
+  phone: '',
+  address: '',
+  specialty: '',
+  coverageArea: '',
+});
+
+const noopSubmit = () => {};
 
 onMounted(() => {
   suppliersStore.fetchSuppliers();
@@ -96,5 +149,24 @@ footer {
 
 footer strong {
   color: #f08a24;
+}
+
+.entity-form {
+  display: grid;
+  gap: 14px;
+}
+
+.entity-form label {
+  color: #33423a;
+  display: grid;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.form-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 </style>

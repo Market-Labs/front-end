@@ -5,9 +5,10 @@ import { Requisition } from '../domain/model/requisition.entity.js';
 const requisitionApi = new RequisitionApi();
 
 const demoRequisitions = [
-  new Requisition({ id: 'req-1', requester: 'Ana Mercado', productName: 'Yogurt organico', quantity: 24, reason: 'Reposicion por venta rapida', status: 'pending', createdAt: '2026-09-18' }),
-  new Requisition({ id: 'req-2', requester: 'Carlos Tienda', productName: 'Quinua real', quantity: 40, reason: 'Campana saludable', status: 'approved', createdAt: '2026-09-17' }),
-  new Requisition({ id: 'req-3', requester: 'Maria Stock', productName: 'Miel de abeja', quantity: 12, reason: 'Bajo stock', status: 'rejected', createdAt: '2026-09-16' }),
+  new Requisition({ id: 'req-1', requester: 'Albino Caceres', productName: 'Yogurt organico', quantity: 24, reason: 'Reposicion por venta rapida', status: 'pending', createdAt: '2026-09-18' }),
+  new Requisition({ id: 'req-2', requester: 'Albino Caceres', productName: 'Leche organica', quantity: 30, reason: 'Demanda semanal de lacteos', status: 'approved', createdAt: '2026-09-18' }),
+  new Requisition({ id: 'req-3', requester: 'Albino Caceres', productName: 'Tomate organico', quantity: 45, reason: 'Reposicion para anaquel principal', status: 'pending', createdAt: '2026-09-17' }),
+  new Requisition({ id: 'req-4', requester: 'Albino Caceres', productName: 'Queso organico', quantity: 15, reason: 'Stock minimo alcanzado', status: 'rejected', createdAt: '2026-09-16' }),
 ];
 
 export const useRequisitionStore = defineStore('requisition', {

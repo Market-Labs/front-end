@@ -7,25 +7,29 @@ export const normalizeApiBaseUrl = (rawBaseUrl) => {
 
 export const platformApiBaseUrl = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
+const defaultMinimarketId = import.meta.env.VITE_MINIMARKET_ID || 'minimarket-demo';
+
+const minimarketEndpoint = (resource) => `api/v1/minimarkets/${defaultMinimarketId}/${resource}`;
+
 export const apiEndpoints = Object.freeze({
   health: 'api/v1/health',
   auth: 'api/v1/auth',
-  users: 'api/v1/users',
+  users: minimarketEndpoint('users'),
   profiles: 'api/v1/profiles',
-  dashboard: 'api/v1/dashboard',
-  analytics: 'api/v1/analytics',
+  dashboard: minimarketEndpoint('dashboard'),
+  analytics: minimarketEndpoint('analytics'),
   products: 'api/v1/products',
-  inventory: 'api/v1/inventory',
-  inventorySearch: 'api/v1/inventory/search',
-  lots: 'api/v1/lots',
-  expirations: 'api/v1/expirations',
-  requisitions: 'api/v1/requisitions',
-  procurements: 'api/v1/orders',
+  inventory: minimarketEndpoint('inventory'),
+  inventorySearch: minimarketEndpoint('inventory/search'),
+  lots: minimarketEndpoint('lots'),
+  expirations: minimarketEndpoint('expirations'),
+  requisitions: minimarketEndpoint('requisitions'),
+  procurements: minimarketEndpoint('purchase-orders'),
   suppliers: 'api/v1/suppliers',
-  conservationMonitoring: 'api/v1/conservation/monitoring',
-  conservationAlerts: 'api/v1/conservation/alerts',
-  notifications: 'api/v1/notifications',
-  activityHistory: 'api/v1/activity-history',
-  waste: 'api/v1/waste',
-  donations: 'api/v1/donations',
+  conservationMonitoring: minimarketEndpoint('conservation/monitoring'),
+  conservationAlerts: minimarketEndpoint('communication/alerts'),
+  notifications: minimarketEndpoint('communication/messages'),
+  activityHistory: minimarketEndpoint('activity-history'),
+  waste: minimarketEndpoint('waste'),
+  donations: minimarketEndpoint('donations'),
 });

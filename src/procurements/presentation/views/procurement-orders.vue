@@ -6,8 +6,39 @@
         <h2>Ordenes de abastecimiento</h2>
         <p>Creacion, visualizacion, filtrado, aceptacion, rechazo y seguimiento de estado.</p>
       </div>
-      <pv-button label="Crear orden" icon="pi pi-plus" />
+      <pv-button label="Crear orden" icon="pi pi-plus" @click="showOrderForm = true" />
     </div>
+
+    <pv-dialog v-model:visible="showOrderForm" modal header="Crear orden" :style="{ width: '540px' }">
+      <form class="entity-form" @submit.prevent>
+        <label>
+          Proveedor
+          <pv-input-text v-model="orderForm.supplier" placeholder="Anita Gamboa" />
+        </label>
+        <label>
+          Minimarket
+          <pv-input-text v-model="orderForm.minimarket" placeholder="Minimarket Verde Sur" />
+        </label>
+        <label>
+          Productos
+          <pv-input-text v-model="orderForm.items" placeholder="Leche organica, Queso organico" />
+        </label>
+        <div class="form-row">
+          <label>
+            Total estimado
+            <pv-input-text v-model="orderForm.total" placeholder="315.80" />
+          </label>
+          <label>
+            Estado
+            <pv-select v-model="orderForm.status" :options="statusOptions" placeholder="Seleccionar estado" />
+          </label>
+        </div>
+      </form>
+      <template #footer>
+        <pv-button label="Cancelar" text @click="showOrderForm = false" />
+        <pv-button label="Guardar" icon="pi pi-save" @click="noopSubmit" />
+      </template>
+    </pv-dialog>
 
     <div class="table-card">
       <pv-data-table :value="procurementsStore.orders" class="marketgo-datatable" responsive-layout="scroll">
@@ -27,10 +58,21 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { useProcurementsStore } from '../../application/procurements.store.js';
 
 const procurementsStore = useProcurementsStore();
+const showOrderForm = ref(false);
+const statusOptions = ['pending', 'approved', 'rejected'];
+const orderForm = reactive({
+  supplier: '',
+  minimarket: 'Minimarket Verde Sur',
+  items: '',
+  total: '',
+  status: 'pending',
+});
+
+const noopSubmit = () => {};
 
 onMounted(() => {
   procurementsStore.fetchOrders();
@@ -76,5 +118,24 @@ onMounted(() => {
   color: #66756b;
   font-weight: 700;
   margin: 0;
+}
+
+.entity-form {
+  display: grid;
+  gap: 14px;
+}
+
+.entity-form label {
+  color: #33423a;
+  display: grid;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.form-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 </style>

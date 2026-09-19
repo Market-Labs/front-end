@@ -6,7 +6,7 @@
         <h2>Indicadores y reportes operativos</h2>
         <p>Resumen agregado para inventario, mermas, ventas, conservacion y abastecimiento.</p>
       </div>
-      <pv-button label="Generar reporte" icon="pi pi-file-pdf" />
+      <pv-button :label="reportButtonLabel" icon="pi pi-file-pdf" @click="generateReport()" />
     </div>
 
     <div class="analytics-grid">
@@ -22,20 +22,58 @@
     <div class="reports-card">
       <h3>Reportes disponibles</h3>
       <div>
-        <button v-for="report in analyticsStore.reports" :key="report" type="button">
+        <button
+          v-for="report in analyticsStore.reports"
+          :key="report"
+          type="button"
+          :class="{ active: selectedReport === report }"
+          @click="selectedReport = report"
+        >
           <i class="pi pi-chart-line"></i>
           {{ report }}
         </button>
       </div>
+      <p v-if="generatedReport" class="report-feedback">{{ generatedReport }}</p>
     </div>
+
+    <section v-if="selectedReportSummary" class="report-detail">
+      <div>
+        <span>Reporte seleccionado</span>
+        <h3>{{ selectedReportSummary.title }}</h3>
+        <p>{{ selectedReportSummary.description }}</p>
+      </div>
+
+      <div class="report-metrics">
+        <article v-for="metric in selectedReportSummary.metrics" :key="metric.label">
+          <span>{{ metric.label }}</span>
+          <strong>{{ metric.value }}</strong>
+        </article>
+      </div>
+
+      <ul>
+        <li v-for="highlight in selectedReportSummary.highlights" :key="highlight">
+          <i class="pi pi-check-circle"></i>
+          {{ highlight }}
+        </li>
+      </ul>
+    </section>
   </section>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useAnalyticsStore } from '../../application/analytics.store.js';
 
 const analyticsStore = useAnalyticsStore();
+const selectedReport = ref('Inventario');
+const generatedReport = ref('');
+
+const reportButtonLabel = computed(() => `Generar ${selectedReport.value}`);
+const selectedReportSummary = computed(() => analyticsStore.reportSummaries[selectedReport.value]);
+
+const generateReport = () => {
+  generatedReport.value = `Reporte de ${selectedReport.value} generado para revision.`;
+};
 
 onMounted(() => {
   analyticsStore.fetchSummary();
@@ -50,7 +88,9 @@ onMounted(() => {
 
 .view-header,
 .analytics-grid article,
-.reports-card {
+.reports-card,
+.report-detail,
+.report-metrics article {
   background: #ffffff;
   border: 1px solid #e8ede9;
   border-radius: 8px;
@@ -72,13 +112,15 @@ onMounted(() => {
 }
 
 .view-header h2,
-.reports-card h3 {
+.reports-card h3,
+.report-detail h3 {
   color: #16251d;
   font-weight: 950;
   margin: 6px 0;
 }
 
-.view-header p {
+.view-header p,
+.report-detail p {
   color: #66756b;
   font-weight: 700;
   margin: 0;
@@ -136,5 +178,75 @@ onMounted(() => {
   gap: 8px;
   min-height: 42px;
   padding: 0 14px;
+}
+
+.reports-card button.active {
+  background: #10261c;
+  color: #ffffff;
+}
+
+.report-feedback {
+  color: #247b5d;
+  font-size: 13px;
+  font-weight: 900;
+  margin: 16px 0 0;
+}
+
+.report-detail {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+
+.report-detail > div:first-child span {
+  color: #3d9f7d;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.report-metrics {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.report-metrics article {
+  box-shadow: none;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.report-metrics span {
+  color: #66756b;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.report-metrics strong {
+  color: #16251d;
+  font-size: 24px;
+  font-weight: 950;
+}
+
+.report-detail ul {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.report-detail li {
+  align-items: center;
+  color: #33423a;
+  display: flex;
+  font-weight: 750;
+  gap: 8px;
+}
+
+.report-detail li i {
+  color: #3d9f7d;
 }
 </style>

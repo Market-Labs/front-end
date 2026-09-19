@@ -6,8 +6,35 @@
         <h2>Solicitudes internas de productos</h2>
         <p>Creacion, revision, aprobacion/rechazo y conversion a abastecimiento.</p>
       </div>
-      <pv-button label="Nueva solicitud" icon="pi pi-plus" />
+      <pv-button label="Nueva solicitud" icon="pi pi-plus" @click="showRequisitionForm = true" />
     </div>
+
+    <pv-dialog v-model:visible="showRequisitionForm" modal header="Nueva solicitud" :style="{ width: '520px' }">
+      <form class="entity-form" @submit.prevent>
+        <label>
+          Producto
+          <pv-input-text v-model="requisitionForm.productName" placeholder="Leche organica" />
+        </label>
+        <div class="form-row">
+          <label>
+            Cantidad
+            <pv-input-text v-model="requisitionForm.quantity" placeholder="30" />
+          </label>
+          <label>
+            Solicitante
+            <pv-input-text v-model="requisitionForm.requester" placeholder="Albino Caceres" />
+          </label>
+        </div>
+        <label>
+          Motivo
+          <pv-input-text v-model="requisitionForm.reason" placeholder="Reposicion de stock" />
+        </label>
+      </form>
+      <template #footer>
+        <pv-button label="Cancelar" text @click="showRequisitionForm = false" />
+        <pv-button label="Guardar" icon="pi pi-save" @click="noopSubmit" />
+      </template>
+    </pv-dialog>
 
     <div class="table-card">
       <pv-data-table :value="requisitionStore.requisitions" class="marketgo-datatable" responsive-layout="scroll">
@@ -26,10 +53,19 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { useRequisitionStore } from '../../application/requisition.store.js';
 
 const requisitionStore = useRequisitionStore();
+const showRequisitionForm = ref(false);
+const requisitionForm = reactive({
+  productName: '',
+  quantity: '',
+  requester: 'Albino Caceres',
+  reason: '',
+});
+
+const noopSubmit = () => {};
 
 onMounted(() => {
   requisitionStore.fetchRequisitions();
@@ -75,5 +111,24 @@ onMounted(() => {
   color: #66756b;
   font-weight: 700;
   margin: 0;
+}
+
+.entity-form {
+  display: grid;
+  gap: 14px;
+}
+
+.entity-form label {
+  color: #33423a;
+  display: grid;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.form-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 </style>
