@@ -32,7 +32,7 @@
       </form>
       <template #footer>
         <pv-button label="Cancelar" text @click="showRequisitionForm = false" />
-        <pv-button label="Guardar" icon="pi pi-save" disabled />
+        <pv-button label="Guardar" icon="pi pi-save" @click="noopSubmit" />
       </template>
     </pv-dialog>
 
@@ -64,6 +64,8 @@ const requisitionForm = reactive({
   requester: 'Albino Caceres',
   reason: '',
 });
+
+const noopSubmit = () => {};
 
 onMounted(() => {
   requisitionStore.fetchRequisitions();

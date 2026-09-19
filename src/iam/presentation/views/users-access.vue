@@ -32,7 +32,7 @@
       </form>
       <template #footer>
         <pv-button label="Cancelar" text @click="showUserForm = false" />
-        <pv-button label="Guardar" icon="pi pi-save" disabled />
+        <pv-button label="Guardar" icon="pi pi-save" @click="noopSubmit" />
       </template>
     </pv-dialog>
 
@@ -77,6 +77,8 @@ const userForm = reactive({
   role: '',
   status: 'active',
 });
+
+const noopSubmit = () => {};
 
 const summaryCards = computed(() => [
   { label: 'Usuarios activos', value: iamStore.users.length, icon: 'pi pi-users' },
