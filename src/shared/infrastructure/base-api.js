@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { platformApiBaseUrl } from './api-endpoints.js';
+import { isDemoMode } from './demo-mode.js';
+import { demoAdapter } from './demo-api.js';
 
 export class BaseApi {
   #http;
@@ -8,6 +10,7 @@ export class BaseApi {
     this.#http = axios.create({
       baseURL: platformApiBaseUrl,
       headers: { 'Content-Type': 'application/json' },
+      adapter: isDemoMode ? demoAdapter : undefined,
     });
 
     this.#http.interceptors.request.use((config) => {

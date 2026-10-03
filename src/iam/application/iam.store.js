@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { IamApi } from '../infrastructure/iam-api.js';
 import { User } from '../domain/model/user.entity.js';
+import { isDemoMode } from '../../shared/infrastructure/demo-mode.js';
 
 const iamApi = new IamApi();
 const sessionKey = 'marketgo.auth.userId';
@@ -24,12 +25,21 @@ const demoUsers = [
   }),
 ];
 
+const staticDemoAdmin = new User({
+  id: 'usr-admin',
+  name: 'Administrador Demo',
+  email: 'contacto@example.invalid',
+  status: 'active',
+  roles: ['Administrador de Minimarket'],
+  permissions: ['inventory:write', 'procurements:approve', 'users:manage'],
+});
+
 export const useIamStore = defineStore('iam', {
   state: () => ({
-    currentUser: demoUsers.find((user) => user.id === (
+    currentUser: isDemoMode ? staticDemoAdmin : demoUsers.find((user) => user.id === (
       window.localStorage.getItem(sessionKey) || window.sessionStorage.getItem(sessionKey)
     )) || null,
-    users: demoUsers,
+    users: isDemoMode ? [staticDemoAdmin] : demoUsers,
     loading: false,
     error: null,
   }),
@@ -51,6 +61,7 @@ export const useIamStore = defineStore('iam', {
       return user;
     },
     async signIn(email, password, remember = false) {
+      if (isDemoMode) return this.currentUser;
       this.error = null;
       const account = await iamApi.signIn({ email: email.trim().toLowerCase(), password });
       const user = demoUsers.find((candidate) => candidate.id === account.userId);
@@ -75,6 +86,7 @@ export const useIamStore = defineStore('iam', {
       }
     },
     logout() {
+      if (isDemoMode) return;
       window.localStorage.removeItem('marketgo.auth.token');
       window.localStorage.removeItem(sessionKey);
       window.sessionStorage.removeItem(sessionKey);

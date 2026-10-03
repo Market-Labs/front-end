@@ -24,6 +24,7 @@
     "logout": "Cerrar sesión"
   },
   "common": {
+    "demoReadOnly": "Vista de demostración: datos ficticios. No es posible guardar cambios.",
     "search_placeholder": "Buscar en esta página",
     "coming_soon": "Este apartado aún no está disponible.",
     "view_all": "Ver todo",

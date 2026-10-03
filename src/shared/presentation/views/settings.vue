@@ -6,7 +6,7 @@
         <h2>{{ $t('page.settings.title') }}</h2>
         <p>{{ $t('page.settings.description') }}</p>
       </div>
-      <pv-button :label="$t('page.settings.saveChanges')" icon="pi pi-save" @click="saveSettings()" />
+      <pv-button :label="$t('page.settings.saveChanges')" icon="pi pi-save" :disabled="isDemoMode" @click="saveSettings()" />
     </div>
 
     <div class="settings-grid">
@@ -47,6 +47,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { isDemoMode } from '../../infrastructure/demo-mode.js';
 
 const savedMessage = ref('');
 const { locale, t } = useI18n();

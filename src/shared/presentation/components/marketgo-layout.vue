@@ -21,7 +21,7 @@
       </div>
 
       <div class="sidebar-footer">
-        <button type="button" class="logout-button" @click="logout">
+        <button v-if="!isDemoMode" type="button" class="logout-button" @click="logout">
           <i class="pi pi-sign-out"></i>
           <span>{{ t('option.logout') }}</span>
         </button>
@@ -56,6 +56,7 @@
         </div>
       </header>
 
+      <p v-if="isDemoMode" class="demo-notice" role="status">{{ t('common.demoReadOnly') }}</p>
       <main class="content">
         <router-view />
       </main>
@@ -69,6 +70,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import LanguageSwitcher from './language-switcher.vue';
 import { useIamStore } from '../../../iam/application/iam.store.js';
+import { isDemoMode } from '../../infrastructure/demo-mode.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -294,6 +296,16 @@ const todayDate = computed(() => (
   flex: 1;
   flex-direction: column;
   min-width: 0;
+}
+
+.demo-notice {
+  background: #eaf4ff;
+  border-block: 1px solid #c7ddf6;
+  color: #023192;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+  padding: 10px 40px;
 }
 
 .topbar {

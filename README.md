@@ -72,6 +72,8 @@ The application uses the same general dashboard and layout for both roles. Avail
 
 The frontend consumes MarketGo API routes through bounded-context adapters and shared endpoint configuration.
 
+The Azure Static Web Apps workflow builds with `VITE_DEMO_MODE=true`. This public demo opens as a sample minimarket administrator, reads sanitized sample data, and does not save changes. It is not authentication or a backend. Outside that workflow, the flag is unset: after `npm install`, run `npm run dev:mock` for the local frontend and writable fake API, including the test-account login. Do not set `VITE_DEMO_MODE` when testing the local API.
+
 `VITE_API_BASE_URL` must point to the API host root:
 
 ```env

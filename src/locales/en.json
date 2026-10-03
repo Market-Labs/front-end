@@ -24,6 +24,7 @@
     "logout": "Sign out"
   },
   "common": {
+    "demoReadOnly": "Demo view: sample data. Changes cannot be saved.",
     "search_placeholder": "Search this page",
     "coming_soon": "This section is not available yet.",
     "view_all": "View all",

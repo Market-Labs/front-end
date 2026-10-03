@@ -14,6 +14,7 @@ import salesRoutes from './sales/presentation/sales-routes.js';
 import i18n from './i18n.js';
 import pinia from './pinia.js';
 import { useIamStore } from './iam/application/iam.store.js';
+import { isDemoMode } from './shared/infrastructure/demo-mode.js';
 
 const routes = [
   {
@@ -75,6 +76,7 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const iamStore = useIamStore(pinia);
+  if (isDemoMode && to.meta.public) return { name: 'home' };
   if (!to.meta.public && !iamStore.isAuthenticated) {
     return { name: 'login', query: { redirect: to.fullPath } };
   }
