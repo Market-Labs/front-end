@@ -39,6 +39,14 @@ export class Requisition {
     return this.status === 'pending';
   }
 
+  get itemCount() {
+    return this.items.length;
+  }
+
+  get totalQuantity() {
+    return this.items.reduce((total, item) => total + Number(item.quantity || 0), 0);
+  }
+
   get canGenerateShippingOrder() {
     return this.status === 'accepted' && !this.shippingOrderId;
   }

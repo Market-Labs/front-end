@@ -4,84 +4,122 @@
       <div>
         <span>{{ $t('page.analytics.eyebrow') }}</span>
         <h2>{{ $t('page.analytics.title') }}</h2>
-        <p>{{ $t('page.analytics.description') }}</p>
+        <p>{{ iamStore.isSupplier ? $t('page.analytics.supplierDescription') : $t('page.analytics.description') }}</p>
       </div>
-      <pv-button :label="reportButtonLabel" icon="pi pi-file-pdf" @click="generateReport()" />
+      <div class="analytics-mark" aria-hidden="true"><i class="pi pi-chart-bar"></i></div>
     </div>
 
     <div class="analytics-grid">
       <article v-for="indicator in filteredIndicators" :key="indicator.label">
         <span>{{ indicator.label }}</span>
-        <strong>{{ indicator.currentValue }}{{ indicator.unit }}</strong>
-        <small :class="indicator.variation >= 0 ? 'up' : 'down'">
-          {{ indicator.variation >= 0 ? '+' : '' }}{{ indicator.variation }}%
-        </small>
+        <strong>{{ indicator.value }}</strong>
       </article>
     </div>
 
-    <div class="reports-card">
+    <div class="reports-card" :aria-busy="generating">
       <h3>{{ $t('page.analytics.availableReports') }}</h3>
       <div>
         <button
-          v-for="report in filteredReports"
+          v-for="report in visibleReports"
           :key="report"
           type="button"
           :class="{ active: selectedReport === report }"
-          @click="selectedReport = report"
+          :disabled="generating"
+          @click="generateReport(report)"
         >
           <i class="pi pi-chart-line"></i>
-          {{ report }}
+          {{ $t(`page.analytics.reportNames.${report}`) }}
         </button>
       </div>
-      <p v-if="generatedReport" class="report-feedback">{{ generatedReport }}</p>
+      <p v-if="error" class="report-error" role="alert">{{ error }}</p>
     </div>
 
-    <section v-if="selectedReportSummary" class="report-detail">
-      <div>
-        <span>{{ $t('page.analytics.selectedReport') }}</span>
-        <h3>{{ selectedReportSummary.title }}</h3>
-        <p>{{ selectedReportSummary.description }}</p>
+    <section v-if="generatedReport" class="report-detail">
+      <div class="report-toolbar">
+        <div><span>{{ $t('page.analytics.selectedReport') }}</span><h3>{{ generatedReport.title }}</h3><p>{{ generatedReport.rows.length }} {{ $t('page.analytics.records') }} · {{ displayDate(generatedReport.generatedAt) }}</p></div>
+        <div class="export-actions">
+          <pv-button :label="$t('page.analytics.exportPdf')" icon="pi pi-file-pdf" outlined :loading="exporting" @click="exportPdf" />
+          <pv-button :label="$t('page.analytics.exportXlsx')" icon="pi pi-file-excel" outlined :loading="exporting" @click="exportXlsx" />
+        </div>
       </div>
-
-      <div class="report-metrics">
-        <article v-for="metric in selectedReportSummary.metrics" :key="metric.label">
-          <span>{{ metric.label }}</span>
-          <strong>{{ metric.value }}</strong>
-        </article>
+      <div ref="reportElement" class="report-print">
+        <div class="report-print-heading"><strong>MarketGo · {{ generatedReport.title }}</strong><span>{{ displayDate(generatedReport.generatedAt) }}</span></div>
+        <div class="report-table-scroll"><table class="report-table"><thead><tr><th v-for="column in generatedReport.columns" :key="column.key">{{ column.label }}</th></tr></thead><tbody><tr v-for="(row, index) in generatedReport.rows" :key="index"><td v-for="column in generatedReport.columns" :key="column.key">{{ column.kind === 'money' ? money(row[column.key]) : row[column.key] }}</td></tr></tbody></table></div>
+        <p v-if="!generatedReport.rows.length" class="empty-report">{{ $t('page.analytics.noRows') }}</p>
       </div>
-
-      <ul>
-        <li v-for="highlight in selectedReportSummary.highlights" :key="highlight">
-          <i class="pi pi-check-circle"></i>
-          {{ highlight }}
-        </li>
-      </ul>
     </section>
   </section>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAnalyticsStore } from '../../application/analytics.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
+import { useIamStore } from '../../../iam/application/iam.store.js';
+import { buildReport } from '../../application/report-builder.js';
+import { exportReportPdf, exportReportXlsx } from '../../infrastructure/report-exporter.js';
 
 const analyticsStore = useAnalyticsStore();
-const { t } = useI18n();
-const selectedReport = ref('Inventario');
-const generatedReport = ref('');
-const filteredIndicators = useSearchFilter(() => analyticsStore.indicators);
-const filteredReports = useSearchFilter(() => analyticsStore.reports);
+const iamStore = useIamStore();
+const { t, locale } = useI18n();
+const selectedReport = ref(null);
+const generatedReport = ref(null);
+const generating = ref(false);
+const exporting = ref(false);
+const error = ref('');
+const reportElement = ref(null);
+const reportTypes = ['Inventario', 'Abastecimiento', 'Mermas', 'Conservacion', 'Proveedores', 'Ventas'];
+const filteredReports = useSearchFilter(() => reportTypes.map((key) => ({ key, label: t(`page.analytics.reportNames.${key}`) })));
+const visibleReports = computed(() => filteredReports.value.map((item) => item.key));
+const money = (value) => `S/ ${Number(value || 0).toFixed(2)}`;
+const displayDate = (value) => new Date(value).toLocaleString(locale.value === 'es' ? 'es-PE' : 'en-US');
+const filteredIndicators = useSearchFilter(() => {
+  const sources = analyticsStore.reportSources;
+  if (!sources) return [];
+  const ownerId = iamStore.isSupplier ? iamStore.currentSupplierId : iamStore.currentMinimarketId;
+  const orders = sources.orders.filter((order) => iamStore.isSupplier ? order.supplierId === ownerId : order.minimarketId === ownerId);
+  const stock = sources.inventory.reduce((sum, item) => sum + Number(item.stock || 0), 0);
+  const waste = sources.waste.filter((item) => item.ownerId === ownerId).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const sales = iamStore.isSupplier ? orders.filter((order) => order.status === 'received').length : sources.sales.filter((sale) => sale.minimarketId === ownerId).length;
+  const normal = sources.conservation.filter((item) => item.status === 'healthy').length;
+  const score = sources.conservation.length ? Math.round(normal / sources.conservation.length * 100) : 0;
+  return [
+    { label: t('page.analytics.inventoryTotal'), value: `${stock} ${t('page.inventory.units')}` },
+    { label: t('page.analytics.wasteTotal'), value: `${waste} ${t('page.inventory.units')}` },
+    { label: t('page.analytics.salesTotal'), value: `${sales}` },
+    { label: t('page.analytics.conservationScore'), value: `${score}%` },
+  ];
+});
 
-const reportButtonLabel = computed(() => t('page.analytics.generate', { report: selectedReport.value }));
-const selectedReportSummary = computed(() => analyticsStore.reportSummaries[selectedReport.value]);
-
-const generateReport = () => {
-  generatedReport.value = t('page.analytics.generated', { report: selectedReport.value });
+const generateReport = async (type) => {
+  selectedReport.value = type;
+  generating.value = true;
+  error.value = '';
+  generatedReport.value = null;
+  try {
+    await analyticsStore.fetchReportSources(iamStore.isSupplier);
+    if (!analyticsStore.reportSources) throw new Error('missing-report-data');
+    generatedReport.value = buildReport(type, analyticsStore.reportSources, iamStore.isSupplier, t);
+  } catch { error.value = t('page.analytics.reportError'); }
+  finally { generating.value = false; }
 };
 
-onMounted(() => {
-  analyticsStore.fetchSummary();
+const exportFile = async (action) => {
+  exporting.value = true;
+  error.value = '';
+  try { await action(); } catch { error.value = t('page.analytics.exportError'); }
+  finally { exporting.value = false; }
+};
+const exportPdf = () => exportFile(() => exportReportPdf(generatedReport.value, reportElement.value));
+const exportXlsx = () => exportFile(() => exportReportXlsx(generatedReport.value));
+
+onMounted(() => analyticsStore.fetchReportSources(iamStore.isSupplier));
+watch(locale, () => {
+  if (generatedReport.value && analyticsStore.reportSources) {
+    const generatedAt = generatedReport.value.generatedAt;
+    generatedReport.value = { ...buildReport(generatedReport.value.type, analyticsStore.reportSources, iamStore.isSupplier, t), generatedAt };
+  }
 });
 </script>
 
@@ -95,7 +133,7 @@ onMounted(() => {
 .analytics-grid article,
 .reports-card,
 .report-detail,
-.report-metrics article {
+.report-table {
   background: #ffffff;
   border: 1px solid #d9e5f6;
   border-radius: 8px;
@@ -131,6 +169,20 @@ onMounted(() => {
   margin: 0;
 }
 
+.analytics-mark {
+  align-items: center;
+  background: #eff3fa;
+  border: 1px solid #d9e5f6;
+  border-radius: 8px;
+  color: #0d8cfb;
+  display: flex;
+  flex: 0 0 56px;
+  font-size: 24px;
+  height: 56px;
+  justify-content: center;
+  margin-left: 16px;
+}
+
 .analytics-grid {
   display: grid;
   gap: 16px;
@@ -153,14 +205,6 @@ onMounted(() => {
   color: #021c45;
   font-size: 30px;
   font-weight: 950;
-}
-
-.up {
-  color: #023192;
-}
-
-.down {
-  color: #b42318;
 }
 
 .reports-card {
@@ -190,8 +234,10 @@ onMounted(() => {
   color: #ffffff;
 }
 
-.report-feedback {
-  color: #023192;
+.reports-card button:disabled { cursor: wait; }
+
+.report-error {
+  color: #b42318;
   font-size: 13px;
   font-weight: 900;
   margin: 16px 0 0;
@@ -203,55 +249,21 @@ onMounted(() => {
   padding: 22px;
 }
 
-.report-detail > div:first-child span {
+.report-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.report-toolbar span {
   color: #0d8cfb;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
 }
 
-.report-metrics {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.report-metrics article {
-  box-shadow: none;
-  display: grid;
-  gap: 8px;
-  padding: 16px;
-}
-
-.report-metrics span {
-  color: #526780;
-  font-size: 13px;
-  font-weight: 850;
-}
-
-.report-metrics strong {
-  color: #021c45;
-  font-size: 24px;
-  font-weight: 950;
-}
-
-.report-detail ul {
-  display: grid;
-  gap: 10px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.report-detail li {
-  align-items: center;
-  color: #023192;
-  display: flex;
-  font-weight: 750;
-  gap: 8px;
-}
-
-.report-detail li i {
-  color: #0d8cfb;
-}
+.export-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.report-print { background: #fff; }
+.report-print-heading { display: flex; justify-content: space-between; color: #021c45; padding: 8px 0 16px; }
+.report-table-scroll { overflow-x: auto; }
+.report-table { width: 100%; border-collapse: collapse; box-shadow: none; font-size: 12px; white-space: nowrap; }
+.report-table th { color: #fff; background: #023192; text-align: left; }
+.report-table td, .report-table th { border-bottom: 1px solid #d9e5f6; padding: 9px 12px; }
+.report-table tbody tr:nth-child(even) { background: #eff3fa; }
+.empty-report { color: #526780; padding: 18px 0; }
 </style>

@@ -50,7 +50,7 @@ import { useI18n } from 'vue-i18n';
 
 const savedMessage = ref('');
 const { locale, t } = useI18n();
-const localeLabel = computed(() => (locale.value === 'es' ? 'ES - Espanol' : 'EN - English'));
+const localeLabel = computed(() => (locale.value === 'es' ? 'ES - Español' : 'EN - English'));
 
 const saveSettings = () => {
   savedMessage.value = t('page.settings.saved');

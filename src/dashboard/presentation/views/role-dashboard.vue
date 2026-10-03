@@ -6,7 +6,7 @@
         <h2>{{ $t('page.roleDashboard.title') }}</h2>
         <p>{{ $t('page.roleDashboard.description') }}</p>
       </div>
-      <pv-button :label="$t('page.roleDashboard.refresh')" icon="pi pi-refresh" @click="dashboardStore.fetchIndicators()" />
+      <pv-button :label="$t('page.roleDashboard.refresh')" icon="pi pi-refresh" @click="dashboardStore.fetchIndicators(iamStore.isSupplier)" />
     </div>
 
     <div class="indicator-grid">
@@ -25,12 +25,14 @@
 import { onMounted } from 'vue';
 import { useDashboardStore } from '../../application/dashboard.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 
 const dashboardStore = useDashboardStore();
+const iamStore = useIamStore();
 const filteredIndicators = useSearchFilter(() => dashboardStore.indicators);
 
 onMounted(() => {
-  dashboardStore.fetchIndicators();
+  dashboardStore.fetchIndicators(iamStore.isSupplier);
 });
 </script>
 

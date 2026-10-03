@@ -7,4 +7,8 @@ export class SuppliersApi extends BaseApi {
     const response = await this.http.get(apiEndpoints.suppliers);
     return response.data.map(SupplierAssembler.toEntity);
   }
+  async createSupplier(supplier) {
+    const response = await this.http.post(apiEndpoints.suppliers, supplier);
+    return SupplierAssembler.toEntity(response.data);
+  }
 }

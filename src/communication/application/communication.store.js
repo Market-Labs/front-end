@@ -21,13 +21,13 @@ export const useCommunicationStore = defineStore('communication', {
     unreadCount: (state) => state.messages.filter((message) => !message.read).length,
   },
   actions: {
-    async fetchMessages() {
+    async fetchMessages(isSupplier = false) {
       this.loading = true;
       try {
-        this.messages = await communicationApi.getNotifications();
+        this.messages = await communicationApi.getNotifications(isSupplier);
       } catch (error) {
         this.error = 'No se pudo cargar alertas. Se muestran datos demo.';
-        this.messages = demoMessages;
+        this.messages = isSupplier ? [] : demoMessages;
       } finally {
         this.loading = false;
       }

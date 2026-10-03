@@ -7,4 +7,12 @@ export class ProcurementsApi extends BaseApi {
     const response = await this.http.get(apiEndpoints.procurements);
     return response.data.map(ProcurementOrderAssembler.toEntity);
   }
+  async createOrder(order) {
+    const response = await this.http.post(apiEndpoints.procurements, order);
+    return ProcurementOrderAssembler.toEntity(response.data);
+  }
+  async updateOrder(id, changes) {
+    const response = await this.http.patch(`${apiEndpoints.procurements}/${encodeURIComponent(id)}`, changes);
+    return ProcurementOrderAssembler.toEntity(response.data);
+  }
 }

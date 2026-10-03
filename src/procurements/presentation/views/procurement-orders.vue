@@ -2,8 +2,8 @@
   <section class="procurements-view">
     <div class="view-header">
       <div>
-        <span>{{ $t('page.procurements.eyebrow') }}</span>
-        <h2>{{ $t('page.procurements.title') }}</h2>
+        <span>{{ iamStore.isMinimarketAdmin ? $t('option.reception') : $t('page.procurements.eyebrow') }}</span>
+        <h2>{{ iamStore.isMinimarketAdmin ? $t('option.reception') : $t('page.procurements.title') }}</h2>
         <p>{{ $t('page.procurements.description') }}</p>
       </div>
       <pv-button
@@ -14,37 +14,59 @@
       />
     </div>
 
-    <pv-dialog v-model:visible="showOrderForm" modal :header="$t('page.procurements.createOrder')" :style="{ width: '540px' }">
+    <pv-dialog v-model:visible="showOrderForm" modal :header="$t('page.procurements.createOrder')" :style="{ width: 'min(640px, calc(100vw - 32px))' }">
       <form class="entity-form" @submit.prevent>
         <label>
           {{ $t('page.procurements.supplier') }}
-          <pv-input-text v-model="orderForm.supplier" placeholder="Anita Gamboa" />
+          <span class="read-only-value">{{ iamStore.userName }}</span>
         </label>
         <label>
           {{ $t('common.minimarket') }}
-          <pv-input-text v-model="orderForm.minimarket" placeholder="Minimarket Verde Sur" />
+          <pv-select v-model="orderForm.minimarketId" :options="minimarkets" option-label="businessName" option-value="id" :placeholder="$t('page.procurements.selectMinimarket')" />
         </label>
-        <label>
-          {{ $t('option.products') }}
-          <pv-input-text v-model="orderForm.items" placeholder="Leche organica, Queso organico" />
-        </label>
-        <div class="form-row">
-          <label>
-            {{ $t('page.procurements.estimatedTotal') }}
-            <pv-input-text v-model="orderForm.total" placeholder="315.80" />
-          </label>
-          <label>
-            {{ $t('common.status') }}
-            <pv-select v-model="orderForm.status" :options="statusOptions" :placeholder="$t('page.procurements.selectStatus')" />
-          </label>
+        <div class="items-field">
+          <strong>{{ $t('common.items') }}</strong>
+          <div v-for="(item, index) in orderForm.items" :key="item.key" class="item-row">
+            <label>{{ $t('common.product') }}<pv-select v-model="item.productId" :options="availableProducts(index)" option-label="name" option-value="id" :placeholder="$t('page.procurements.selectProduct')" /></label>
+            <label>{{ $t('common.quantity') }}<pv-input-text v-model="item.quantity" type="number" min="1" step="1" placeholder="1" /></label>
+            <pv-button v-if="orderForm.items.length > 3" type="button" icon="pi pi-trash" text severity="danger" :aria-label="$t('common.removeItem')" :title="$t('common.removeItem')" @click="removeItem(index)" />
+          </div>
+          <pv-button type="button" :label="$t('common.addItem')" icon="pi pi-plus" text @click="addItem" />
         </div>
+        <label>{{ $t('page.procurements.estimatedTotal') }}<span class="read-only-value">{{ estimatedTotal }}</span></label>
+        <label>{{ $t('page.procurements.shippingDate') }}<pv-input-text v-model="orderForm.shippingDate" type="date" /></label>
+        <label>{{ $t('common.status') }}<span class="read-only-value">{{ $t('status.pending-reception') }}</span></label>
+        <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
       </form>
       <template #footer>
         <pv-button :label="$t('common.cancel')" text @click="showOrderForm = false" />
-        <pv-button :label="$t('common.save')" icon="pi pi-save" @click="noopSubmit" />
+        <pv-button :label="$t('common.save')" icon="pi pi-save" :loading="saving" @click="saveOrder" />
       </template>
     </pv-dialog>
 
+    <pv-dialog v-model:visible="showDetails" modal :header="`${$t('page.procurements.order')} ${selectedOrder?.id || ''}`" :style="{ width: 'min(760px, calc(100vw - 32px))' }">
+      <template v-if="selectedOrder">
+        <dl class="detail-meta">
+          <div><dt>{{ $t('page.procurements.supplier') }}</dt><dd>{{ selectedOrder.supplier }}</dd></div>
+          <div><dt>{{ $t('common.minimarket') }}</dt><dd>{{ selectedOrder.minimarket }}</dd></div>
+          <div><dt>{{ $t('common.status') }}</dt><dd>{{ $t(`status.${selectedOrder.status}`) }}</dd></div>
+          <div><dt>{{ $t('common.createdAt') }}</dt><dd>{{ selectedOrder.createdAt }}</dd></div>
+          <div><dt>{{ $t('page.procurements.shippingDate') }}</dt><dd>{{ selectedOrder.shippingDate || '-' }}</dd></div>
+          <div v-if="selectedOrder.supplyRequestId"><dt>{{ $t('page.requisition.request') }}</dt><dd>{{ selectedOrder.supplyRequestId }}</dd></div>
+          <div v-if="selectedOrder.observations"><dt>{{ $t('common.observations') }}</dt><dd>{{ selectedOrder.observations }}</dd></div>
+          <div v-if="selectedOrder.rejectionReason"><dt>{{ $t('common.rejectionReason') }}</dt><dd>{{ selectedOrder.rejectionReason }}</dd></div>
+        </dl>
+        <div class="detail-scroll">
+          <table class="detail-table">
+            <thead><tr><th>{{ $t('common.product') }}</th><th>{{ $t('common.quantity') }}</th><th>{{ $t('common.unitPrice') }}</th><th>{{ $t('common.total') }}</th></tr></thead>
+            <tbody><tr v-for="(item, index) in selectedOrder.items" :key="index"><td>{{ item.productName }}</td><td>{{ item.quantity }}</td><td>{{ formatMoney(item.unitPrice) }}</td><td>{{ formatMoney(item.quantity * item.unitPrice) }}</td></tr></tbody>
+            <tfoot><tr><th colspan="3">{{ $t('common.total') }}</th><th>{{ formatMoney(selectedOrder.total) }}</th></tr></tfoot>
+          </table>
+        </div>
+      </template>
+    </pv-dialog>
+
+    <p v-if="actionError" class="form-error" role="alert">{{ actionError }}</p>
     <div class="table-card">
       <pv-data-table :value="filteredOrders" class="marketgo-datatable" responsive-layout="scroll">
         <pv-column field="id" :header="$t('page.procurements.order')" />
@@ -52,7 +74,7 @@
         <pv-column field="minimarket" :header="$t('common.minimarket')" />
         <pv-column field="itemCount" :header="$t('common.items')" />
         <pv-column field="shippingDate" :header="$t('page.procurements.shippingDate')" />
-        <pv-column field="total" :header="$t('common.total')" />
+        <pv-column :header="$t('common.total')"><template #body="{ data }">{{ formatMoney(data.total) }}</template></pv-column>
         <pv-column :header="$t('common.status')">
           <template #body="{ data }">
             <span :class="['status-badge', `status-${data.status}`]">{{ $t(`status.${data.status}`) }}</span>
@@ -61,11 +83,13 @@
         <pv-column :header="$t('common.actions')">
           <template #body="{ data }">
             <div class="action-group">
+              <pv-button :label="$t('common.viewDetails')" size="small" icon="pi pi-eye" outlined @click="openDetails(data)" />
               <pv-button
                 v-if="iamStore.isMinimarketAdmin && data.canBeReviewed"
                 :label="$t('page.procurements.acceptReception')"
                 size="small"
                 icon="pi pi-check"
+                :loading="busyOrderId === data.id"
                 @click="acceptReception(data)"
               />
               <pv-button
@@ -75,11 +99,9 @@
                 severity="danger"
                 outlined
                 icon="pi pi-times"
-                @click="procurementsStore.rejectReception(data.id)"
+                :loading="busyOrderId === data.id"
+                @click="rejectReception(data)"
               />
-              <span v-if="!(iamStore.isMinimarketAdmin && data.canBeReviewed)" class="muted-action">
-                {{ $t('common.no_actions') }}
-              </span>
             </div>
           </template>
         </pv-column>
@@ -94,31 +116,119 @@ import { useProcurementsStore } from '../../application/procurements.store.js';
 import { useInventoryStore } from '../../../inventory/application/inventory.store.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
+import { useProfilesStore } from '../../../profiles/application/profiles.store.js';
+import { useProductsStore } from '../../../products/application/products.store.js';
+import { useI18n } from 'vue-i18n';
 
 const procurementsStore = useProcurementsStore();
 const inventoryStore = useInventoryStore();
 const iamStore = useIamStore();
+const profilesStore = useProfilesStore();
+const productsStore = useProductsStore();
+const { t } = useI18n();
 const visibleOrders = computed(() => procurementsStore.visibleForUser(iamStore.currentUser));
 const filteredOrders = useSearchFilter(() => visibleOrders.value);
 const showOrderForm = ref(false);
-const statusOptions = ['pending-reception', 'received', 'rejected'];
+const saving = ref(false);
+const formError = ref('');
+const actionError = ref('');
+const busyOrderId = ref(null);
+const showDetails = ref(false);
+const selectedOrderId = ref(null);
+const selectedOrder = computed(() => procurementsStore.orders.find((order) => order.id === selectedOrderId.value));
+const formatMoney = (value) => `S/ ${Number(value || 0).toFixed(2)}`;
+let nextItemKey = 3;
+const newItem = () => ({ key: nextItemKey++, productId: null, quantity: '' });
+const minimarkets = computed(() => profilesStore.profiles.filter((profile) => profile.type === 'minimarket'));
 const orderForm = reactive({
-  supplier: '',
-  minimarket: 'Minimarket Verde Sur',
-  items: '',
-  total: '',
-  status: 'pending',
+  minimarketId: null,
+  shippingDate: new Date().toISOString().slice(0, 10),
+  items: [newItem(), newItem(), newItem()],
+});
+const addItem = () => orderForm.items.push(newItem());
+const removeItem = (index) => orderForm.items.splice(index, 1);
+const availableProducts = (index) => {
+  const selected = new Set(orderForm.items.filter((_, itemIndex) => itemIndex !== index).map((item) => item.productId));
+  return productsStore.products.filter((product) => !selected.has(product.id) && product.supplierId === iamStore.currentSupplierId);
+};
+const openDetails = (order) => {
+  selectedOrderId.value = order.id;
+  showDetails.value = true;
+};
+const estimatedTotal = computed(() => {
+  const total = orderForm.items.reduce((sum, item) => {
+    const product = productsStore.products.find((entry) => entry.id === item.productId);
+    const quantity = Number(item.quantity);
+    return sum + (product && Number.isFinite(quantity) && quantity > 0 ? product.price * quantity : 0);
+  }, 0);
+  return formatMoney(total);
 });
 
-const noopSubmit = () => {};
-const acceptReception = (order) => {
-  procurementsStore.acceptReception(order.id);
-  inventoryStore.receiveShipmentItems(order.items);
+const saveOrder = async () => {
+  const minimarket = minimarkets.value.find((entry) => entry.id === orderForm.minimarketId);
+  const items = orderForm.items.map((line) => {
+    const product = productsStore.products.find((entry) => entry.id === line.productId && entry.supplierId === iamStore.currentSupplierId);
+    return product && { productName: product.name, quantity: Number(line.quantity), unitPrice: product.price };
+  });
+  if (!minimarket || !/^\d{4}-\d{2}-\d{2}$/.test(orderForm.shippingDate) || items.length < 3 || items.some((item) => !item || !Number.isInteger(item.quantity) || item.quantity <= 0) || new Set(items.map((item) => item?.productName)).size !== items.length) {
+    formError.value = t('common.invalidForm');
+    return;
+  }
+  saving.value = true;
+  formError.value = '';
+  try {
+    await procurementsStore.createOrder({ supplierId: iamStore.currentSupplierId, minimarketId: minimarket.id, supplier: iamStore.userName, minimarket: minimarket.businessName, shippingDate: orderForm.shippingDate, items, total: Number(items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0).toFixed(2)) });
+    showOrderForm.value = false;
+    orderForm.minimarketId = null;
+    orderForm.items = [newItem(), newItem(), newItem()];
+  } catch {
+    formError.value = t('common.errorSaving');
+  } finally {
+    saving.value = false;
+  }
+};
+const acceptReception = async (order) => {
+  if (busyOrderId.value) return;
+  busyOrderId.value = order.id;
+  actionError.value = '';
+  let changes = [];
+  try {
+    changes = await inventoryStore.receiveShipmentItems(order.items, productsStore.products, order.id);
+    try {
+      await procurementsStore.acceptReception(order.id);
+    } catch (error) {
+      await inventoryStore.restoreShipment(changes);
+      throw error;
+    }
+  } catch {
+    actionError.value = t('page.procurements.receptionError');
+  } finally {
+    busyOrderId.value = null;
+  }
+};
+const rejectReception = async (order) => {
+  if (busyOrderId.value) return;
+  busyOrderId.value = order.id;
+  actionError.value = '';
+  try {
+    await procurementsStore.rejectReception(order.id);
+  } catch {
+    actionError.value = t('page.procurements.receptionError');
+  } finally {
+    busyOrderId.value = null;
+  }
 };
 
 onMounted(() => {
   procurementsStore.fetchOrders();
-  inventoryStore.fetchInventory();
+  if (iamStore.isMinimarketAdmin) {
+    inventoryStore.fetchInventory();
+    productsStore.fetchProducts();
+  }
+  if (iamStore.isSupplier) {
+    profilesStore.fetchProfiles();
+    productsStore.fetchProducts();
+  }
 });
 </script>
 
@@ -167,6 +277,7 @@ onMounted(() => {
   display: grid;
   gap: 14px;
 }
+.form-error { color: #bc2d2d; font-weight: 700; margin: 0; }
 
 .entity-form label {
   color: #023192;
@@ -182,15 +293,38 @@ onMounted(() => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.read-only-value {
+  align-items: center;
+  background: #eff3fa;
+  border: 1px solid #d9e5f6;
+  border-radius: 8px;
+  color: #023192;
+  display: flex;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
 .action-group {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.muted-action {
-  color: #526780;
-  font-size: 12px;
-  font-weight: 800;
+.items-field { display: grid; gap: 8px; }
+.items-field strong { color: #023192; font-size: 13px; }
+.item-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 100px) 36px; gap: 10px; align-items: end; }
+.item-row label { min-width: 0; }
+.item-row :deep(.p-select), .item-row :deep(.p-inputtext) { min-width: 0; width: 100%; }
+.detail-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0 0 20px; }
+.detail-meta div { min-width: 0; }
+.detail-meta dt { color: #526780; font-size: 12px; font-weight: 700; }
+.detail-meta dd { color: #021c45; font-weight: 700; margin: 3px 0 0; overflow-wrap: anywhere; }
+.detail-scroll { overflow-x: auto; }
+.detail-table { border-collapse: collapse; min-width: 480px; width: 100%; }
+.detail-table th, .detail-table td { border-bottom: 1px solid #d9e5f6; padding: 10px 8px; text-align: left; }
+.detail-table th:not(:first-child), .detail-table td:not(:first-child) { text-align: right; }
+@media (max-width: 540px) {
+  .detail-meta { grid-template-columns: 1fr; }
+  .item-row { grid-template-columns: minmax(0, 1fr) minmax(0, 80px) 36px; }
 }
 </style>

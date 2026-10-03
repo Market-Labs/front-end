@@ -33,13 +33,15 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useConservationStore } from '../../application/conservation.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 
 const router = useRouter();
 const conservationStore = useConservationStore();
+const iamStore = useIamStore();
 const filteredRecords = useSearchFilter(() => conservationStore.records);
 
 onMounted(() => {
-  conservationStore.fetchMonitoring();
+  conservationStore.fetchMonitoring(iamStore.isSupplier);
 });
 </script>
 

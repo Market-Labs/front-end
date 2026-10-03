@@ -3,12 +3,13 @@ import { IamApi } from '../infrastructure/iam-api.js';
 import { User } from '../domain/model/user.entity.js';
 
 const iamApi = new IamApi();
+const sessionKey = 'marketgo.auth.userId';
 
 const demoUsers = [
   new User({
     id: 'usr-admin',
     name: 'Albino Caceres',
-    email: 'albinoca@marketgo.pe',
+    email: 'admi@marketgo.com',
     status: 'active',
     roles: ['Administrador de Minimarket'],
     permissions: ['inventory:write', 'procurements:approve', 'users:manage'],
@@ -16,7 +17,7 @@ const demoUsers = [
   new User({
     id: 'usr-provider',
     name: 'Anita Gamboa',
-    email: 'anitaG@bioandes.pe',
+    email: 'proveedor@marketgo.com',
     status: 'active',
     roles: ['Proveedor Organico'],
     permissions: ['products:write', 'procurements:track'],
@@ -25,7 +26,9 @@ const demoUsers = [
 
 export const useIamStore = defineStore('iam', {
   state: () => ({
-    currentUser: demoUsers[0],
+    currentUser: demoUsers.find((user) => user.id === (
+      window.localStorage.getItem(sessionKey) || window.sessionStorage.getItem(sessionKey)
+    )) || null,
     users: demoUsers,
     loading: false,
     error: null,
@@ -41,6 +44,24 @@ export const useIamStore = defineStore('iam', {
     currentMinimarketId: (state) => (state.currentUser?.roles?.includes('Administrador de Minimarket') ? 'min-1' : 'min-1'),
   },
   actions: {
+    async updateUser(id, changes) {
+      const user = await iamApi.updateUser(id, changes);
+      this.users = this.users.map((entry) => entry.id === id ? user : entry);
+      if (this.currentUser?.id === id) this.currentUser = user;
+      return user;
+    },
+    async signIn(email, password, remember = false) {
+      this.error = null;
+      const account = await iamApi.signIn({ email: email.trim().toLowerCase(), password });
+      const user = demoUsers.find((candidate) => candidate.id === account.userId);
+      if (!user) throw new Error('invalid-credentials');
+      this.currentUser = user;
+      window.localStorage.removeItem(sessionKey);
+      window.sessionStorage.removeItem(sessionKey);
+      const storage = remember ? window.localStorage : window.sessionStorage;
+      storage.setItem(sessionKey, user.id);
+      return user;
+    },
     async fetchUsers() {
       this.loading = true;
       this.error = null;
@@ -55,11 +76,9 @@ export const useIamStore = defineStore('iam', {
     },
     logout() {
       window.localStorage.removeItem('marketgo.auth.token');
+      window.localStorage.removeItem(sessionKey);
+      window.sessionStorage.removeItem(sessionKey);
       this.currentUser = null;
-    },
-    switchDemoUser(userId) {
-      const nextUser = this.users.find((user) => user.id === userId);
-      if (nextUser) this.currentUser = nextUser;
     },
   },
 });

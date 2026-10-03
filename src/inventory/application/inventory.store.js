@@ -20,6 +20,7 @@ const demoItems = [
 export const useInventoryStore = defineStore('inventory', {
   state: () => ({
     items: demoItems,
+    waste: [],
     loading: false,
     error: null,
   }),
@@ -27,25 +28,123 @@ export const useInventoryStore = defineStore('inventory', {
     lowStockCount: (state) => state.items.filter((item) => item.isLowStock).length,
   },
   actions: {
-    async fetchInventory() {
+    async fetchWaste(isSupplier = false) {
+      try {
+        this.waste = await inventoryApi.getWaste(isSupplier);
+      } catch {
+        this.waste = [];
+      }
+    },
+    async registerWaste({ itemId, quantity, reason, ownerId, isSupplier }) {
+      const item = this.items.find((entry) => entry.id === itemId);
+      if (!item || !Number.isInteger(quantity) || quantity <= 0 || quantity > item.stock) throw new Error('invalid-waste');
+      const before = item.stock;
+      const stock = before - quantity;
+      const updated = await inventoryApi.updateItem(item.id, { stock, status: stock <= item.minimumStock ? 'risk' : 'healthy' }, isSupplier);
+      Object.assign(item, updated);
+      try {
+        const record = await inventoryApi.createWaste({ id: `waste-${crypto.randomUUID()}`, ownerId, productName: item.productName, lotCode: item.lotCode, quantity, unit: 'units', reason, recordedAt: new Date().toISOString() });
+        this.waste.unshift(record);
+        return record;
+      } catch (error) {
+        const restored = await inventoryApi.updateItem(item.id, { stock: before, status: before <= item.minimumStock ? 'risk' : 'healthy' }, isSupplier);
+        Object.assign(item, restored);
+        throw error;
+      }
+    },
+    async registerStock(data, isSupplier = false) {
+      const item = await inventoryApi.createItem({ ...data, id: `inv-${crypto.randomUUID()}`, status: data.stock <= data.minimumStock ? 'risk' : 'healthy' }, isSupplier);
+      this.items.push(item);
+      return item;
+    },
+    async fetchInventory(isSupplier = false) {
       this.loading = true;
       try {
-        this.items = await inventoryApi.getInventory();
+        this.items = await inventoryApi.getInventory(isSupplier);
       } catch (error) {
         this.error = 'No se pudo cargar inventario. Se muestran datos demo.';
-        this.items = demoItems;
+        this.items = isSupplier ? [] : demoItems;
       } finally {
         this.loading = false;
       }
     },
-    receiveShipmentItems(shipmentItems = []) {
-      shipmentItems.forEach((shipmentItem) => {
-        const inventoryItem = this.items.find((item) => item.productName === shipmentItem.productName);
-        if (inventoryItem) {
-          inventoryItem.stock += Number(shipmentItem.quantity || 0);
-          inventoryItem.status = inventoryItem.stock <= inventoryItem.minimumStock ? 'risk' : 'healthy';
+    async allocateSale(lines) {
+      const planned = new Map();
+      for (const line of lines) {
+        let remaining = Number(line.quantity);
+        const lots = this.items.filter((item) => item.productName === line.productName)
+          .sort((a, b) => a.expirationDate.localeCompare(b.expirationDate));
+        for (const lot of lots) {
+          if (remaining <= 0) break;
+          const current = planned.get(lot.id)?.after ?? lot.stock;
+          const taken = Math.min(remaining, current);
+          if (taken > 0) planned.set(lot.id, { item: lot, before: lot.stock, after: current - taken });
+          remaining -= taken;
         }
-      });
+        if (remaining > 0) throw new Error('insufficient-stock');
+      }
+      const allocations = [...planned.values()];
+      const updated = [];
+      try {
+        for (const allocation of allocations) {
+          const stock = allocation.after;
+          const saved = await inventoryApi.updateItem(allocation.item.id, { stock, status: stock <= allocation.item.minimumStock ? 'risk' : 'healthy' });
+          Object.assign(allocation.item, saved);
+          updated.push(allocation);
+        }
+      } catch (error) {
+        await this.restoreAllocations(updated);
+        throw error;
+      }
+      return allocations;
+    },
+    async restoreAllocations(allocations) {
+      for (const allocation of allocations) {
+        const stock = allocation.before;
+        const saved = await inventoryApi.updateItem(allocation.item.id, { stock, status: stock <= allocation.item.minimumStock ? 'risk' : 'healthy' });
+        Object.assign(allocation.item, saved);
+      }
+    },
+    async receiveShipmentItems(shipmentItems = [], products = [], orderId = '') {
+      const changes = [];
+      try {
+        for (const shipmentItem of shipmentItems) {
+          const inventoryItem = this.items.find((item) => item.productName === shipmentItem.productName);
+          if (inventoryItem) {
+            const before = inventoryItem.stock;
+            const stock = before + Number(shipmentItem.quantity);
+            const saved = await inventoryApi.updateItem(inventoryItem.id, { stock, status: stock <= inventoryItem.minimumStock ? 'risk' : 'healthy' });
+            Object.assign(inventoryItem, saved);
+            changes.push({ item: inventoryItem, before });
+          } else {
+            const product = products.find((entry) => entry.name === shipmentItem.productName);
+            if (!product) throw new Error(`missing-product:${shipmentItem.productName}`);
+            const saved = await inventoryApi.createItem({
+              id: `inv-${crypto.randomUUID()}`, productName: product.name,
+              stock: Number(shipmentItem.quantity), minimumStock: 0,
+              lotCode: `SHIP-${orderId}`, expirationDate: product.expirationDate, status: 'healthy',
+            });
+            this.items.push(saved);
+            changes.push({ item: saved, created: true });
+          }
+        }
+        return changes;
+      } catch (error) {
+        await this.restoreShipment(changes);
+        throw error;
+      }
+    },
+    async restoreShipment(changes) {
+      for (const change of [...changes].reverse()) {
+        if (change.created) {
+          await inventoryApi.deleteItem(change.item.id);
+          this.items = this.items.filter((entry) => entry.id !== change.item.id);
+        } else {
+          const stock = change.before;
+          const saved = await inventoryApi.updateItem(change.item.id, { stock, status: stock <= change.item.minimumStock ? 'risk' : 'healthy' });
+          Object.assign(change.item, saved);
+        }
+      }
     },
   },
 });
