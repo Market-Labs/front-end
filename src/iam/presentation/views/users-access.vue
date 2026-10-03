@@ -6,18 +6,18 @@
         <h2>{{ $t('page.iam.title') }}</h2>
         <p>{{ $t('page.iam.description') }}</p>
       </div>
-      <pv-button :label="$t('page.iam.newUser')" icon="pi pi-user-plus" @click="showUserForm = true" />
+      <pv-button :label="$t('page.iam.newUser')" icon="pi pi-user-plus" @click="openUserForm" />
     </div>
 
     <pv-dialog v-model:visible="showUserForm" modal :header="$t('page.iam.newUser')" :style="{ width: '520px' }">
       <form class="entity-form" @submit.prevent>
         <label>
-          {{ $t('common.name') }}
-          <pv-input-text v-model="userForm.name" placeholder="Albino Caceres" />
+          {{ $t('page.iam.user') }}
+          <pv-select v-model="userForm.userId" :options="visibleUsers" option-label="name" option-value="id" :placeholder="$t('page.iam.selectUser')" />
         </label>
         <label>
           {{ $t('page.iam.email') }}
-          <pv-input-text v-model="userForm.email" placeholder="usuario@marketgo.pe" />
+          <span class="read-only-value">{{ selectedUser?.email || '-' }}</span>
         </label>
         <div class="form-row">
           <label>
@@ -26,13 +26,14 @@
           </label>
           <label>
             {{ $t('common.status') }}
-            <pv-select v-model="userForm.status" :options="statusOptions" :placeholder="$t('page.iam.selectStatus')" />
+            <pv-select v-model="userForm.status" :options="statusOptions" option-label="label" option-value="value" :placeholder="$t('page.iam.selectStatus')" />
           </label>
         </div>
+        <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
       </form>
       <template #footer>
         <pv-button :label="$t('common.cancel')" text @click="showUserForm = false" />
-        <pv-button :label="$t('common.save')" icon="pi pi-save" @click="noopSubmit" />
+        <pv-button :label="$t('common.save')" icon="pi pi-save" :loading="saving" @click="saveUser" />
       </template>
     </pv-dialog>
 
@@ -64,28 +65,67 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, onMounted } from 'vue';
+import { computed, reactive, ref, onMounted, watch } from 'vue';
 import { useIamStore } from '../../application/iam.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
+import { useI18n } from 'vue-i18n';
 
 const iamStore = useIamStore();
-const filteredUsers = useSearchFilter(() => iamStore.users);
+const { t } = useI18n();
+const visibleUsers = computed(() => iamStore.isSupplier
+  ? iamStore.users.filter((user) => user.id === iamStore.currentUser?.id)
+  : iamStore.users);
+const filteredUsers = useSearchFilter(() => visibleUsers.value);
 const showUserForm = ref(false);
-const roleOptions = ['Administrador de Minimarket', 'Proveedor Organico', 'Operador de Minimarket'];
-const statusOptions = ['active', 'inactive'];
+const saving = ref(false);
+const formError = ref('');
+const roleOptions = computed(() => [...new Set(visibleUsers.value.flatMap((user) => user.roles))]);
+const statusOptions = computed(() => [
+  { label: t('status.active'), value: 'active' },
+  { label: t('status.inactive'), value: 'inactive' },
+]);
 const userForm = reactive({
-  name: '',
-  email: '',
-  role: '',
+  userId: null,
+  role: null,
   status: 'active',
 });
+const selectedUser = computed(() => visibleUsers.value.find((user) => user.id === userForm.userId));
 
-const noopSubmit = () => {};
+watch(selectedUser, (user) => {
+  userForm.role = user?.roles?.[0] || null;
+  userForm.status = user?.status || 'active';
+});
+
+const openUserForm = () => {
+  userForm.userId = null;
+  userForm.role = null;
+  userForm.status = 'active';
+  formError.value = '';
+  showUserForm.value = true;
+};
+
+const saveUser = async () => {
+  if (!selectedUser.value || !roleOptions.value.includes(userForm.role) || !['active', 'inactive'].includes(userForm.status)) {
+    formError.value = t('common.invalidForm');
+    return;
+  }
+  saving.value = true;
+  formError.value = '';
+  try {
+    const matchingRole = iamStore.users.find((user) => user.roles.includes(userForm.role));
+    await iamStore.updateUser(selectedUser.value.id, { roles: [userForm.role], status: userForm.status, permissions: matchingRole?.permissions || [] });
+    showUserForm.value = false;
+  } catch {
+    formError.value = t('common.errorSaving');
+  } finally {
+    saving.value = false;
+  }
+};
 
 const summaryCards = computed(() => [
-  { label: 'page.iam.activeUsers', value: iamStore.users.length, icon: 'pi pi-users' },
-  { label: 'page.iam.definedRoles', value: 2, icon: 'pi pi-id-card' },
-  { label: 'page.iam.keyPermissions', value: 5, icon: 'pi pi-shield' },
+  { label: 'page.iam.activeUsers', value: visibleUsers.value.filter((user) => user.status === 'active').length, icon: 'pi pi-users' },
+  { label: 'page.iam.definedRoles', value: roleOptions.value.length, icon: 'pi pi-id-card' },
+  { label: 'page.iam.keyPermissions', value: new Set(visibleUsers.value.flatMap((user) => user.permissions)).size, icon: 'pi pi-shield' },
 ]);
 
 onMounted(() => {
@@ -167,6 +207,7 @@ onMounted(() => {
   display: grid;
   gap: 14px;
 }
+.form-error { color: #bc2d2d; font-weight: 700; margin: 0; }
 
 .entity-form label {
   color: #023192;
@@ -180,5 +221,16 @@ onMounted(() => {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.read-only-value {
+  align-items: center;
+  background: #eff3fa;
+  border: 1px solid #d9e5f6;
+  border-radius: 8px;
+  color: #023192;
+  display: flex;
+  min-height: 42px;
+  padding: 0 12px;
 }
 </style>

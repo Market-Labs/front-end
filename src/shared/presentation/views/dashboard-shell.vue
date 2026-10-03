@@ -76,6 +76,8 @@ import { useSearchFilter } from '../../application/use-search-filter.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useRequisitionStore } from '../../../requisition/application/requisition.store.js';
 import { useProcurementsStore } from '../../../procurements/application/procurements.store.js';
+import { useInventoryStore } from '../../../inventory/application/inventory.store.js';
+import { useProductsStore } from '../../../products/application/products.store.js';
 
 const router = useRouter();
 const { t } = useI18n();
@@ -83,9 +85,11 @@ const overviewStore = useDashboardOverviewStore();
 const iamStore = useIamStore();
 const requisitionStore = useRequisitionStore();
 const procurementsStore = useProcurementsStore();
+const inventoryStore = useInventoryStore();
+const productsStore = useProductsStore();
 
 const adminIndicators = computed(() => [
-  { label: t('dashboardRole.inventory'), value: '1,248', detail: t('dashboardRole.availableUnits'), icon: 'pi pi-box', route: '/inventory' },
+  { label: t('dashboardRole.inventory'), value: inventoryStore.items.reduce((sum, item) => sum + Number(item.stock || 0), 0), detail: t('dashboardRole.availableUnits'), icon: 'pi pi-box', route: '/inventory' },
   { label: t('dashboardRole.requests'), value: requisitionStore.visibleForUser(iamStore.currentUser).length, detail: t('dashboardRole.createdByMinimarket'), icon: 'pi pi-list-check', route: '/requisition' },
   { label: t('dashboardRole.shipments'), value: procurementsStore.visibleForUser(iamStore.currentUser).filter((order) => order.status === 'pending-reception').length, detail: t('dashboardRole.pendingReception'), icon: 'pi pi-truck', route: '/procurements' },
 ]);
@@ -93,7 +97,7 @@ const adminIndicators = computed(() => [
 const supplierIndicators = computed(() => [
   { label: t('dashboardRole.requests'), value: requisitionStore.visibleForUser(iamStore.currentUser).filter((request) => request.status === 'pending').length, detail: t('dashboardRole.toReview'), icon: 'pi pi-list-check', route: '/requisition' },
   { label: t('dashboardRole.orders'), value: procurementsStore.visibleForUser(iamStore.currentUser).length, detail: t('dashboardRole.shippingOrders'), icon: 'pi pi-truck', route: '/procurements' },
-  { label: t('dashboardRole.catalog'), value: '10', detail: t('dashboardRole.organicProducts'), icon: 'pi pi-shopping-bag', route: '/products' },
+  { label: t('dashboardRole.catalog'), value: productsStore.products.filter((product) => product.supplierId === iamStore.currentSupplierId).length, detail: t('dashboardRole.organicProducts'), icon: 'pi pi-shopping-bag', route: '/products' },
 ]);
 
 const roleIndicators = computed(() => (iamStore.isSupplier ? supplierIndicators.value : adminIndicators.value));
@@ -101,7 +105,7 @@ const roleIndicators = computed(() => (iamStore.isSupplier ? supplierIndicators.
 const modules = computed(() => (iamStore.isSupplier ? [
   { name: t('dashboardRole.receivedRequests'), description: t('dashboardRole.receivedRequestsDetail'), icon: 'pi pi-list-check', route: '/requisition' },
   { name: t('dashboardRole.shippingOrdersModule'), description: t('dashboardRole.shippingOrdersDetail'), icon: 'pi pi-truck', route: '/procurements' },
-  { name: t('dashboardRole.supplierProfile'), description: t('dashboardRole.supplierProfileDetail'), icon: 'pi pi-id-card', route: '/profiles' },
+  { name: t('option.clients'), description: t('page.clients.description'), icon: 'pi pi-users', route: '/clients' },
 ] : [
   { name: t('dashboardRole.inventory'), description: t('dashboardRole.inventoryDetail'), icon: 'pi pi-box', route: '/inventory' },
   { name: t('dashboardRole.supplyRequests'), description: t('dashboardRole.supplyRequestsDetail'), icon: 'pi pi-list-check', route: '/requisition' },
@@ -121,9 +125,11 @@ const goToMetric = (metric) => {
 };
 
 onMounted(() => {
-  overviewStore.fetchOverview();
+  overviewStore.fetchOverview(iamStore.isSupplier);
   requisitionStore.fetchRequisitions();
   procurementsStore.fetchOrders();
+  inventoryStore.fetchInventory(iamStore.isSupplier);
+  productsStore.fetchProducts();
 });
 </script>
 

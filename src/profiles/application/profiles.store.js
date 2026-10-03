@@ -10,6 +10,7 @@ const demoProfiles = [
     userId: 'usr-admin',
     type: 'minimarket',
     businessName: 'Minimarket Verde Sur',
+    email: 'admi@marketgo.com',
     phone: '+51 987 654 321',
     address: 'Av. Los Alimentos 120',
     district: 'Surco',
@@ -18,11 +19,12 @@ const demoProfiles = [
     id: 'prof-provider',
     userId: 'usr-provider',
     type: 'provider',
-    businessName: 'BioAndes Organic',
+    businessName: 'Anita Gamboa',
+    email: 'proveedor@marketgo.com',
     phone: '+51 955 222 110',
-    address: 'Ruta Agricola 45',
-    specialty: 'Lacteos y vegetales organicos',
-    coverageArea: 'Lima Metropolitana',
+    address: 'Cerro Colorado, Arequipa',
+    specialty: 'Lacteos y derivados',
+    coverageArea: 'Cerro Colorado - Arequipa',
   }),
 ];
 
@@ -44,6 +46,11 @@ export const useProfilesStore = defineStore('profiles', {
       } finally {
         this.loading = false;
       }
+    },
+    async updateContact(id, payload) {
+      const updated = await profilesApi.updateProfile(id, payload);
+      this.profiles = this.profiles.map((profile) => profile.id === id ? updated : profile);
+      return updated;
     },
   },
 });

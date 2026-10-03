@@ -18,14 +18,14 @@ export const useDashboardStore = defineStore('dashboard', {
     error: null,
   }),
   actions: {
-    async fetchIndicators() {
+    async fetchIndicators(isSupplier = false) {
       this.loading = true;
       this.error = null;
       try {
-        this.indicators = await dashboardApi.getIndicators();
+        this.indicators = await dashboardApi.getIndicators(isSupplier);
       } catch (error) {
         this.error = 'No se pudo cargar el dashboard desde la API. Se muestran datos demo.';
-        this.indicators = demoIndicators;
+        this.indicators = isSupplier ? [] : demoIndicators;
       } finally {
         this.loading = false;
       }

@@ -21,15 +21,7 @@
       </div>
 
       <div class="sidebar-footer">
-        <label class="role-switcher">
-          <span>{{ t('common.current_role') }}</span>
-          <select :value="iamStore.currentUser?.id" @change="iamStore.switchDemoUser($event.target.value)">
-            <option v-for="user in iamStore.users" :key="user.id" :value="user.id">
-              {{ user.roles[0] }}
-            </option>
-          </select>
-        </label>
-        <button type="button" class="logout-button">
+        <button type="button" class="logout-button" @click="logout">
           <i class="pi pi-sign-out"></i>
           <span>{{ t('option.logout') }}</span>
         </button>
@@ -56,7 +48,7 @@
             <i class="pi pi-search"></i>
             <input v-model="searchQuery" :placeholder="t('common.search_placeholder')" type="search" />
           </div>
-          <button type="button" class="icon-button" aria-label="Notifications">
+          <button type="button" class="icon-button" aria-label="Notifications" @click="router.push('/communication')">
             <i class="pi pi-bell"></i>
             <span class="notification-dot"></span>
           </button>
@@ -92,16 +84,18 @@ watch(() => route.fullPath, () => {
 
 const menuItems = [
   { to: '/home', icon: 'pi pi-microsoft', labelKey: 'option.dashboard', roles: ['admin', 'supplier'] },
-  { to: '/inventory', icon: 'pi pi-box', labelKey: 'option.inventory', roles: ['admin'] },
+  { to: '/inventory', icon: 'pi pi-box', labelKey: 'option.inventory', roles: ['admin', 'supplier'] },
   { to: '/products', icon: 'pi pi-shopping-bag', labelKey: 'option.products', roles: ['admin', 'supplier'] },
+  { to: '/sales', icon: 'pi pi-wallet', labelKey: 'option.sales', roles: ['admin', 'supplier'] },
   { to: '/requisition', icon: 'pi pi-list-check', labelKey: 'option.requisition', roles: ['admin', 'supplier'] },
-  { to: '/procurements', icon: 'pi pi-truck', labelKey: 'option.procurements', roles: ['admin', 'supplier'] },
-  { to: '/suppliers', icon: 'pi pi-users', labelKey: 'option.suppliers', roles: ['admin', 'supplier'] },
-  { to: '/conservation', icon: 'pi pi-cloud', labelKey: 'option.conservation', roles: ['admin'] },
+  { to: '/procurements', icon: 'pi pi-truck', labelKey: 'option.procurements', roles: ['supplier'] },
+  { to: '/procurements', icon: 'pi pi-truck', labelKey: 'option.reception', roles: ['admin'] },
+  { to: '/suppliers', icon: 'pi pi-users', labelKey: 'option.suppliers', roles: ['admin'] },
+  { to: '/clients', icon: 'pi pi-users', labelKey: 'option.clients', roles: ['supplier'] },
+  { to: '/conservation', icon: 'pi pi-cloud', labelKey: 'option.conservation', roles: ['admin', 'supplier'] },
   { to: '/analytics', icon: 'pi pi-chart-bar', labelKey: 'option.analytics', roles: ['admin', 'supplier'] },
   { to: '/communication', icon: 'pi pi-comments', labelKey: 'option.communication', roles: ['admin', 'supplier'] },
-  { to: '/profiles', icon: 'pi pi-id-card', labelKey: 'option.profiles', roles: ['admin', 'supplier'] },
-  { to: '/iam', icon: 'pi pi-shield', labelKey: 'option.iam', roles: ['admin'] },
+  { to: '/iam', icon: 'pi pi-shield', labelKey: 'option.iam', roles: ['admin', 'supplier'] },
   { to: '/settings', icon: 'pi pi-cog', labelKey: 'option.settings', roles: ['admin', 'supplier'] },
 ];
 
@@ -110,6 +104,11 @@ const activeRoleKey = computed(() => (iamStore.isSupplier ? 'supplier' : 'admin'
 const visibleMenuItems = computed(() => (
   menuItems.filter((item) => item.roles.includes(activeRoleKey.value))
 ));
+
+const logout = () => {
+  iamStore.logout();
+  router.replace('/login');
+};
 
 const alwaysAllowedPaths = ['/dashboard', '/access-denied'];
 
@@ -127,6 +126,7 @@ const routeTitleKeys = {
 };
 
 const pageTitle = computed(() => {
+  if (route.name === 'procurements' && iamStore.isMinimarketAdmin) return t('option.reception');
   const key = route.meta.titleKey || routeTitleKeys[route.name];
   return key ? t(key) : route.meta.title || t('option.dashboard');
 });
@@ -246,25 +246,6 @@ const todayDate = computed(() => (
   padding: 0 14px;
 }
 
-.role-switcher {
-  color: #b8c9e8;
-  display: grid;
-  font-size: 11px;
-  font-weight: 800;
-  gap: 6px;
-  text-transform: uppercase;
-}
-
-.role-switcher select {
-  background: #ffffff;
-  border: 1px solid #d9e5f6;
-  border-radius: 8px;
-  color: #023192;
-  font: inherit;
-  min-height: 40px;
-  padding: 0 10px;
-  text-transform: none;
-}
 
 .logout-button,
 .profile-button {

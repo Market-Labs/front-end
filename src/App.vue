@@ -1,5 +1,6 @@
 <template>
-  <marketgo-layout />
+  <router-view v-if="$route.meta.public" />
+  <marketgo-layout v-else />
 </template>
 
 <script setup>

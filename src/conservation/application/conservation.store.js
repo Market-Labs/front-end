@@ -20,13 +20,13 @@ export const useConservationStore = defineStore('conservation', {
     riskCount: (state) => state.records.filter((record) => record.isRisky).length,
   },
   actions: {
-    async fetchMonitoring() {
+    async fetchMonitoring(isSupplier = false) {
       this.loading = true;
       try {
-        this.records = await conservationApi.getMonitoring();
+        this.records = await conservationApi.getMonitoring(isSupplier);
       } catch (error) {
         this.error = 'No se pudo cargar monitoreo. Se muestran datos demo.';
-        this.records = demoRecords;
+        this.records = isSupplier ? [] : demoRecords;
       } finally {
         this.loading = false;
       }

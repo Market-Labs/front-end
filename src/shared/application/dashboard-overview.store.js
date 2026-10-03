@@ -26,19 +26,19 @@ export const useDashboardOverviewStore = defineStore('dashboardOverview', {
     error: null,
   }),
   actions: {
-    async fetchOverview() {
+    async fetchOverview(isSupplier = false) {
       this.loading = true;
       this.error = null;
       try {
-        const overview = await overviewApi.getOverview();
+        const overview = await overviewApi.getOverview(isSupplier);
         this.healthScore = overview.healthScore;
         this.indicators = overview.indicators;
         this.activity = overview.activity;
       } catch (error) {
         this.error = 'Fake API no disponible. Se muestran datos locales.';
-        this.healthScore = fallbackOverview.healthScore;
-        this.indicators = fallbackOverview.indicators;
-        this.activity = fallbackOverview.activity;
+        this.healthScore = isSupplier ? 0 : fallbackOverview.healthScore;
+        this.indicators = isSupplier ? [] : fallbackOverview.indicators;
+        this.activity = isSupplier ? [] : fallbackOverview.activity;
       } finally {
         this.loading = false;
       }

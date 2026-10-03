@@ -10,9 +10,24 @@ import procurementsRoutes from './procurements/presentation/procurements-routes.
 import suppliersRoutes from './suppliers/presentation/suppliers-routes.js';
 import conservationRoutes from './conservation/presentation/conservation-routes.js';
 import communicationRoutes from './communication/presentation/communication-routes.js';
+import salesRoutes from './sales/presentation/sales-routes.js';
 import i18n from './i18n.js';
+import pinia from './pinia.js';
+import { useIamStore } from './iam/application/iam.store.js';
 
 const routes = [
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('./iam/presentation/views/sign-in.vue'),
+    meta: { public: true, titleKey: 'auth.signIn' },
+  },
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: () => import('./iam/presentation/views/forgot-password.vue'),
+    meta: { public: true, titleKey: 'auth.forgotPassword' },
+  },
   {
     path: '/',
     redirect: '/home',
@@ -46,6 +61,7 @@ const routes = [
   ...suppliersRoutes,
   ...conservationRoutes,
   ...communicationRoutes,
+  ...salesRoutes,
   {
     path: '/:pathMatch(.*)*',
     redirect: '/home',
@@ -58,6 +74,14 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
+  const iamStore = useIamStore(pinia);
+  if (!to.meta.public && !iamStore.isAuthenticated) {
+    return { name: 'login', query: { redirect: to.fullPath } };
+  }
+  if (to.meta.public && iamStore.isAuthenticated) return { name: 'home' };
+  if (to.meta.roles && !to.meta.roles.some((role) => (
+    role === 'admin' ? iamStore.isMinimarketAdmin : iamStore.isSupplier
+  ))) return { name: 'access-denied' };
   const title = to.meta.titleKey ? i18n.global.t(to.meta.titleKey) : to.meta.title || 'App';
   document.title = `MarketGo - ${title}`;
 });

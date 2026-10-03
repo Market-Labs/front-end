@@ -79,20 +79,35 @@ export const useAnalyticsStore = defineStore('analytics', {
     indicators: demoIndicators,
     reports: ['Inventario', 'Abastecimiento', 'Mermas', 'Conservacion', 'Proveedores', 'Ventas'],
     reportSummaries: demoReportSummaries,
+    reportSources: null,
     loading: false,
     error: null,
   }),
   actions: {
-    async fetchSummary() {
+    async fetchReportSources(isSupplier = false) {
+      this.loading = true;
+      this.error = null;
+      try {
+        this.reportSources = await analyticsApi.getReportSources(isSupplier);
+      } catch {
+        this.reportSources = null;
+        this.error = 'No se pudieron cargar los datos para los reportes.';
+      } finally {
+        this.loading = false;
+      }
+    },
+    async fetchSummary(isSupplier = false) {
       this.loading = true;
       try {
-        const summary = await analyticsApi.getSummary();
+        const summary = await analyticsApi.getSummary(isSupplier);
         this.indicators = summary.indicators;
-        this.reportSummaries = { ...demoReportSummaries, ...summary.reportSummaries };
+        this.reports = Object.keys(summary.reportSummaries);
+        this.reportSummaries = summary.reportSummaries;
       } catch (error) {
         this.error = 'No se pudo cargar analitica. Se muestran datos demo.';
-        this.indicators = demoIndicators;
-        this.reportSummaries = demoReportSummaries;
+        this.indicators = isSupplier ? [] : demoIndicators;
+        this.reports = isSupplier ? [] : Object.keys(demoReportSummaries);
+        this.reportSummaries = isSupplier ? {} : demoReportSummaries;
       } finally {
         this.loading = false;
       }

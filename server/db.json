@@ -7,6 +7,18 @@
     "token": "fake-marketgo-token",
     "expiresAt": "2026-09-18T23:59:59"
   },
+  "authAccounts": [
+    {
+      "userId": "usr-admin",
+      "email": "admi@marketgo.com",
+      "password": "admi"
+    },
+    {
+      "userId": "usr-provider",
+      "email": "proveedor@marketgo.com",
+      "password": "proveedor"
+    }
+  ],
   "dashboard": {
     "healthScore": 87,
     "indicators": [
@@ -94,9 +106,18 @@
         "title": "Inventario",
         "description": "Stock disponible, productos en riesgo y vencimientos cercanos.",
         "metrics": [
-          { "label": "Productos en stock", "value": "10" },
-          { "label": "Unidades disponibles", "value": "1,248" },
-          { "label": "Lotes en riesgo", "value": "1" }
+          {
+            "label": "Productos en stock",
+            "value": "10"
+          },
+          {
+            "label": "Unidades disponibles",
+            "value": "1,248"
+          },
+          {
+            "label": "Lotes en riesgo",
+            "value": "1"
+          }
         ],
         "highlights": [
           "Yogurt organico requiere reposicion.",
@@ -108,9 +129,18 @@
         "title": "Abastecimiento",
         "description": "Ordenes de compra y seguimiento de proveedores.",
         "metrics": [
-          { "label": "Ordenes activas", "value": "3" },
-          { "label": "Pendientes", "value": "2" },
-          { "label": "Monto total", "value": "S/ 964.70" }
+          {
+            "label": "Ordenes activas",
+            "value": "3"
+          },
+          {
+            "label": "Pendientes",
+            "value": "2"
+          },
+          {
+            "label": "Monto total",
+            "value": "S/ 964.70"
+          }
         ],
         "highlights": [
           "Anita Gamboa tiene orden pendiente.",
@@ -122,9 +152,18 @@
         "title": "Mermas",
         "description": "Perdidas registradas por vencimiento, conservacion y manipulacion.",
         "metrics": [
-          { "label": "Merma total", "value": "21 kg" },
-          { "label": "Reduccion mensual", "value": "25%" },
-          { "label": "Producto critico", "value": "Yogurt" }
+          {
+            "label": "Merma total",
+            "value": "21 kg"
+          },
+          {
+            "label": "Reduccion mensual",
+            "value": "25%"
+          },
+          {
+            "label": "Producto critico",
+            "value": "Yogurt"
+          }
         ],
         "highlights": [
           "La merma bajo frente al periodo anterior.",
@@ -136,9 +175,18 @@
         "title": "Conservacion",
         "description": "Temperatura, humedad y alertas por zona de almacenamiento.",
         "metrics": [
-          { "label": "Score", "value": "92%" },
-          { "label": "Alertas activas", "value": "4" },
-          { "label": "Zonas monitoreadas", "value": "2" }
+          {
+            "label": "Score",
+            "value": "92%"
+          },
+          {
+            "label": "Alertas activas",
+            "value": "4"
+          },
+          {
+            "label": "Zonas monitoreadas",
+            "value": "2"
+          }
         ],
         "highlights": [
           "Camara fria A esta dentro del rango.",
@@ -150,9 +198,18 @@
         "title": "Proveedores",
         "description": "Directorio, cobertura y participacion en ordenes.",
         "metrics": [
-          { "label": "Proveedores activos", "value": "2" },
-          { "label": "Zona destacada", "value": "Arequipa" },
-          { "label": "Especialidad lider", "value": "Lacteos" }
+          {
+            "label": "Proveedores activos",
+            "value": "2"
+          },
+          {
+            "label": "Zona destacada",
+            "value": "Arequipa"
+          },
+          {
+            "label": "Especialidad lider",
+            "value": "Lacteos"
+          }
         ],
         "highlights": [
           "Anita Gamboa cubre Cerro Colorado - Arequipa.",
@@ -164,9 +221,18 @@
         "title": "Ventas",
         "description": "Operaciones por oferta y productos con mayor movimiento.",
         "metrics": [
-          { "label": "Ventas por oferta", "value": "86 ops" },
-          { "label": "Crecimiento", "value": "34%" },
-          { "label": "Categoria fuerte", "value": "Vegetales" }
+          {
+            "label": "Ventas por oferta",
+            "value": "86 ops"
+          },
+          {
+            "label": "Crecimiento",
+            "value": "34%"
+          },
+          {
+            "label": "Categoria fuerte",
+            "value": "Vegetales"
+          }
         ],
         "highlights": [
           "Tomate y lechugas tienen alta rotacion.",
@@ -180,18 +246,29 @@
     {
       "id": "usr-admin",
       "name": "Albino Caceres",
-      "email": "albinoca@marketgo.pe",
+      "email": "admi@marketgo.com",
       "status": "active",
-      "roles": ["Administrador de Minimarket"],
-      "permissions": ["inventory:write", "procurements:approve", "users:manage"]
+      "roles": [
+        "Administrador de Minimarket"
+      ],
+      "permissions": [
+        "inventory:write",
+        "procurements:approve",
+        "users:manage"
+      ]
     },
     {
       "id": "usr-provider",
       "name": "Anita Gamboa",
-      "email": "anitaG@bioandes.pe",
+      "email": "proveedor@marketgo.com",
       "status": "active",
-      "roles": ["Proveedor Organico"],
-      "permissions": ["products:write", "procurements:track"]
+      "roles": [
+        "Proveedor Organico"
+      ],
+      "permissions": [
+        "products:write",
+        "procurements:track"
+      ]
     }
   ],
   "profiles": [
@@ -200,6 +277,7 @@
       "userId": "usr-admin",
       "type": "minimarket",
       "businessName": "Minimarket Verde Sur",
+      "email": "admi@marketgo.com",
       "phone": "+51 987 654 321",
       "address": "Av. Los Alimentos 120",
       "district": "Surco"
@@ -208,113 +286,124 @@
       "id": "prof-provider",
       "userId": "usr-provider",
       "type": "provider",
-      "businessName": "BioAndes Organic",
+      "businessName": "Anita Gamboa",
+      "email": "proveedor@marketgo.com",
       "phone": "+51 955 222 110",
-      "address": "Ruta Agricola 45",
-      "specialty": "Lacteos y vegetales organicos",
-      "coverageArea": "Lima Metropolitana"
+      "address": "Cerro Colorado, Arequipa",
+      "specialty": "Lacteos y derivados",
+      "coverageArea": "Cerro Colorado - Arequipa"
     }
   ],
   "products": [
     {
-      "id": "prod-1",
+      "id": "VGT-00001",
       "name": "Tomate organico",
       "description": "Tomates frescos de cultivo organico.",
       "category": "Vegetales",
       "expirationDate": "2026-09-28",
       "quantity": 60,
       "price": 3.8,
-      "available": true
+      "available": true,
+      "supplierId": "sup-1"
     },
     {
-      "id": "prod-2",
+      "id": "VGT-00002",
       "name": "Lechugas organicas",
       "description": "Lechugas frescas seleccionadas.",
       "category": "Vegetales",
       "expirationDate": "2026-09-25",
       "quantity": 42,
       "price": 4.5,
-      "available": true
+      "available": true,
+      "supplierId": "sup-1"
     },
     {
-      "id": "prod-3",
+      "id": "LCT-00001",
       "name": "Yogurt organico",
       "description": "Yogurt artesanal sin preservantes.",
       "category": "Lacteos",
       "expirationDate": "2026-09-22",
       "quantity": 12,
       "price": 8.9,
-      "available": true
+      "available": true,
+      "supplierId": "sup-2"
     },
     {
-      "id": "prod-4",
+      "id": "FRT-00001",
       "name": "Manzanas organicas",
       "description": "Manzanas dulces de cosecha natural.",
       "category": "Frutas",
       "expirationDate": "2026-10-05",
       "quantity": 75,
       "price": 5.2,
-      "available": true
+      "available": true,
+      "supplierId": "sup-1"
     },
     {
-      "id": "prod-5",
+      "id": "VGT-00003",
       "name": "Pepino organico",
       "description": "Pepinos frescos para consumo saludable.",
       "category": "Vegetales",
       "expirationDate": "2026-09-27",
       "quantity": 38,
       "price": 2.9,
-      "available": true
+      "available": true,
+      "supplierId": "sup-1"
     },
     {
-      "id": "prod-6",
+      "id": "VGT-00004",
       "name": "Zanahoria organica",
       "description": "Zanahorias seleccionadas de cultivo natural.",
       "category": "Vegetales",
       "expirationDate": "2026-10-02",
       "quantity": 54,
       "price": 3.4,
-      "available": true
+      "available": true,
+      "supplierId": "sup-1"
     },
     {
-      "id": "prod-7",
+      "id": "VGT-00005",
       "name": "Brocoli organico",
       "description": "Brocoli fresco rico en nutrientes.",
       "category": "Vegetales",
       "expirationDate": "2026-09-29",
       "quantity": 31,
       "price": 6.3,
-      "available": true
+      "available": true,
+      "supplierId": "sup-1"
     },
     {
-      "id": "prod-8",
+      "id": "VGT-00006",
       "name": "Pimientos organicos",
       "description": "Pimientos organicos variados.",
       "category": "Vegetales",
       "expirationDate": "2026-10-01",
       "quantity": 44,
       "price": 5.8,
-      "available": true
+      "available": true,
+      "supplierId": "sup-1"
     },
     {
-      "id": "prod-9",
+      "id": "LCT-00002",
       "name": "Queso organico",
       "description": "Queso fresco de produccion artesanal.",
       "category": "Lacteos",
       "expirationDate": "2026-09-30",
       "quantity": 20,
       "price": 14.5,
-      "available": true
+      "available": true,
+      "supplierId": "sup-2"
     },
     {
-      "id": "prod-10",
+      "id": "LCT-00003",
       "name": "Leche organica",
       "description": "Leche fresca de proveedor local.",
       "category": "Lacteos",
       "expirationDate": "2026-09-24",
       "quantity": 36,
       "price": 7.2,
-      "available": true
+      "available": true,
+      "supplierId": "sup-2"
     }
   ],
   "inventory": [
@@ -330,11 +419,11 @@
     {
       "id": "inv-2",
       "productName": "Yogurt organico",
-      "stock": 12,
+      "stock": 36,
       "minimumStock": 18,
       "lotCode": "LOT-014",
       "expirationDate": "2026-09-22",
-      "status": "risk"
+      "status": "healthy"
     },
     {
       "id": "inv-3",
@@ -393,7 +482,7 @@
     {
       "id": "inv-9",
       "productName": "Queso organico",
-      "stock": 20,
+      "stock": 32,
       "minimumStock": 14,
       "lotCode": "LOT-027",
       "expirationDate": "2026-09-30",
@@ -402,7 +491,7 @@
     {
       "id": "inv-10",
       "productName": "Leche organica",
-      "stock": 36,
+      "stock": 66,
       "minimumStock": 24,
       "lotCode": "LOT-028",
       "expirationDate": "2026-09-24",
@@ -424,7 +513,20 @@
       "createdAt": "2026-09-18",
       "reviewedAt": null,
       "rejectionReason": "",
-      "items": [{ "productName": "Yogurt organico", "quantity": 24 }]
+      "items": [
+        {
+          "productName": "Yogurt organico",
+          "quantity": 24
+        },
+        {
+          "productName": "Leche organica",
+          "quantity": 30
+        },
+        {
+          "productName": "Queso organico",
+          "quantity": 12
+        }
+      ]
     },
     {
       "id": "req-2",
@@ -442,8 +544,18 @@
       "rejectionReason": "",
       "shippingOrderId": "ship-1001",
       "items": [
-        { "productName": "Leche organica", "quantity": 30 },
-        { "productName": "Queso organico", "quantity": 12 }
+        {
+          "productName": "Leche organica",
+          "quantity": 30
+        },
+        {
+          "productName": "Queso organico",
+          "quantity": 12
+        },
+        {
+          "productName": "Yogurt organico",
+          "quantity": 24
+        }
       ]
     },
     {
@@ -461,8 +573,18 @@
       "reviewedAt": null,
       "rejectionReason": "",
       "items": [
-        { "productName": "Tomate organico", "quantity": 45 },
-        { "productName": "Pepino organico", "quantity": 20 }
+        {
+          "productName": "Tomate organico",
+          "quantity": 45
+        },
+        {
+          "productName": "Pepino organico",
+          "quantity": 20
+        },
+        {
+          "productName": "Lechugas organicas",
+          "quantity": 15
+        }
       ]
     },
     {
@@ -479,7 +601,20 @@
       "createdAt": "2026-09-16",
       "reviewedAt": "2026-09-16 16:20",
       "rejectionReason": "Produccion diaria agotada",
-      "items": [{ "productName": "Queso organico", "quantity": 15 }]
+      "items": [
+        {
+          "productName": "Queso organico",
+          "quantity": 15
+        },
+        {
+          "productName": "Leche organica",
+          "quantity": 10
+        },
+        {
+          "productName": "Yogurt organico",
+          "quantity": 8
+        }
+      ]
     },
     {
       "id": "req-5",
@@ -497,8 +632,18 @@
       "rejectionReason": "",
       "shippingOrderId": "ship-1003",
       "items": [
-        { "productName": "Brocoli organico", "quantity": 18 },
-        { "productName": "Pimientos organicos", "quantity": 24 }
+        {
+          "productName": "Brocoli organico",
+          "quantity": 18
+        },
+        {
+          "productName": "Pimientos organicos",
+          "quantity": 24
+        },
+        {
+          "productName": "Yogurt organico",
+          "quantity": 12
+        }
       ]
     }
   ],
@@ -510,15 +655,34 @@
       "minimarketId": "min-1",
       "supplier": "Anita Gamboa",
       "minimarket": "Minimarket Verde Sur",
-      "status": "pending-reception",
-      "total": 315.8,
+      "status": "received",
+      "total": 603.6,
       "createdAt": "2026-09-18",
       "shippingDate": "2026-09-19",
       "observations": "Despacho refrigerado para lacteos.",
       "items": [
-        { "productName": "Leche organica", "quantity": 30, "unitPrice": 7.2 },
-        { "productName": "Queso organico", "quantity": 12, "unitPrice": 14.5 }
-      ]
+        {
+          "productName": "Leche organica",
+          "quantity": 30,
+          "unitPrice": 7.2
+        },
+        {
+          "productName": "Queso organico",
+          "quantity": 12,
+          "unitPrice": 14.5
+        },
+        {
+          "productName": "Yogurt organico",
+          "quantity": 24,
+          "unitPrice": 8.9
+        }
+      ],
+      "receivedAt": "2026-10-03T04:17:13.104Z",
+      "reception": {
+        "administratorId": "usr-admin",
+        "accepted": true,
+        "reviewedAt": "2026-10-03T04:17:13.104Z"
+      }
     },
     {
       "id": "ship-1002",
@@ -527,15 +691,35 @@
       "minimarketId": "min-1",
       "supplier": "BioAndes Organic",
       "minimarket": "Minimarket Verde Sur",
-      "status": "pending-reception",
-      "total": 228.4,
+      "status": "rejected",
+      "total": 296.5,
       "createdAt": "2026-09-17",
       "shippingDate": "2026-09-19",
       "observations": "Entrega parcial de vegetales frescos.",
       "items": [
-        { "productName": "Tomate organico", "quantity": 45, "unitPrice": 3.8 },
-        { "productName": "Pepino organico", "quantity": 20, "unitPrice": 2.9 }
-      ]
+        {
+          "productName": "Tomate organico",
+          "quantity": 45,
+          "unitPrice": 3.8
+        },
+        {
+          "productName": "Pepino organico",
+          "quantity": 20,
+          "unitPrice": 2.9
+        },
+        {
+          "productName": "Lechugas organicas",
+          "quantity": 15,
+          "unitPrice": 4.5
+        }
+      ],
+      "rejectionReason": "Recepcion rechazada por diferencias en la entrega.",
+      "reception": {
+        "administratorId": "usr-admin",
+        "accepted": false,
+        "comment": "Recepcion rechazada por diferencias en la entrega.",
+        "reviewedAt": "2026-10-03T04:32:10.303Z"
+      }
     },
     {
       "id": "ship-1003",
@@ -545,14 +729,27 @@
       "supplier": "Anita Gamboa",
       "minimarket": "Minimarket Verde Sur",
       "status": "received",
-      "total": 252.6,
+      "total": 359.4,
       "createdAt": "2026-09-15",
       "shippingDate": "2026-09-16",
       "receivedAt": "2026-09-16 15:40",
       "observations": "Recepcion aceptada sin observaciones.",
       "items": [
-        { "productName": "Brocoli organico", "quantity": 18, "unitPrice": 6.3 },
-        { "productName": "Pimientos organicos", "quantity": 24, "unitPrice": 5.8 }
+        {
+          "productName": "Brocoli organico",
+          "quantity": 18,
+          "unitPrice": 6.3
+        },
+        {
+          "productName": "Pimientos organicos",
+          "quantity": 24,
+          "unitPrice": 5.8
+        },
+        {
+          "productName": "Yogurt organico",
+          "quantity": 12,
+          "unitPrice": 8.9
+        }
       ]
     },
     {
@@ -563,12 +760,126 @@
       "supplier": "Anita Gamboa",
       "minimarket": "Minimarket Verde Sur",
       "status": "rejected",
-      "total": 217.5,
+      "total": 360.7,
       "createdAt": "2026-09-16",
       "shippingDate": "2026-09-17",
       "rejectionReason": "Solicitud rechazada por disponibilidad.",
       "items": [
-        { "productName": "Queso organico", "quantity": 15, "unitPrice": 14.5 }
+        {
+          "productName": "Queso organico",
+          "quantity": 15,
+          "unitPrice": 14.5
+        },
+        {
+          "productName": "Leche organica",
+          "quantity": 10,
+          "unitPrice": 7.2
+        },
+        {
+          "productName": "Yogurt organico",
+          "quantity": 8,
+          "unitPrice": 8.9
+        }
+      ]
+    }
+  ],
+  "waste": [
+    {
+      "id": "waste-1001",
+      "ownerId": "min-1",
+      "productName": "Yogurt organico",
+      "lotCode": "LOT-014",
+      "quantity": 4,
+      "unit": "units",
+      "reason": "expiration",
+      "recordedAt": "2026-09-18T09:15:00"
+    },
+    {
+      "id": "waste-1002",
+      "ownerId": "min-1",
+      "productName": "Lechugas organicas",
+      "lotCode": "LOT-001",
+      "quantity": 3,
+      "unit": "units",
+      "reason": "conservation",
+      "recordedAt": "2026-09-17T15:00:00"
+    },
+    {
+      "id": "waste-1003",
+      "ownerId": "sup-2",
+      "productName": "Queso organico",
+      "lotCode": "PROV-003",
+      "quantity": 2,
+      "unit": "units",
+      "reason": "handling",
+      "recordedAt": "2026-09-18T08:40:00"
+    }
+  ],
+  "retailSales": [
+    {
+      "id": "sale-1001",
+      "minimarketId": "min-1",
+      "customer": "Cliente mostrador",
+      "occurredAt": "2026-09-18T10:20:00",
+      "discount": 2,
+      "type": "retail",
+      "items": [
+        {
+          "productId": "VGT-00001",
+          "productName": "Tomate organico",
+          "quantity": 5,
+          "unitPrice": 3.8
+        },
+        {
+          "productId": "VGT-00002",
+          "productName": "Lechugas organicas",
+          "quantity": 3,
+          "unitPrice": 4.5
+        }
+      ]
+    },
+    {
+      "id": "sale-1002",
+      "minimarketId": "min-1",
+      "customer": "Cliente mostrador",
+      "occurredAt": "2026-09-18T11:35:00",
+      "discount": 0,
+      "type": "retail",
+      "items": [
+        {
+          "productId": "FRT-00001",
+          "productName": "Manzanas organicas",
+          "quantity": 4,
+          "unitPrice": 5.2
+        },
+        {
+          "productId": "LCT-00001",
+          "productName": "Yogurt organico",
+          "quantity": 2,
+          "unitPrice": 8.9
+        }
+      ]
+    },
+    {
+      "id": "sale-1003",
+      "minimarketId": "min-1",
+      "customer": "Cliente mostrador",
+      "occurredAt": "2026-09-17T16:15:00",
+      "discount": 3,
+      "type": "retail",
+      "items": [
+        {
+          "productId": "VGT-00005",
+          "productName": "Brocoli organico",
+          "quantity": 2,
+          "unitPrice": 6.3
+        },
+        {
+          "productId": "VGT-00006",
+          "productName": "Pimientos organicos",
+          "quantity": 3,
+          "unitPrice": 5.8
+        }
       ]
     }
   ],
@@ -660,6 +971,216 @@
       "sentAt": "2026-09-18 09:10"
     }
   ],
+  "supplierDashboard": {
+    "healthScore": 91,
+    "indicators": [
+      {
+        "title": "Inventario propio",
+        "type": "inventory",
+        "value": 230,
+        "variation": 7
+      },
+      {
+        "title": "Solicitudes recibidas",
+        "type": "requisition",
+        "value": 4,
+        "variation": 33
+      },
+      {
+        "title": "Ordenes de envio",
+        "type": "procurements",
+        "value": 3,
+        "variation": 50
+      },
+      {
+        "title": "Alertas activas",
+        "type": "alerts",
+        "value": 2,
+        "variation": 0
+      }
+    ],
+    "activity": [
+      {
+        "title": "Solicitud recibida",
+        "detail": "Minimarket Verde Sur solicito Yogurt organico.",
+        "time": "09:20",
+        "kind": "info"
+      },
+      {
+        "title": "Orden en seguimiento",
+        "detail": "Envio de lacteos pendiente de recepcion.",
+        "time": "10:45",
+        "kind": "success"
+      }
+    ]
+  },
+  "supplierInventory": [
+    {
+      "id": "sinv-1",
+      "productName": "Yogurt organico",
+      "stock": 84,
+      "minimumStock": 30,
+      "lotCode": "PROV-001",
+      "expirationDate": "2026-10-15",
+      "status": "healthy"
+    },
+    {
+      "id": "sinv-2",
+      "productName": "Leche organica",
+      "stock": 120,
+      "minimumStock": 40,
+      "lotCode": "PROV-002",
+      "expirationDate": "2026-10-10",
+      "status": "healthy"
+    },
+    {
+      "id": "sinv-3",
+      "productName": "Queso organico",
+      "stock": 26,
+      "minimumStock": 30,
+      "lotCode": "PROV-003",
+      "expirationDate": "2026-10-20",
+      "status": "risk"
+    }
+  ],
+  "supplierConservationMonitoring": [
+    {
+      "id": "scon-1",
+      "zone": "Camara lacteos",
+      "productName": "Yogurt organico",
+      "temperature": 4,
+      "humidity": 58,
+      "recordedAt": "2026-09-18 09:30",
+      "status": "healthy"
+    },
+    {
+      "id": "scon-2",
+      "zone": "Almacen proveedor",
+      "productName": "Queso organico",
+      "temperature": 8,
+      "humidity": 68,
+      "recordedAt": "2026-09-18 09:40",
+      "status": "risk"
+    }
+  ],
+  "supplierAlerts": [
+    {
+      "id": "salert-1",
+      "title": "Nueva solicitud",
+      "message": "Minimarket Verde Sur solicita Yogurt organico.",
+      "sender": "Minimarket Verde Sur",
+      "receiver": "Anita Gamboa",
+      "read": false,
+      "createdAt": "2026-09-18 09:20"
+    },
+    {
+      "id": "salert-2",
+      "title": "Conservacion en riesgo",
+      "message": "Revisar humedad del almacen de queso.",
+      "sender": "Sistema MarketGo",
+      "receiver": "Anita Gamboa",
+      "read": false,
+      "createdAt": "2026-09-18 09:40"
+    }
+  ],
+  "supplierAnalytics": {
+    "indicators": [
+      {
+        "label": "Inventario propio",
+        "currentValue": 230,
+        "previousValue": 214,
+        "unit": "items"
+      },
+      {
+        "label": "Solicitudes recibidas",
+        "currentValue": 4,
+        "previousValue": 3,
+        "unit": "sol"
+      },
+      {
+        "label": "Ordenes de envio",
+        "currentValue": 3,
+        "previousValue": 2,
+        "unit": "ord"
+      },
+      {
+        "label": "Score conservacion",
+        "currentValue": 91,
+        "previousValue": 88,
+        "unit": "%"
+      }
+    ],
+    "reportSummaries": {
+      "Inventario": {
+        "title": "Inventario propio",
+        "description": "Productos y lotes disponibles para abastecimiento.",
+        "metrics": [
+          {
+            "label": "Productos",
+            "value": "3"
+          },
+          {
+            "label": "Unidades",
+            "value": "230"
+          }
+        ],
+        "highlights": [
+          "Queso organico requiere reposicion."
+        ]
+      },
+      "Abastecimiento": {
+        "title": "Abastecimiento",
+        "description": "Solicitudes y ordenes del proveedor.",
+        "metrics": [
+          {
+            "label": "Solicitudes",
+            "value": "4"
+          },
+          {
+            "label": "Ordenes",
+            "value": "3"
+          }
+        ],
+        "highlights": [
+          "Una solicitud nueva requiere revision."
+        ]
+      },
+      "Conservacion": {
+        "title": "Conservacion",
+        "description": "Condiciones de almacenamiento del proveedor.",
+        "metrics": [
+          {
+            "label": "Zonas",
+            "value": "2"
+          },
+          {
+            "label": "En riesgo",
+            "value": "1"
+          }
+        ],
+        "highlights": [
+          "Revisar la humedad del almacen de queso."
+        ]
+      },
+      "Clientes": {
+        "title": "Clientes",
+        "description": "Minimarkets atendidos por el proveedor.",
+        "metrics": [
+          {
+            "label": "Minimarkets",
+            "value": "1"
+          },
+          {
+            "label": "Zona",
+            "value": "Surco"
+          }
+        ],
+        "highlights": [
+          "Minimarket Verde Sur tiene ordenes en seguimiento."
+        ]
+      }
+    }
+  },
   "activityHistory": [
     {
       "id": "act-1",

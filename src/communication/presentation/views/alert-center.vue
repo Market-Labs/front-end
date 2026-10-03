@@ -7,7 +7,7 @@
         <p>{{ $t('page.alerts.description') }}</p>
       </div>
       <div class="header-actions">
-        <pv-button :label="$t('page.alerts.viewSuppliers')" icon="pi pi-truck" severity="secondary" @click="router.push('/suppliers')" />
+        <pv-button :label="iamStore.isSupplier ? $t('option.clients') : $t('page.alerts.viewSuppliers')" icon="pi pi-users" severity="secondary" @click="router.push(iamStore.isSupplier ? '/clients' : '/suppliers')" />
         <pv-button :label="$t('page.alerts.unread', { count: communicationStore.unreadCount })" icon="pi pi-bell" />
       </div>
     </div>
@@ -33,13 +33,15 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCommunicationStore } from '../../application/communication.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 
 const communicationStore = useCommunicationStore();
+const iamStore = useIamStore();
 const filteredMessages = useSearchFilter(() => communicationStore.messages);
 const router = useRouter();
 
 onMounted(() => {
-  communicationStore.fetchMessages();
+  communicationStore.fetchMessages(iamStore.isSupplier);
 });
 </script>
 

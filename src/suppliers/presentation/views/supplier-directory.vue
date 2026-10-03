@@ -6,7 +6,7 @@
         <h2>{{ $t('page.suppliers.title') }}</h2>
         <p>{{ $t('page.suppliers.description') }}</p>
       </div>
-      <pv-button :label="$t('page.suppliers.newSupplier')" icon="pi pi-plus" @click="showSupplierForm = true" />
+      <pv-button :label="$t('page.suppliers.newSupplier')" icon="pi pi-plus" @click="openSupplierForm" />
     </div>
 
     <pv-dialog v-model:visible="showSupplierForm" modal :header="$t('page.suppliers.newSupplier')" :style="{ width: '540px' }">
@@ -36,17 +36,18 @@
         <div class="form-row">
           <label>
             {{ $t('page.suppliers.specialty') }}
-            <pv-input-text v-model="supplierForm.specialty" placeholder="Lacteos y derivados" />
+            <pv-input-text v-model="supplierForm.specialty" placeholder="Lácteos y derivados" />
           </label>
           <label>
             {{ $t('page.suppliers.coverage') }}
             <pv-input-text v-model="supplierForm.coverageArea" placeholder="Cerro Colorado - Arequipa" />
           </label>
         </div>
+        <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
       </form>
       <template #footer>
         <pv-button :label="$t('common.cancel')" text @click="showSupplierForm = false" />
-        <pv-button :label="$t('common.save')" icon="pi pi-save" @click="noopSubmit" />
+        <pv-button :label="$t('common.save')" icon="pi pi-save" :loading="saving" @click="saveSupplier" />
       </template>
     </pv-dialog>
 
@@ -68,10 +69,14 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useSuppliersStore } from '../../application/suppliers.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
+import { useI18n } from 'vue-i18n';
 
 const suppliersStore = useSuppliersStore();
+const { t } = useI18n();
 const filteredSuppliers = useSearchFilter(() => suppliersStore.suppliers);
 const showSupplierForm = ref(false);
+const saving = ref(false);
+const formError = ref('');
 const supplierForm = reactive({
   businessName: '',
   ruc: '',
@@ -82,7 +87,28 @@ const supplierForm = reactive({
   coverageArea: '',
 });
 
-const noopSubmit = () => {};
+const openSupplierForm = () => {
+  Object.keys(supplierForm).forEach((key) => { supplierForm[key] = ''; });
+  formError.value = '';
+  showSupplierForm.value = true;
+};
+const saveSupplier = async () => {
+  const data = Object.fromEntries(Object.entries(supplierForm).map(([key, value]) => [key, value.trim()]));
+  if (Object.values(data).some((value) => !value) || !/^\S+@\S+\.\S+$/.test(data.email) || !/^\d{11}$/.test(data.ruc)) {
+    formError.value = t('common.invalidForm');
+    return;
+  }
+  saving.value = true;
+  formError.value = '';
+  try {
+    await suppliersStore.createSupplier(data);
+    showSupplierForm.value = false;
+  } catch {
+    formError.value = t('common.errorSaving');
+  } finally {
+    saving.value = false;
+  }
+};
 
 onMounted(() => {
   suppliersStore.fetchSuppliers();
@@ -157,6 +183,7 @@ footer strong {
   display: grid;
   gap: 14px;
 }
+.form-error { color: #bc2d2d; font-weight: 700; margin: 0; }
 
 .entity-form label {
   color: #023192;

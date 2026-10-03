@@ -5,11 +5,11 @@ import { Requisition } from '../domain/model/requisition.entity.js';
 const requisitionApi = new RequisitionApi();
 
 const demoRequisitions = [
-  new Requisition({ id: 'req-1', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Yogurt organico', quantity: 24, reason: 'Reposicion por venta rapida', status: 'pending', createdAt: '2026-09-18', items: [{ productName: 'Yogurt organico', quantity: 24 }] }),
-  new Requisition({ id: 'req-2', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Leche organica', quantity: 30, reason: 'Demanda semanal de lacteos', status: 'accepted', createdAt: '2026-09-18', reviewedAt: '2026-09-18 11:00', shippingOrderId: 'ship-1001', items: [{ productName: 'Leche organica', quantity: 30 }, { productName: 'Queso organico', quantity: 12 }] }),
-  new Requisition({ id: 'req-3', minimarketId: 'min-1', supplierId: 'sup-1', requester: 'Albino Caceres', supplier: 'BioAndes Organic', productName: 'Tomate organico', quantity: 45, reason: 'Reposicion para anaquel principal', status: 'pending', createdAt: '2026-09-17', items: [{ productName: 'Tomate organico', quantity: 45 }, { productName: 'Pepino organico', quantity: 20 }] }),
-  new Requisition({ id: 'req-4', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Queso organico', quantity: 15, reason: 'Stock minimo alcanzado', status: 'rejected', createdAt: '2026-09-16', reviewedAt: '2026-09-16 16:20', rejectionReason: 'Produccion diaria agotada', items: [{ productName: 'Queso organico', quantity: 15 }] }),
-  new Requisition({ id: 'req-5', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Brocoli organico', quantity: 18, reason: 'Campana de productos frescos', status: 'accepted', createdAt: '2026-09-15', reviewedAt: '2026-09-15 12:15', shippingOrderId: 'ship-1003', items: [{ productName: 'Brocoli organico', quantity: 18 }, { productName: 'Pimientos organicos', quantity: 24 }] }),
+  new Requisition({ id: 'req-1', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Yogurt organico', quantity: 24, reason: 'Reposicion por venta rapida', status: 'pending', createdAt: '2026-09-18', items: [{ productName: 'Yogurt organico', quantity: 24 }, { productName: 'Leche organica', quantity: 30 }, { productName: 'Queso organico', quantity: 12 }] }),
+  new Requisition({ id: 'req-2', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Leche organica', quantity: 30, reason: 'Demanda semanal de lacteos', status: 'accepted', createdAt: '2026-09-18', reviewedAt: '2026-09-18 11:00', shippingOrderId: 'ship-1001', items: [{ productName: 'Leche organica', quantity: 30 }, { productName: 'Queso organico', quantity: 12 }, { productName: 'Yogurt organico', quantity: 24 }] }),
+  new Requisition({ id: 'req-3', minimarketId: 'min-1', supplierId: 'sup-1', requester: 'Albino Caceres', supplier: 'BioAndes Organic', productName: 'Tomate organico', quantity: 45, reason: 'Reposicion para anaquel principal', status: 'pending', createdAt: '2026-09-17', items: [{ productName: 'Tomate organico', quantity: 45 }, { productName: 'Pepino organico', quantity: 20 }, { productName: 'Lechugas organicas', quantity: 15 }] }),
+  new Requisition({ id: 'req-4', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Queso organico', quantity: 15, reason: 'Stock minimo alcanzado', status: 'rejected', createdAt: '2026-09-16', reviewedAt: '2026-09-16 16:20', rejectionReason: 'Produccion diaria agotada', items: [{ productName: 'Queso organico', quantity: 15 }, { productName: 'Leche organica', quantity: 10 }, { productName: 'Yogurt organico', quantity: 8 }] }),
+  new Requisition({ id: 'req-5', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Brocoli organico', quantity: 18, reason: 'Campana de productos frescos', status: 'accepted', createdAt: '2026-09-15', reviewedAt: '2026-09-15 12:15', shippingOrderId: 'ship-1003', items: [{ productName: 'Brocoli organico', quantity: 18 }, { productName: 'Pimientos organicos', quantity: 24 }, { productName: 'Yogurt organico', quantity: 12 }] }),
 ];
 
 export const useRequisitionStore = defineStore('requisition', {
@@ -19,6 +19,11 @@ export const useRequisitionStore = defineStore('requisition', {
     error: null,
   }),
   actions: {
+    async createRequest(data) {
+      const request = await requisitionApi.createRequisition({ ...data, id: `req-${crypto.randomUUID()}`, status: 'pending', createdAt: new Date().toISOString().slice(0, 10) });
+      this.requisitions.unshift(request);
+      return request;
+    },
     async fetchRequisitions() {
       this.loading = true;
       try {
@@ -37,47 +42,32 @@ export const useRequisitionStore = defineStore('requisition', {
       }
       return this.requisitions.filter((request) => request.minimarketId === 'min-1');
     },
-    acceptRequest(requestId, supplierId = 'sup-2') {
-      this.requisitions = this.requisitions.map((request) => (
-        request.id === requestId
-          ? new Requisition({
-            ...request,
-            status: 'accepted',
-            reviewedAt: new Date().toISOString(),
-            response: {
-              id: `res-${request.id}`,
-              supplierId,
-              accepted: true,
-              comment: 'Solicitud aceptada por el proveedor.',
-              respondedAt: new Date().toISOString(),
-            },
-          })
-          : request
-      ));
+    async acceptRequest(requestId, supplierId = 'sup-2') {
+      const request = this.requisitions.find((entry) => entry.id === requestId);
+      if (!request || request.status !== 'pending' || request.supplierId !== supplierId) throw new Error('invalid-request-status');
+      const reviewedAt = new Date().toISOString();
+      const updated = await requisitionApi.updateRequisition(requestId, {
+        status: 'accepted', reviewedAt,
+        response: { id: `res-${requestId}`, supplierId, accepted: true, comment: 'Solicitud aceptada por el proveedor.', respondedAt: reviewedAt },
+      });
+      this.requisitions = this.requisitions.map((entry) => entry.id === requestId ? updated : entry);
+      return updated;
     },
-    rejectRequest(requestId, reason = 'Solicitud rechazada por disponibilidad.') {
-      this.requisitions = this.requisitions.map((request) => (
-        request.id === requestId
-          ? new Requisition({
-            ...request,
-            status: 'rejected',
-            reviewedAt: new Date().toISOString(),
-            rejectionReason: reason,
-            response: {
-              id: `res-${request.id}`,
-              supplierId: request.supplierId,
-              accepted: false,
-              comment: reason,
-              respondedAt: new Date().toISOString(),
-            },
-          })
-          : request
-      ));
+    async rejectRequest(requestId, reason = 'Solicitud rechazada por disponibilidad.') {
+      const request = this.requisitions.find((entry) => entry.id === requestId);
+      if (!request || request.status !== 'pending') throw new Error('invalid-request-status');
+      const reviewedAt = new Date().toISOString();
+      const updated = await requisitionApi.updateRequisition(requestId, {
+        status: 'rejected', reviewedAt, rejectionReason: reason,
+        response: { id: `res-${requestId}`, supplierId: request.supplierId, accepted: false, comment: reason, respondedAt: reviewedAt },
+      });
+      this.requisitions = this.requisitions.map((entry) => entry.id === requestId ? updated : entry);
+      return updated;
     },
-    linkShippingOrder(requestId, orderId) {
-      this.requisitions = this.requisitions.map((request) => (
-        request.id === requestId ? new Requisition({ ...request, shippingOrderId: orderId }) : request
-      ));
+    async linkShippingOrder(requestId, orderId) {
+      const updated = await requisitionApi.updateRequisition(requestId, { shippingOrderId: orderId });
+      this.requisitions = this.requisitions.map((entry) => entry.id === requestId ? updated : entry);
+      return updated;
     },
   },
 });
