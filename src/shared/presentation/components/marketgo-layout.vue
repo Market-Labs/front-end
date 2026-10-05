@@ -71,6 +71,7 @@ import { useI18n } from 'vue-i18n';
 import LanguageSwitcher from './language-switcher.vue';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { isDemoMode } from '../../infrastructure/demo-mode.js';
+import { isFirebaseMode } from '../../infrastructure/firebase-client.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -107,9 +108,9 @@ const visibleMenuItems = computed(() => (
   menuItems.filter((item) => item.roles.includes(activeRoleKey.value))
 ));
 
-const logout = () => {
-  iamStore.logout();
-  router.replace('/login');
+const logout = async () => {
+  await iamStore.logout();
+  await router.replace('/login');
 };
 
 const alwaysAllowedPaths = ['/dashboard', '/access-denied'];
@@ -134,6 +135,7 @@ const pageTitle = computed(() => {
 });
 
 watch([() => route.path, visibleMenuItems], () => {
+  if ((isFirebaseMode && !iamStore.sessionReady) || route.matched.length === 0) return;
   const hasVisibleRoute = visibleMenuItems.value.some((item) => route.path === item.to);
   if (!hasVisibleRoute && !alwaysAllowedPaths.includes(route.path)) {
     router.push('/access-denied');

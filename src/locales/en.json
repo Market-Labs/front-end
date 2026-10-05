@@ -74,6 +74,7 @@
     "recoveryDescription": "Enter your email to recover access.",
     "requestReset": "Request recovery",
     "recoveryDemo": "Email recovery is not available in this demo version yet.",
+    "recoverySent": "If the account exists, you will receive a password reset email.",
     "backToLogin": "Back to sign in"
   },
   "status": {
@@ -223,8 +224,12 @@
     "iam": {
       "eyebrow": "Users",
       "title": "Users, roles and permissions",
-      "description": "View users and update their roles and status.",
-      "newUser": "Edit user",
+      "description": "View and manage your minimarket users.",
+      "supplierDescription": "View and manage your organization's users.",
+      "newUser": "New user",
+      "editUser": "Edit user",
+      "emailInUse": "An account already uses this email.",
+      "cleanupRequired": "The profile could not be saved and the account could not be removed. Check Firebase Authentication.",
       "user": "User",
       "selectUser": "Select a user",
       "email": "Email",

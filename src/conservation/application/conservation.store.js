@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ConservationApi } from '../infrastructure/conservation-api.js';
 import { ConservationRecord } from '../domain/model/conservation-record.entity.js';
+import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 
 const conservationApi = new ConservationApi();
 
@@ -12,7 +13,7 @@ const demoRecords = [
 
 export const useConservationStore = defineStore('conservation', {
   state: () => ({
-    records: demoRecords,
+    records: isFirebaseMode ? [] : demoRecords,
     loading: false,
     error: null,
   }),
@@ -25,8 +26,8 @@ export const useConservationStore = defineStore('conservation', {
       try {
         this.records = await conservationApi.getMonitoring(isSupplier);
       } catch (error) {
-        this.error = 'No se pudo cargar monitoreo. Se muestran datos demo.';
-        this.records = isSupplier ? [] : demoRecords;
+        this.error = isFirebaseMode ? 'No se pudo cargar monitoreo desde Firestore.' : 'No se pudo cargar monitoreo. Se muestran datos demo.';
+        this.records = isSupplier || isFirebaseMode ? [] : demoRecords;
       } finally {
         this.loading = false;
       }

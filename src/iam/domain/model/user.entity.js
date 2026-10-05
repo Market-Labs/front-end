@@ -6,6 +6,9 @@ export class User {
     status = 'active',
     roles = [],
     permissions = [],
+    supplierId = null,
+    minimarketId = null,
+    createdBy = null,
   }) {
     this.id = id;
     this.name = name;
@@ -13,6 +16,9 @@ export class User {
     this.status = status;
     this.roles = roles;
     this.permissions = permissions;
+    this.supplierId = supplierId;
+    this.minimarketId = minimarketId;
+    this.createdBy = createdBy;
   }
 
   get initials() {

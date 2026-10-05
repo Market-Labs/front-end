@@ -1,0 +1,164 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function hasAccount() {
+      return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function account() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function active() {
+      return hasAccount() && account().status == 'active';
+    }
+
+    function admin() {
+      return active() && account().role == 'admin';
+    }
+
+    function supplier() {
+      return active() && account().role == 'supplier';
+    }
+
+    function myMinimarket(data) {
+      return admin() && data.minimarketId == account().minimarketId;
+    }
+
+    function mySupplier(data) {
+      return supplier() && data.supplierId == account().supplierId;
+    }
+
+    function managesUsers() {
+      return active() && account().permissions.hasAny(['users:manage']);
+    }
+
+    function sameOrganization(data) {
+      return myMinimarket(data) || mySupplier(data);
+    }
+
+    match /users/{uid} {
+      allow get: if active() && (request.auth.uid == uid || sameOrganization(resource.data));
+      allow list: if active() && sameOrganization(resource.data);
+      allow create: if managesUsers() && sameOrganization(request.resource.data)
+        && request.resource.data.id == uid
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.role == account().role
+        && request.resource.data.roles == account().roles
+        && request.resource.data.permissions == account().permissions
+        && request.resource.data.status == 'active'
+        && request.resource.data.keys().hasOnly([
+          'id', 'name', 'email', 'role', 'roles', 'permissions', 'status',
+          'minimarketId', 'supplierId', 'createdBy'
+        ]);
+      allow update: if managesUsers() && sameOrganization(resource.data)
+        && resource.data.keys().hasAny(['createdBy'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['active', 'inactive'];
+      allow delete: if false;
+    }
+
+    match /profiles/{id} {
+      allow read: if active();
+      allow update: if active() && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId;
+      allow create, delete: if false;
+    }
+
+    match /products/{id} {
+      allow read: if active();
+      allow create: if admin() || mySupplier(request.resource.data);
+      allow update: if admin() || (mySupplier(resource.data)
+        && request.resource.data.supplierId == resource.data.supplierId);
+      allow delete: if admin() || mySupplier(resource.data);
+    }
+
+    match /suppliers/{id} {
+      allow read: if active();
+      allow create, update, delete: if admin();
+    }
+
+    match /inventory/{id} {
+      allow read: if myMinimarket(resource.data);
+      allow create: if myMinimarket(request.resource.data);
+      allow update: if myMinimarket(resource.data)
+        && request.resource.data.minimarketId == resource.data.minimarketId;
+      allow delete: if myMinimarket(resource.data);
+    }
+
+    match /supplierInventory/{id} {
+      allow read: if mySupplier(resource.data);
+      allow create: if mySupplier(request.resource.data);
+      allow update: if mySupplier(resource.data)
+        && request.resource.data.supplierId == resource.data.supplierId;
+      allow delete: if mySupplier(resource.data);
+    }
+
+    match /requisitions/{id} {
+      allow read: if myMinimarket(resource.data) || mySupplier(resource.data);
+      allow create: if myMinimarket(request.resource.data);
+      allow update: if mySupplier(resource.data)
+        && request.resource.data.supplierId == resource.data.supplierId
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'reviewedAt', 'rejectionReason', 'response', 'shippingOrderId'])
+        && (request.resource.data.status == resource.data.status
+          || (resource.data.status == 'pending' && request.resource.data.status in ['accepted', 'rejected']));
+      allow delete: if false;
+    }
+
+    match /purchaseOrders/{id} {
+      allow read: if myMinimarket(resource.data) || mySupplier(resource.data);
+      allow create: if mySupplier(request.resource.data)
+        && request.resource.data.status == 'pending-reception';
+      allow update: if myMinimarket(resource.data)
+        && resource.data.status == 'pending-reception'
+        && request.resource.data.status in ['received', 'rejected']
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'receivedAt', 'rejectionReason', 'reception']);
+      allow delete: if false;
+    }
+
+    match /waste/{id} {
+      allow read: if active() && (resource.data.ownerId == account().minimarketId && admin()
+        || resource.data.ownerId == account().supplierId && supplier());
+      allow create: if active() && (request.resource.data.ownerId == account().minimarketId && admin()
+        || request.resource.data.ownerId == account().supplierId && supplier());
+      allow update, delete: if false;
+    }
+
+    match /retailSales/{id} {
+      allow read: if myMinimarket(resource.data);
+      allow create: if myMinimarket(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    match /conservationMonitoring/{id} {
+      allow read: if myMinimarket(resource.data);
+    }
+    match /conservationAlerts/{id} {
+      allow read: if myMinimarket(resource.data);
+    }
+    match /notifications/{id} {
+      allow read: if myMinimarket(resource.data);
+    }
+    match /activityHistory/{id} {
+      allow read: if myMinimarket(resource.data);
+    }
+    match /supplierConservationMonitoring/{id} {
+      allow read: if mySupplier(resource.data);
+    }
+    match /supplierAlerts/{id} {
+      allow read: if mySupplier(resource.data);
+    }
+
+    match /summaries/{id} {
+      allow get: if admin() && id in ['dashboard', 'analytics']
+        || supplier() && id in ['supplierDashboard', 'supplierAnalytics'];
+      allow list, create, update, delete: if false;
+    }
+  }
+}

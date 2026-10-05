@@ -115,6 +115,7 @@ import { computed, reactive, ref, onMounted } from 'vue';
 import { useProcurementsStore } from '../../application/procurements.store.js';
 import { useInventoryStore } from '../../../inventory/application/inventory.store.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
+import { isFirebaseMode } from '../../../shared/infrastructure/firebase-client.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useProfilesStore } from '../../../profiles/application/profiles.store.js';
 import { useProductsStore } from '../../../products/application/products.store.js';
@@ -193,12 +194,16 @@ const acceptReception = async (order) => {
   actionError.value = '';
   let changes = [];
   try {
-    changes = await inventoryStore.receiveShipmentItems(order.items, productsStore.products, order.id);
-    try {
-      await procurementsStore.acceptReception(order.id);
-    } catch (error) {
-      await inventoryStore.restoreShipment(changes);
-      throw error;
+    if (isFirebaseMode) {
+      await procurementsStore.acceptReception(order.id, productsStore.products);
+    } else {
+      changes = await inventoryStore.receiveShipmentItems(order.items, productsStore.products, order.id);
+      try {
+        await procurementsStore.acceptReception(order.id);
+      } catch (error) {
+        await inventoryStore.restoreShipment(changes);
+        throw error;
+      }
     }
   } catch {
     actionError.value = t('page.procurements.receptionError');

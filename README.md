@@ -72,7 +72,19 @@ The application uses the same general dashboard and layout for both roles. Avail
 
 The frontend consumes MarketGo API routes through bounded-context adapters and shared endpoint configuration.
 
-The Azure Static Web Apps workflow builds with `VITE_DEMO_MODE=true`. This public demo opens as a sample minimarket administrator, reads sanitized sample data, and does not save changes. It is not authentication or a backend. Outside that workflow, the flag is unset: after `npm install`, run `npm run dev:mock` for the local frontend and writable fake API, including the test-account login. Do not set `VITE_DEMO_MODE` when testing the local API.
+The Azure Static Web Apps workflow builds with `VITE_DATA_SOURCE=firebase`, using Firebase Authentication and Firestore. For the writable local fake API, run `npm run dev:mock` with neither `VITE_DEMO_MODE` nor `VITE_DATA_SOURCE` set.
+
+## Firebase Pilot
+
+The Firebase adapter is opt-in with `VITE_DATA_SOURCE=firebase`. It uses Firebase Authentication for sign-in and Cloud Firestore for app data. The web config in `src/shared/infrastructure/firebase-client.js` is a public client identifier, not an administrator credential. Do not put service-account keys or account passwords in Vite variables or in the repository.
+
+1. In Firebase Console, enable **Authentication > Sign-in method > Email/Password**. Under **Authentication > Users > Add user**, create `administrador@marketgo.com` and `proveedor@marketgo.com` with private passwords. Never commit those passwords.
+2. Deploy `firestore.rules` to project `marketgo-d9c75` with the Firebase CLI: `npx firebase-tools login`, then `npx firebase-tools deploy --only firestore:rules --project marketgo-d9c75`. Review the rules before using real customer data.
+3. Authenticate the Firebase Admin SDK locally with Google Application Default Credentials (`gcloud auth application-default login`) using a project account authorized to write Firestore and read Firebase Auth users. Set `GOOGLE_CLOUD_PROJECT=marketgo-d9c75` in the shell, then run `npm run seed:firestore -- --apply`. A plain `npm run seed:firestore` is a no-write dry run; `--check` verifies the two Auth accounts without writing. The importer also accepts a temporary `MARKETGO_FIREBASE_ACCESS_TOKEN` from an authorized Firebase CLI session instead of ADC. Do not save this token in the repository or a Vite variable. It creates documents only when absent and never imports `authAccounts` or plaintext passwords from `server/db.json`.
+4. Start Vite with `VITE_DATA_SOURCE=firebase` and without `VITE_DEMO_MODE`. Sign in as both roles and verify product lists, requests, shipping orders, inventory, and reports. In PowerShell: `$env:VITE_DATA_SOURCE='firebase'; Remove-Item Env:VITE_DEMO_MODE -ErrorAction SilentlyContinue; npm run dev`.
+5. The Azure workflow already sets `VITE_DATA_SOURCE: 'firebase'`; a push to `main` deploys the Firebase-backed build through Azure Static Web Apps.
+
+In Firebase mode, users with `users:manage` can create accounts for their own minimarket or supplier. The app creates the Firebase Authentication account in a secondary client session, then its scoped Firestore profile; it removes the new Auth account if profile creation fails. Existing accounts can be deactivated, but the two original organization accounts are protected. This client-only provisioning is suitable for a course pilot; a production service should move account creation to a trusted backend.
 
 `VITE_API_BASE_URL` must point to the API host root:
 

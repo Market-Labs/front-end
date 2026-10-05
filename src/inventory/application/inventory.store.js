@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { InventoryApi } from '../infrastructure/inventory-api.js';
 import { InventoryItem } from '../domain/model/inventory-item.entity.js';
+import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
+import { registerWasteInFirestore } from '../infrastructure/firestore-waste.js';
 
 const inventoryApi = new InventoryApi();
 
@@ -19,7 +21,7 @@ const demoItems = [
 
 export const useInventoryStore = defineStore('inventory', {
   state: () => ({
-    items: demoItems,
+    items: isFirebaseMode ? [] : demoItems,
     waste: [],
     loading: false,
     error: null,
@@ -38,6 +40,12 @@ export const useInventoryStore = defineStore('inventory', {
     async registerWaste({ itemId, quantity, reason, ownerId, isSupplier }) {
       const item = this.items.find((entry) => entry.id === itemId);
       if (!item || !Number.isInteger(quantity) || quantity <= 0 || quantity > item.stock) throw new Error('invalid-waste');
+      if (isFirebaseMode) {
+        const { record, updated } = await registerWasteInFirestore({ item, quantity, reason, ownerId, isSupplier });
+        Object.assign(item, updated);
+        this.waste.unshift(record);
+        return record;
+      }
       const before = item.stock;
       const stock = before - quantity;
       const updated = await inventoryApi.updateItem(item.id, { stock, status: stock <= item.minimumStock ? 'risk' : 'healthy' }, isSupplier);
@@ -62,13 +70,13 @@ export const useInventoryStore = defineStore('inventory', {
       try {
         this.items = await inventoryApi.getInventory(isSupplier);
       } catch (error) {
-        this.error = 'No se pudo cargar inventario. Se muestran datos demo.';
-        this.items = isSupplier ? [] : demoItems;
+        this.error = isFirebaseMode ? 'No se pudo cargar inventario desde Firestore.' : 'No se pudo cargar inventario. Se muestran datos demo.';
+        this.items = isSupplier || isFirebaseMode ? [] : demoItems;
       } finally {
         this.loading = false;
       }
     },
-    async allocateSale(lines) {
+    planSale(lines) {
       const planned = new Map();
       for (const line of lines) {
         let remaining = Number(line.quantity);
@@ -83,7 +91,10 @@ export const useInventoryStore = defineStore('inventory', {
         }
         if (remaining > 0) throw new Error('insufficient-stock');
       }
-      const allocations = [...planned.values()];
+      return [...planned.values()];
+    },
+    async allocateSale(lines) {
+      const allocations = this.planSale(lines);
       const updated = [];
       try {
         for (const allocation of allocations) {

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ProductsApi } from '../infrastructure/products-api.js';
 import { Product } from '../domain/model/product.entity.js';
+import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 
 const productsApi = new ProductsApi();
 
@@ -31,7 +32,7 @@ const demoProducts = [
 
 export const useProductsStore = defineStore('products', {
   state: () => ({
-    products: demoProducts,
+    products: isFirebaseMode ? [] : demoProducts,
     loading: false,
     saving: false,
     error: null,
@@ -45,8 +46,8 @@ export const useProductsStore = defineStore('products', {
       try {
         this.products = await productsApi.getProducts();
       } catch (error) {
-        this.error = 'No se pudo cargar catalogo. Se muestran datos demo.';
-        this.products = demoProducts;
+        this.error = isFirebaseMode ? 'No se pudo cargar el catalogo desde Firestore.' : 'No se pudo cargar catalogo. Se muestran datos demo.';
+        this.products = isFirebaseMode ? [] : demoProducts;
       } finally {
         this.loading = false;
       }

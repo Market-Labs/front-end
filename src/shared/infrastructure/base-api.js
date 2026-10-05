@@ -2,6 +2,8 @@ import axios from 'axios';
 import { platformApiBaseUrl } from './api-endpoints.js';
 import { isDemoMode } from './demo-mode.js';
 import { demoAdapter } from './demo-api.js';
+import { isFirebaseMode } from './firebase-client.js';
+import { firestoreAdapter } from './firestore-api.js';
 
 export class BaseApi {
   #http;
@@ -10,7 +12,7 @@ export class BaseApi {
     this.#http = axios.create({
       baseURL: platformApiBaseUrl,
       headers: { 'Content-Type': 'application/json' },
-      adapter: isDemoMode ? demoAdapter : undefined,
+      adapter: isDemoMode ? demoAdapter : isFirebaseMode ? firestoreAdapter : undefined,
     });
 
     this.#http.interceptors.request.use((config) => {

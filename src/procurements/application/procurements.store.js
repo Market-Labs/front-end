@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia';
 import { ProcurementsApi } from '../infrastructure/procurements-api.js';
 import { ProcurementOrder } from '../domain/model/procurement-order.entity.js';
+import { useIamStore } from '../../iam/application/iam.store.js';
+import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
+import { receiveOrderInFirestore } from '../infrastructure/firestore-reception.js';
+import { useInventoryStore } from '../../inventory/application/inventory.store.js';
+import { createShippingOrderInFirestore } from '../infrastructure/firestore-shipping.js';
 
 const procurementsApi = new ProcurementsApi();
 
@@ -13,7 +18,7 @@ const demoOrders = [
 
 export const useProcurementsStore = defineStore('procurements', {
   state: () => ({
-    orders: demoOrders,
+    orders: isFirebaseMode ? [] : demoOrders,
     loading: false,
     error: null,
   }),
@@ -28,8 +33,8 @@ export const useProcurementsStore = defineStore('procurements', {
       try {
         this.orders = await procurementsApi.getOrders();
       } catch (error) {
-        this.error = 'No se pudo cargar abastecimientos. Se muestran datos demo.';
-        this.orders = demoOrders;
+        this.error = isFirebaseMode ? 'No se pudo cargar pedidos desde Firestore.' : 'No se pudo cargar abastecimientos. Se muestran datos demo.';
+        this.orders = isFirebaseMode ? [] : demoOrders;
       } finally {
         this.loading = false;
       }
@@ -37,12 +42,17 @@ export const useProcurementsStore = defineStore('procurements', {
     visibleForUser(user) {
       if (!user) return [];
       if (user.roles?.includes('Proveedor Organico')) {
-        return this.orders.filter((order) => order.supplierId === 'sup-2');
+        return this.orders.filter((order) => order.supplierId === (user.supplierId || 'sup-2'));
       }
-      return this.orders.filter((order) => order.minimarketId === 'min-1');
+      return this.orders.filter((order) => order.minimarketId === (user.minimarketId || 'min-1'));
     },
     async createFromSupplyRequest(request, products = []) {
       if (request.status !== 'accepted' || request.shippingOrderId) throw new Error('invalid-request-status');
+      if (isFirebaseMode) {
+        const resource = await createShippingOrderInFirestore(request, products, useIamStore().currentSupplierId);
+        this.orders.unshift(new ProcurementOrder(resource));
+        return resource.id;
+      }
       const items = request.items.map((item) => ({
         productName: item.productName,
         quantity: Number(item.quantity),
@@ -63,13 +73,20 @@ export const useProcurementsStore = defineStore('procurements', {
       });
       return order.id;
     },
-    async acceptReception(orderId) {
+    async acceptReception(orderId, products = []) {
       const order = this.orders.find((entry) => entry.id === orderId);
       if (!order?.canBeReviewed) throw new Error('invalid-order-status');
+      if (isFirebaseMode) {
+        const resource = await receiveOrderInFirestore(order, products, useIamStore().currentUser.id);
+        const updated = new ProcurementOrder(resource);
+        this.orders = this.orders.map((entry) => entry.id === orderId ? updated : entry);
+        await useInventoryStore().fetchInventory();
+        return updated;
+      }
       const receivedAt = new Date().toISOString();
       const updated = await procurementsApi.updateOrder(orderId, {
         status: 'received', receivedAt,
-        reception: { administratorId: 'usr-admin', accepted: true, reviewedAt: receivedAt },
+        reception: { administratorId: useIamStore().currentUser?.id || 'usr-admin', accepted: true, reviewedAt: receivedAt },
       });
       this.orders = this.orders.map((entry) => entry.id === orderId ? updated : entry);
       return updated;
@@ -79,7 +96,7 @@ export const useProcurementsStore = defineStore('procurements', {
       if (!order?.canBeReviewed) throw new Error('invalid-order-status');
       const updated = await procurementsApi.updateOrder(orderId, {
         status: 'rejected', rejectionReason: reason,
-        reception: { administratorId: 'usr-admin', accepted: false, comment: reason, reviewedAt: new Date().toISOString() },
+        reception: { administratorId: useIamStore().currentUser?.id || 'usr-admin', accepted: false, comment: reason, reviewedAt: new Date().toISOString() },
       });
       this.orders = this.orders.map((entry) => entry.id === orderId ? updated : entry);
       return updated;

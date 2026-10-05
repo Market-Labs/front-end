@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { RequisitionApi } from '../infrastructure/requisition-api.js';
 import { Requisition } from '../domain/model/requisition.entity.js';
+import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 
 const requisitionApi = new RequisitionApi();
 
@@ -14,7 +15,7 @@ const demoRequisitions = [
 
 export const useRequisitionStore = defineStore('requisition', {
   state: () => ({
-    requisitions: demoRequisitions,
+    requisitions: isFirebaseMode ? [] : demoRequisitions,
     loading: false,
     error: null,
   }),
@@ -29,8 +30,8 @@ export const useRequisitionStore = defineStore('requisition', {
       try {
         this.requisitions = await requisitionApi.getRequisitions();
       } catch (error) {
-        this.error = 'No se pudo cargar requisiciones. Se muestran datos demo.';
-        this.requisitions = demoRequisitions;
+        this.error = isFirebaseMode ? 'No se pudo cargar solicitudes desde Firestore.' : 'No se pudo cargar requisiciones. Se muestran datos demo.';
+        this.requisitions = isFirebaseMode ? [] : demoRequisitions;
       } finally {
         this.loading = false;
       }
@@ -38,9 +39,9 @@ export const useRequisitionStore = defineStore('requisition', {
     visibleForUser(user) {
       if (!user) return [];
       if (user.roles?.includes('Proveedor Organico')) {
-        return this.requisitions.filter((request) => request.supplierId === 'sup-2');
+        return this.requisitions.filter((request) => request.supplierId === (user.supplierId || 'sup-2'));
       }
-      return this.requisitions.filter((request) => request.minimarketId === 'min-1');
+      return this.requisitions.filter((request) => request.minimarketId === (user.minimarketId || 'min-1'));
     },
     async acceptRequest(requestId, supplierId = 'sup-2') {
       const request = this.requisitions.find((entry) => entry.id === requestId);

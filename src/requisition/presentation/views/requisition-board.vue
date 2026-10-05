@@ -126,6 +126,7 @@ import { computed, reactive, ref, onMounted } from 'vue';
 import { useRequisitionStore } from '../../application/requisition.store.js';
 import { useProcurementsStore } from '../../../procurements/application/procurements.store.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
+import { isFirebaseMode } from '../../../shared/infrastructure/firebase-client.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useProductsStore } from '../../../products/application/products.store.js';
 import { useSuppliersStore } from '../../../suppliers/application/suppliers.store.js';
@@ -204,7 +205,8 @@ const acceptSupplyRequest = (request) => runAction(request, () => requisitionSto
 const rejectSupplyRequest = (request) => runAction(request, () => requisitionStore.rejectRequest(request.id));
 const createShippingOrder = (request) => runAction(request, async () => {
   const orderId = await procurementsStore.createFromSupplyRequest(request, productsStore.products);
-  await requisitionStore.linkShippingOrder(request.id, orderId);
+  if (isFirebaseMode) await requisitionStore.fetchRequisitions();
+  else await requisitionStore.linkShippingOrder(request.id, orderId);
 });
 
 onMounted(() => {

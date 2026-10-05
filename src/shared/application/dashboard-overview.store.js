@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { DashboardOverviewApi } from '../infrastructure/dashboard-overview-api.js';
+import { isFirebaseMode } from '../infrastructure/firebase-client.js';
 
 const overviewApi = new DashboardOverviewApi();
 
@@ -19,9 +20,9 @@ const fallbackOverview = {
 
 export const useDashboardOverviewStore = defineStore('dashboardOverview', {
   state: () => ({
-    healthScore: fallbackOverview.healthScore,
-    indicators: fallbackOverview.indicators,
-    activity: fallbackOverview.activity,
+    healthScore: isFirebaseMode ? 0 : fallbackOverview.healthScore,
+    indicators: isFirebaseMode ? [] : fallbackOverview.indicators,
+    activity: isFirebaseMode ? [] : fallbackOverview.activity,
     loading: false,
     error: null,
   }),
@@ -35,10 +36,10 @@ export const useDashboardOverviewStore = defineStore('dashboardOverview', {
         this.indicators = overview.indicators;
         this.activity = overview.activity;
       } catch (error) {
-        this.error = 'Fake API no disponible. Se muestran datos locales.';
-        this.healthScore = isSupplier ? 0 : fallbackOverview.healthScore;
-        this.indicators = isSupplier ? [] : fallbackOverview.indicators;
-        this.activity = isSupplier ? [] : fallbackOverview.activity;
+        this.error = isFirebaseMode ? 'No se pudo cargar el resumen desde Firestore.' : 'Fake API no disponible. Se muestran datos locales.';
+        this.healthScore = isSupplier || isFirebaseMode ? 0 : fallbackOverview.healthScore;
+        this.indicators = isSupplier || isFirebaseMode ? [] : fallbackOverview.indicators;
+        this.activity = isSupplier || isFirebaseMode ? [] : fallbackOverview.activity;
       } finally {
         this.loading = false;
       }

@@ -9,6 +9,9 @@ export const UserAssembler = {
       status: resource.status,
       roles: resource.roles || [],
       permissions: resource.permissions || [],
+      supplierId: resource.supplierId || null,
+      minimarketId: resource.minimarketId || null,
+      createdBy: resource.createdBy || null,
     });
   },
 };

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { CommunicationApi } from '../infrastructure/communication-api.js';
 import { Message } from '../domain/model/message.entity.js';
+import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 
 const communicationApi = new CommunicationApi();
 
@@ -13,7 +14,7 @@ const demoMessages = [
 
 export const useCommunicationStore = defineStore('communication', {
   state: () => ({
-    messages: demoMessages,
+    messages: isFirebaseMode ? [] : demoMessages,
     loading: false,
     error: null,
   }),
@@ -26,8 +27,8 @@ export const useCommunicationStore = defineStore('communication', {
       try {
         this.messages = await communicationApi.getNotifications(isSupplier);
       } catch (error) {
-        this.error = 'No se pudo cargar alertas. Se muestran datos demo.';
-        this.messages = isSupplier ? [] : demoMessages;
+        this.error = isFirebaseMode ? 'No se pudo cargar alertas desde Firestore.' : 'No se pudo cargar alertas. Se muestran datos demo.';
+        this.messages = isSupplier || isFirebaseMode ? [] : demoMessages;
       } finally {
         this.loading = false;
       }

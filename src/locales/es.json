@@ -74,6 +74,7 @@
     "recoveryDescription": "Ingresa tu correo para recuperar el acceso.",
     "requestReset": "Solicitar recuperación",
     "recoveryDemo": "La recuperación por correo aún no está disponible en esta versión de prueba.",
+    "recoverySent": "Si la cuenta existe, recibirás un correo para restablecer la contraseña.",
     "backToLogin": "Volver al inicio de sesión"
   },
   "status": {
@@ -223,8 +224,12 @@
     "iam": {
       "eyebrow": "Usuarios",
       "title": "Usuarios, roles y permisos",
-      "description": "Consulta los usuarios y actualiza sus roles y estados.",
-      "newUser": "Editar usuario",
+      "description": "Consulta y gestiona los usuarios de tu minimarket.",
+      "supplierDescription": "Consulta y gestiona los usuarios de tu organización.",
+      "newUser": "Nuevo usuario",
+      "editUser": "Editar usuario",
+      "emailInUse": "Ese correo ya tiene una cuenta.",
+      "cleanupRequired": "No se pudo guardar el perfil ni revertir la cuenta. Revísala en Firebase Authentication.",
       "user": "Usuario",
       "selectUser": "Selecciona un usuario",
       "email": "Correo",

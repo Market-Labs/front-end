@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ProfilesApi } from '../infrastructure/profiles-api.js';
 import { Profile } from '../domain/model/profile.entity.js';
+import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 
 const profilesApi = new ProfilesApi();
 
@@ -30,7 +31,7 @@ const demoProfiles = [
 
 export const useProfilesStore = defineStore('profiles', {
   state: () => ({
-    profiles: demoProfiles,
+    profiles: isFirebaseMode ? [] : demoProfiles,
     loading: false,
     error: null,
   }),
@@ -41,8 +42,8 @@ export const useProfilesStore = defineStore('profiles', {
       try {
         this.profiles = await profilesApi.getProfiles();
       } catch (error) {
-        this.error = 'No se pudo conectar con perfiles. Se muestran datos demo.';
-        this.profiles = demoProfiles;
+        this.error = isFirebaseMode ? 'No se pudo cargar contactos desde Firestore.' : 'No se pudo conectar con perfiles. Se muestran datos demo.';
+        this.profiles = isFirebaseMode ? [] : demoProfiles;
       } finally {
         this.loading = false;
       }

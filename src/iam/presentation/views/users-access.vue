@@ -4,16 +4,45 @@
       <div>
         <span>{{ $t('page.iam.eyebrow') }}</span>
         <h2>{{ $t('page.iam.title') }}</h2>
-        <p>{{ $t('page.iam.description') }}</p>
+        <p>{{ $t(iamStore.isSupplier ? 'page.iam.supplierDescription' : 'page.iam.description') }}</p>
       </div>
-      <pv-button :label="$t('page.iam.newUser')" icon="pi pi-user-plus" @click="openUserForm" />
+      <div v-if="canManageUsers" class="header-actions">
+        <pv-button :label="$t('page.iam.editUser')" icon="pi pi-user-edit" outlined :disabled="!editableUsers.length" @click="openUserForm" />
+        <pv-button v-if="isFirebaseMode" :label="$t('page.iam.newUser')" icon="pi pi-user-plus" @click="openCreateForm" />
+      </div>
     </div>
 
-    <pv-dialog v-model:visible="showUserForm" modal :header="$t('page.iam.newUser')" :style="{ width: '520px' }">
+    <pv-dialog v-model:visible="showCreateForm" modal :header="$t('page.iam.newUser')" :style="{ width: '520px' }">
+      <form class="entity-form" @submit.prevent="saveNewUser">
+        <label>
+          {{ $t('page.iam.user') }}
+          <pv-input-text v-model.trim="createForm.name" autocomplete="name" required />
+        </label>
+        <label>
+          {{ $t('page.iam.email') }}
+          <pv-input-text v-model.trim="createForm.email" type="email" autocomplete="off" required />
+        </label>
+        <label>
+          {{ $t('auth.password') }}
+          <pv-input-text v-model="createForm.password" type="password" autocomplete="new-password" required minlength="6" />
+        </label>
+        <label>
+          {{ $t('page.iam.role') }}
+          <span class="read-only-value">{{ iamStore.userRole }}</span>
+        </label>
+        <p v-if="createError" class="form-error" role="alert">{{ createError }}</p>
+      </form>
+      <template #footer>
+        <pv-button :label="$t('common.cancel')" text @click="showCreateForm = false" />
+        <pv-button :label="$t('common.save')" icon="pi pi-save" :loading="creating" @click="saveNewUser" />
+      </template>
+    </pv-dialog>
+
+    <pv-dialog v-model:visible="showUserForm" modal :header="$t('page.iam.editUser')" :style="{ width: '520px' }">
       <form class="entity-form" @submit.prevent>
         <label>
           {{ $t('page.iam.user') }}
-          <pv-select v-model="userForm.userId" :options="visibleUsers" option-label="name" option-value="id" :placeholder="$t('page.iam.selectUser')" />
+          <pv-select v-model="userForm.userId" :options="editableUsers" option-label="name" option-value="id" :placeholder="$t('page.iam.selectUser')" />
         </label>
         <label>
           {{ $t('page.iam.email') }}
@@ -22,7 +51,8 @@
         <div class="form-row">
           <label>
             {{ $t('page.iam.role') }}
-            <pv-select v-model="userForm.role" :options="roleOptions" :placeholder="$t('page.iam.selectRole')" />
+            <span v-if="isFirebaseMode" class="read-only-value">{{ selectedUser?.roles[0] || '-' }}</span>
+            <pv-select v-else v-model="userForm.role" :options="roleOptions" :placeholder="$t('page.iam.selectRole')" />
           </label>
           <label>
             {{ $t('common.status') }}
@@ -69,16 +99,21 @@ import { computed, reactive, ref, onMounted, watch } from 'vue';
 import { useIamStore } from '../../application/iam.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useI18n } from 'vue-i18n';
+import { isFirebaseMode } from '../../../shared/infrastructure/firebase-client.js';
 
 const iamStore = useIamStore();
 const { t } = useI18n();
-const visibleUsers = computed(() => iamStore.isSupplier
-  ? iamStore.users.filter((user) => user.id === iamStore.currentUser?.id)
-  : iamStore.users);
+const visibleUsers = computed(() => iamStore.users);
+const editableUsers = computed(() => visibleUsers.value.filter((user) => user.createdBy && user.id !== iamStore.currentUser?.id));
+const canManageUsers = computed(() => iamStore.currentUser?.permissions.includes('users:manage') || false);
 const filteredUsers = useSearchFilter(() => visibleUsers.value);
 const showUserForm = ref(false);
+const showCreateForm = ref(false);
 const saving = ref(false);
+const creating = ref(false);
 const formError = ref('');
+const createError = ref('');
+const createForm = reactive({ name: '', email: '', password: '' });
 const roleOptions = computed(() => [...new Set(visibleUsers.value.flatMap((user) => user.roles))]);
 const statusOptions = computed(() => [
   { label: t('status.active'), value: 'active' },
@@ -89,7 +124,7 @@ const userForm = reactive({
   role: null,
   status: 'active',
 });
-const selectedUser = computed(() => visibleUsers.value.find((user) => user.id === userForm.userId));
+const selectedUser = computed(() => editableUsers.value.find((user) => user.id === userForm.userId));
 
 watch(selectedUser, (user) => {
   userForm.role = user?.roles?.[0] || null;
@@ -104,6 +139,36 @@ const openUserForm = () => {
   showUserForm.value = true;
 };
 
+const openCreateForm = () => {
+  createForm.name = '';
+  createForm.email = '';
+  createForm.password = '';
+  createError.value = '';
+  showCreateForm.value = true;
+};
+
+const saveNewUser = async () => {
+  if (!createForm.name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(createForm.email)
+    || createForm.password.length < 6) {
+    createError.value = t('common.invalidForm');
+    return;
+  }
+  creating.value = true;
+  createError.value = '';
+  try {
+    await iamStore.createUser(createForm);
+    createForm.password = '';
+    showCreateForm.value = false;
+  } catch (error) {
+    createError.value = error.code === 'auth/email-already-in-use'
+      ? t('page.iam.emailInUse')
+      : error.message === 'provisioning-cleanup-required'
+        ? t('page.iam.cleanupRequired') : t('common.errorSaving');
+  } finally {
+    creating.value = false;
+  }
+};
+
 const saveUser = async () => {
   if (!selectedUser.value || !roleOptions.value.includes(userForm.role) || !['active', 'inactive'].includes(userForm.status)) {
     formError.value = t('common.invalidForm');
@@ -112,8 +177,12 @@ const saveUser = async () => {
   saving.value = true;
   formError.value = '';
   try {
-    const matchingRole = iamStore.users.find((user) => user.roles.includes(userForm.role));
-    await iamStore.updateUser(selectedUser.value.id, { roles: [userForm.role], status: userForm.status, permissions: matchingRole?.permissions || [] });
+    if (isFirebaseMode) {
+      await iamStore.updateUser(selectedUser.value.id, { status: userForm.status });
+    } else {
+      const matchingRole = iamStore.users.find((user) => user.roles.includes(userForm.role));
+      await iamStore.updateUser(selectedUser.value.id, { roles: [userForm.role], status: userForm.status, permissions: matchingRole?.permissions || [] });
+    }
     showUserForm.value = false;
   } catch {
     formError.value = t('common.errorSaving');
@@ -151,8 +220,16 @@ onMounted(() => {
 .view-header {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
   justify-content: space-between;
   padding: 24px;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .view-header span {

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { SuppliersApi } from '../infrastructure/suppliers-api.js';
 import { Supplier } from '../domain/model/supplier.entity.js';
+import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 
 const suppliersApi = new SuppliersApi();
 
@@ -11,7 +12,7 @@ const demoSuppliers = [
 
 export const useSuppliersStore = defineStore('suppliers', {
   state: () => ({
-    suppliers: demoSuppliers,
+    suppliers: isFirebaseMode ? [] : demoSuppliers,
     loading: false,
     error: null,
   }),
@@ -26,8 +27,8 @@ export const useSuppliersStore = defineStore('suppliers', {
       try {
         this.suppliers = await suppliersApi.getSuppliers();
       } catch (error) {
-        this.error = 'No se pudo cargar proveedores. Se muestran datos demo.';
-        this.suppliers = demoSuppliers;
+        this.error = isFirebaseMode ? 'No se pudo cargar proveedores desde Firestore.' : 'No se pudo cargar proveedores. Se muestran datos demo.';
+        this.suppliers = isFirebaseMode ? [] : demoSuppliers;
       } finally {
         this.loading = false;
       }
