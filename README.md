@@ -57,6 +57,7 @@ Accepts / Rejects
 If Accepted
         ↓
 Inventory is Updated
+
 ```
 
 ## Role-Based Behavior
