@@ -125,6 +125,12 @@ Bounded-context adapters should call those centralized endpoints instead of hard
 | Waste | `/api/v1/minimarkets/{minimarketId}/waste` | Inventory API |
 | Donations | `/api/v1/minimarkets/{minimarketId}/donations` | Inventory API |
 
+
+| Messages | `/api/v1/minimarkets/{minimarketId}/communication/messages` | `CommunicationApi` |
+| Activity history | `/api/v1/minimarkets/{minimarketId}/activity-history` | Dashboard / Shared |
+| Waste | `/api/v1/minimarkets/{minimarketId}/waste` | Inventory API |
+| Donations | `/api/v1/minimarkets/{minimarketId}/donations` | Inventory API |
+
 ## Development
 
 Install dependencies:
