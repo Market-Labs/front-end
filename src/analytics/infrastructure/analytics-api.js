@@ -18,7 +18,6 @@ export class AnalyticsApi extends BaseApi {
       waste: isSupplier ? apiEndpoints.supplierWaste : apiEndpoints.waste,
       conservation: isSupplier ? apiEndpoints.supplierConservationMonitoring : apiEndpoints.conservationMonitoring,
       suppliers: apiEndpoints.suppliers,
-      sales: apiEndpoints.sales,
     };
     const entries = await Promise.all(Object.entries(endpoints).map(async ([key, endpoint]) => {
       const response = await this.http.get(endpoint);

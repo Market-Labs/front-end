@@ -12,27 +12,19 @@ const sources = {
   waste: [{ id: 'w-1', ownerId: 'min-1', productName: 'Tomate', lotCode: 'L-1', quantity: 2, reason: 'expiration', recordedAt: '2026-10-01' }],
   conservation: [{ id: 'c-1', zone: 'Cool', productName: 'Tomate', temperature: 4, humidity: 60, recordedAt: '2026-10-01', status: 'healthy' }],
   suppliers: [{ id: 'sup-2', businessName: 'Anita', ruc: '123', specialty: 'Vegetales', coverageArea: 'Arequipa' }],
-  sales: [{ id: 'sale-1', minimarketId: 'min-1', occurredAt: '2026-10-01', customer: 'Counter', discount: 1, items: [{ productName: 'Tomate', quantity: 2, unitPrice: 4 }] }],
 };
 const t = (key) => key;
 
-test('all six reports produce rows with aligned columns', () => {
-  for (const type of ['Inventario', 'Abastecimiento', 'Mermas', 'Conservacion', 'Proveedores', 'Ventas']) {
+test('all five reports produce rows with aligned columns', () => {
+  for (const type of ['Inventario', 'Abastecimiento', 'Mermas', 'Conservacion', 'Proveedores']) {
     const report = buildReport(type, sources, false, t);
     assert.ok(report.rows.length > 0, type);
     for (const row of report.rows) assert.deepEqual(Object.keys(row), report.columns.map((column) => column.key));
   }
 });
 
-test('supplier sales come only from their received shipments', () => {
-  const report = buildReport('Ventas', sources, true, t);
+test('waste report includes only waste records', () => {
+  const report = buildReport('Mermas', sources, false, t);
   assert.equal(report.rows.length, 1);
-  assert.equal(report.rows[0].id, 'sale-ship-1');
-  assert.equal(report.rows[0].total, 12);
-});
-
-test('minimarket sales come from retail records and include discount', () => {
-  const report = buildReport('Ventas', sources, false, t);
-  assert.equal(report.rows.length, 1);
-  assert.equal(report.rows[0].total, 7);
+  assert.equal(report.rows[0].reason, 'page.inventory.wasteReasons.expiration');
 });

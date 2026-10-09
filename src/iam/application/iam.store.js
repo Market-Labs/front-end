@@ -143,7 +143,6 @@ export const useIamStore = defineStore('iam', {
           import('../../products/application/products.store.js').then((module) => module.useProductsStore),
           import('../../profiles/application/profiles.store.js').then((module) => module.useProfilesStore),
           import('../../requisition/application/requisition.store.js').then((module) => module.useRequisitionStore),
-          import('../../sales/application/sales.store.js').then((module) => module.useSalesStore),
           import('../../shared/application/dashboard-overview.store.js').then((module) => module.useDashboardOverviewStore),
           import('../../suppliers/application/suppliers.store.js').then((module) => module.useSuppliersStore),
         ]);

@@ -6,7 +6,7 @@
         <h2>{{ $t('page.inventory.title') }}</h2>
         <p>{{ $t('page.inventory.description') }}</p>
       </div>
-      <div class="view-actions"><pv-button :label="$t('page.inventory.registerWaste')" icon="pi pi-trash" outlined @click="openWasteForm" /><pv-button :label="$t('page.inventory.registerStock')" icon="pi pi-plus" @click="openStockForm" /></div>
+      <div class="view-actions"><pv-button :label="$t(iamStore.isSupplier ? 'page.inventory.registerWaste' : 'page.inventory.registerOutput')" icon="pi pi-minus" outlined @click="openWasteForm" /><pv-button :label="$t('page.inventory.registerStock')" icon="pi pi-plus" @click="openStockForm" /></div>
     </div>
 
     <pv-dialog v-model:visible="showStockForm" modal :header="$t('page.inventory.registerStock')" :style="{ width: '520px' }">
@@ -43,12 +43,12 @@
       </template>
     </pv-dialog>
 
-    <pv-dialog v-model:visible="showWasteForm" modal :header="$t('page.inventory.registerWaste')" :style="{ width: 'min(520px, calc(100vw - 32px))' }">
+    <pv-dialog v-model:visible="showWasteForm" modal :header="$t(iamStore.isSupplier ? 'page.inventory.registerWaste' : 'page.inventory.registerOutput')" :style="{ width: 'min(520px, calc(100vw - 32px))' }">
       <form class="entity-form" @submit.prevent="saveWaste">
         <label>{{ $t('page.inventory.lot') }}<pv-select v-model="wasteForm.itemId" :options="inventoryStore.items.filter((item) => item.stock > 0)" option-label="productName" option-value="id" :placeholder="$t('page.inventory.selectLot')" /></label>
         <p v-if="selectedWasteItem" class="waste-lot">{{ selectedWasteItem.lotCode }} · {{ selectedWasteItem.stock }} {{ $t('page.inventory.units') }}</p>
         <label>{{ $t('common.quantity') }}<pv-input-text v-model="wasteForm.quantity" type="number" min="1" step="1" /></label>
-        <label>{{ $t('page.inventory.wasteReason') }}<pv-select v-model="wasteForm.reason" :options="wasteReasons" option-label="label" option-value="value" :placeholder="$t('page.inventory.selectReason')" /></label>
+        <label>{{ $t(iamStore.isSupplier ? 'page.inventory.wasteReason' : 'page.inventory.outputReason') }}<pv-select v-model="wasteForm.reason" :options="outputReasons" option-label="label" option-value="value" :placeholder="$t('page.inventory.selectReason')" /></label>
         <p v-if="wasteError" class="form-error" role="alert">{{ wasteError }}</p>
       </form>
       <template #footer><pv-button :label="$t('common.cancel')" text @click="showWasteForm = false" /><pv-button :label="$t('common.save')" icon="pi pi-save" :loading="savingWaste" @click="saveWaste" /></template>
@@ -95,7 +95,10 @@ const savingWaste = ref(false);
 const wasteError = ref('');
 const wasteForm = reactive({ itemId: null, quantity: '', reason: null });
 const selectedWasteItem = computed(() => inventoryStore.items.find((item) => item.id === wasteForm.itemId));
-const wasteReasons = computed(() => ['expiration', 'conservation', 'handling'].map((value) => ({ value, label: t(`page.inventory.wasteReasons.${value}`) })));
+const outputReasons = computed(() => [
+  ...(iamStore.isSupplier ? [] : [{ value: 'dispatch', label: t('page.inventory.dispatch') }]),
+  ...['expiration', 'handling', 'conservation'].map((value) => ({ value, label: t(`page.inventory.wasteReasons.${value}`) })),
+]);
 const saving = ref(false);
 const formError = ref('');
 const stockForm = reactive({
@@ -125,7 +128,11 @@ const saveWaste = async () => {
   savingWaste.value = true;
   wasteError.value = '';
   try {
-    await inventoryStore.registerWaste({ itemId: wasteForm.itemId, quantity, reason: wasteForm.reason, ownerId: iamStore.isSupplier ? iamStore.currentSupplierId : iamStore.currentMinimarketId, isSupplier: iamStore.isSupplier });
+    if (wasteForm.reason === 'dispatch') {
+      await inventoryStore.registerStockOutput({ itemId: wasteForm.itemId, quantity, ownerId: iamStore.currentMinimarketId });
+    } else {
+      await inventoryStore.registerWaste({ itemId: wasteForm.itemId, quantity, reason: wasteForm.reason, ownerId: iamStore.isSupplier ? iamStore.currentSupplierId : iamStore.currentMinimarketId, isSupplier: iamStore.isSupplier });
+    }
     showWasteForm.value = false;
   } catch {
     wasteError.value = t('common.errorSaving');

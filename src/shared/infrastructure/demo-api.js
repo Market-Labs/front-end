@@ -10,7 +10,6 @@ const resources = new Map([
   [apiEndpoints.analytics, demoData.analytics],
   [apiEndpoints.supplierAnalytics, demoData.supplierAnalytics],
   [apiEndpoints.products, demoData.products],
-  [apiEndpoints.sales, demoData.retailSales],
   [apiEndpoints.inventory, demoData.inventory],
   [apiEndpoints.supplierInventory, demoData.supplierInventory],
   [apiEndpoints.inventorySearch, demoData.inventory],

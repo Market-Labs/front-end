@@ -2,7 +2,6 @@ export const boundedContextNavigation = Object.freeze([
   { context: 'dashboard', path: '/home' },
   { context: 'inventory', path: '/inventory' },
   { context: 'products', path: '/products' },
-  { context: 'sales', path: '/sales' },
   { context: 'requisition', path: '/requisition' },
   { context: 'procurements', path: '/procurements' },
   { context: 'suppliers', path: '/suppliers' },

@@ -69,7 +69,7 @@ const generating = ref(false);
 const exporting = ref(false);
 const error = ref('');
 const reportElement = ref(null);
-const reportTypes = ['Inventario', 'Abastecimiento', 'Mermas', 'Conservacion', 'Proveedores', 'Ventas'];
+const reportTypes = ['Inventario', 'Abastecimiento', 'Mermas', 'Conservacion', 'Proveedores'];
 const filteredReports = useSearchFilter(() => reportTypes.map((key) => ({ key, label: t(`page.analytics.reportNames.${key}`) })));
 const visibleReports = computed(() => filteredReports.value.map((item) => item.key));
 const money = (value) => `S/ ${Number(value || 0).toFixed(2)}`;
@@ -81,13 +81,13 @@ const filteredIndicators = useSearchFilter(() => {
   const orders = sources.orders.filter((order) => iamStore.isSupplier ? order.supplierId === ownerId : order.minimarketId === ownerId);
   const stock = sources.inventory.reduce((sum, item) => sum + Number(item.stock || 0), 0);
   const waste = sources.waste.filter((item) => item.ownerId === ownerId).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-  const sales = iamStore.isSupplier ? orders.filter((order) => order.status === 'received').length : sources.sales.filter((sale) => sale.minimarketId === ownerId).length;
+  const receivedOrders = orders.filter((order) => order.status === 'received').length;
   const normal = sources.conservation.filter((item) => item.status === 'healthy').length;
   const score = sources.conservation.length ? Math.round(normal / sources.conservation.length * 100) : 0;
   return [
     { label: t('page.analytics.inventoryTotal'), value: `${stock} ${t('page.inventory.units')}` },
     { label: t('page.analytics.wasteTotal'), value: `${waste} ${t('page.inventory.units')}` },
-    { label: t('page.analytics.salesTotal'), value: `${sales}` },
+    { label: t('page.analytics.receivedOrdersTotal'), value: `${receivedOrders}` },
     { label: t('page.analytics.conservationScore'), value: `${score}%` },
   ];
 });

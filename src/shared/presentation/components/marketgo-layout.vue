@@ -89,7 +89,6 @@ const menuItems = [
   { to: '/home', icon: 'pi pi-microsoft', labelKey: 'option.dashboard', roles: ['admin', 'supplier'] },
   { to: '/inventory', icon: 'pi pi-box', labelKey: 'option.inventory', roles: ['admin', 'supplier'] },
   { to: '/products', icon: 'pi pi-shopping-bag', labelKey: 'option.products', roles: ['admin', 'supplier'] },
-  { to: '/sales', icon: 'pi pi-wallet', labelKey: 'option.sales', roles: ['admin', 'supplier'] },
   { to: '/requisition', icon: 'pi pi-list-check', labelKey: 'option.requisition', roles: ['admin', 'supplier'] },
   { to: '/procurements', icon: 'pi pi-truck', labelKey: 'option.procurements', roles: ['supplier'] },
   { to: '/procurements', icon: 'pi pi-truck', labelKey: 'option.reception', roles: ['admin'] },

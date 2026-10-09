@@ -8,7 +8,6 @@ const analyticsApi = new AnalyticsApi();
 const demoIndicators = [
   new OperationalIndicator({ label: 'Inventario total', currentValue: 1248, previousValue: 1180, unit: 'items' }),
   new OperationalIndicator({ label: 'Mermas registradas', currentValue: 21, previousValue: 28, unit: 'kg' }),
-  new OperationalIndicator({ label: 'Ventas por oferta', currentValue: 86, previousValue: 64, unit: 'ops' }),
   new OperationalIndicator({ label: 'Score conservacion', currentValue: 92, previousValue: 88, unit: '%' }),
 ];
 
@@ -63,22 +62,12 @@ const demoReportSummaries = {
     ],
     highlights: ['Anita Gamboa cubre Cerro Colorado - Arequipa.', 'BioAndes Organic atiende lacteos y vegetales.', 'Hay proveedores con ordenes pendientes.'],
   },
-  Ventas: {
-    title: 'Ventas',
-    description: 'Operaciones por oferta y productos con mayor movimiento.',
-    metrics: [
-      { label: 'Ventas por oferta', value: '86 ops' },
-      { label: 'Crecimiento', value: '34%' },
-      { label: 'Categoria fuerte', value: 'Vegetales' },
-    ],
-    highlights: ['Tomate y lechugas tienen alta rotacion.', 'Las ofertas organicas elevan operaciones.', 'Manzanas mantienen disponibilidad saludable.'],
-  },
 };
 
 export const useAnalyticsStore = defineStore('analytics', {
   state: () => ({
     indicators: isFirebaseMode ? [] : demoIndicators,
-    reports: isFirebaseMode ? [] : ['Inventario', 'Abastecimiento', 'Mermas', 'Conservacion', 'Proveedores', 'Ventas'],
+    reports: isFirebaseMode ? [] : ['Inventario', 'Abastecimiento', 'Mermas', 'Conservacion', 'Proveedores'],
     reportSummaries: isFirebaseMode ? {} : demoReportSummaries,
     reportSources: null,
     loading: false,

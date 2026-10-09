@@ -3,6 +3,7 @@ import { InventoryApi } from '../infrastructure/inventory-api.js';
 import { InventoryItem } from '../domain/model/inventory-item.entity.js';
 import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 import { registerWasteInFirestore } from '../infrastructure/firestore-waste.js';
+import { registerStockOutputInFirestore } from '../infrastructure/firestore-stock-output.js';
 
 const inventoryApi = new InventoryApi();
 
@@ -60,6 +61,29 @@ export const useInventoryStore = defineStore('inventory', {
         throw error;
       }
     },
+    async registerStockOutput({ itemId, quantity, ownerId }) {
+      const item = this.items.find((entry) => entry.id === itemId);
+      if (!item || !Number.isInteger(quantity) || quantity <= 0 || quantity > item.stock) {
+        throw new Error('invalid-output');
+      }
+      const movement = {
+        id: `stock-update-${crypto.randomUUID()}`,
+        reason: 'dispatch',
+        quantity,
+        before: item.stock,
+        after: item.stock - quantity,
+        recordedAt: new Date().toISOString(),
+      };
+      const updated = isFirebaseMode
+        ? await registerStockOutputInFirestore({ item, quantity, ownerId, movement })
+        : await inventoryApi.updateItem(item.id, {
+          stock: item.stock - quantity,
+          status: item.stock - quantity <= item.minimumStock ? 'risk' : 'healthy',
+          stockUpdates: [...item.stockUpdates, movement],
+        });
+      Object.assign(item, updated);
+      return updated;
+    },
     async registerStock(data, isSupplier = false) {
       const item = await inventoryApi.createItem({ ...data, id: `inv-${crypto.randomUUID()}`, status: data.stock <= data.minimumStock ? 'risk' : 'healthy' }, isSupplier);
       this.items.push(item);
@@ -74,46 +98,6 @@ export const useInventoryStore = defineStore('inventory', {
         this.items = isSupplier || isFirebaseMode ? [] : demoItems;
       } finally {
         this.loading = false;
-      }
-    },
-    planSale(lines) {
-      const planned = new Map();
-      for (const line of lines) {
-        let remaining = Number(line.quantity);
-        const lots = this.items.filter((item) => item.productName === line.productName)
-          .sort((a, b) => a.expirationDate.localeCompare(b.expirationDate));
-        for (const lot of lots) {
-          if (remaining <= 0) break;
-          const current = planned.get(lot.id)?.after ?? lot.stock;
-          const taken = Math.min(remaining, current);
-          if (taken > 0) planned.set(lot.id, { item: lot, before: lot.stock, after: current - taken });
-          remaining -= taken;
-        }
-        if (remaining > 0) throw new Error('insufficient-stock');
-      }
-      return [...planned.values()];
-    },
-    async allocateSale(lines) {
-      const allocations = this.planSale(lines);
-      const updated = [];
-      try {
-        for (const allocation of allocations) {
-          const stock = allocation.after;
-          const saved = await inventoryApi.updateItem(allocation.item.id, { stock, status: stock <= allocation.item.minimumStock ? 'risk' : 'healthy' });
-          Object.assign(allocation.item, saved);
-          updated.push(allocation);
-        }
-      } catch (error) {
-        await this.restoreAllocations(updated);
-        throw error;
-      }
-      return allocations;
-    },
-    async restoreAllocations(allocations) {
-      for (const allocation of allocations) {
-        const stock = allocation.before;
-        const saved = await inventoryApi.updateItem(allocation.item.id, { stock, status: stock <= allocation.item.minimumStock ? 'risk' : 'healthy' });
-        Object.assign(allocation.item, saved);
       }
     },
     async receiveShipmentItems(shipmentItems = [], products = [], orderId = '') {

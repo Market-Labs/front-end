@@ -25,11 +25,11 @@ export const buildReport = (type, sources, isSupplier, t) => {
       rows = orders.flatMap((order) => order.items.map((item) => ({ orderId: order.id, requestId: order.supplyRequestId || '-', supplier: order.supplier, minimarket: order.minimarket, product: item.productName, quantity: item.quantity, unitPrice: money(item.unitPrice), subtotal: money(item.quantity * item.unitPrice), status: t(`status.${order.status}`), date: order.shippingDate || '-' })));
       break;
     case 'Mermas':
-      columns = [c('date', 'page.sales.date'), c('product', 'common.product'), c('lot', 'page.inventory.lot'), c('quantity', 'common.quantity'), c('unit', 'page.analytics.unit'), c('reason', 'page.inventory.wasteReason')];
+      columns = [c('date', 'common.date'), c('product', 'common.product'), c('lot', 'page.inventory.lot'), c('quantity', 'common.quantity'), c('unit', 'page.analytics.unit'), c('reason', 'page.inventory.wasteReason')];
       rows = visibleWaste.map((record) => ({ date: record.recordedAt, product: record.productName, lot: record.lotCode, quantity: record.quantity, unit: t('page.inventory.units'), reason: t(`page.inventory.wasteReasons.${record.reason}`) }));
       break;
     case 'Conservacion':
-      columns = [c('date', 'page.sales.date'), c('zone', 'page.conservation.zone'), c('product', 'common.product'), c('temperature', 'page.conservation.temperature'), c('humidity', 'page.conservation.humidity'), c('status', 'common.status')];
+      columns = [c('date', 'common.date'), c('zone', 'page.conservation.zone'), c('product', 'common.product'), c('temperature', 'page.conservation.temperature'), c('humidity', 'page.conservation.humidity'), c('status', 'common.status')];
       rows = sources.conservation.map((record) => ({ date: record.recordedAt, zone: record.zone, product: record.productName, temperature: record.temperature, humidity: record.humidity, status: t(`status.${record.status}`) }));
       break;
     case 'Proveedores':
@@ -39,21 +39,6 @@ export const buildReport = (type, sources, isSupplier, t) => {
         return { id: supplier.id, supplier: supplier.businessName, ruc: supplier.ruc, specialty: supplier.specialty, coverage: supplier.coverageArea, orders: related.length, received: related.filter((order) => order.status === 'received').length, amount: money(related.filter((order) => order.status === 'received').reduce((sum, order) => sum + Number(order.total), 0)) };
       });
       break;
-    case 'Ventas': {
-      columns = [c('id', 'page.sales.sale'), c('date', 'page.sales.date'), c('customer', 'page.sales.customer'), c('product', 'common.product'), c('quantity', 'common.quantity'), c('unitPrice', 'common.unitPrice', 'money'), c('discount', 'page.sales.discount', 'money'), c('total', 'common.total', 'money')];
-      const sales = isSupplier
-        ? orders.filter((order) => order.status === 'received').map((order) => ({ id: `sale-${order.id}`, occurredAt: order.receivedAt || order.shippingDate, customer: order.minimarket, items: order.items, discount: 0 }))
-        : sources.sales.filter((sale) => sale.minimarketId === ownerId);
-      rows = sales.flatMap((sale) => {
-        const gross = sale.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
-        return sale.items.map((item) => {
-          const subtotal = item.quantity * item.unitPrice;
-          const discount = gross ? Number(sale.discount || 0) * subtotal / gross : 0;
-          return { id: sale.id, date: sale.occurredAt, customer: sale.customer, product: item.productName, quantity: item.quantity, unitPrice: money(item.unitPrice), discount: money(discount), total: money(subtotal - discount) };
-        });
-      });
-      break;
-    }
     default:
       throw new Error('unknown-report');
   }

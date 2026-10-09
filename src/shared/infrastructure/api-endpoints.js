@@ -22,7 +22,6 @@ export const apiEndpoints = Object.freeze({
   analytics: minimarketEndpoint('analytics'),
   supplierAnalytics: supplierEndpoint('analytics'),
   products: 'api/v1/products',
-  sales: minimarketEndpoint('sales'),
   supplierProducts: supplierEndpoint('products'),
   inventory: minimarketEndpoint('inventory'),
   supplierInventory: supplierEndpoint('inventory'),

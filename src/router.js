@@ -10,7 +10,6 @@ import procurementsRoutes from './procurements/presentation/procurements-routes.
 import suppliersRoutes from './suppliers/presentation/suppliers-routes.js';
 import conservationRoutes from './conservation/presentation/conservation-routes.js';
 import communicationRoutes from './communication/presentation/communication-routes.js';
-import salesRoutes from './sales/presentation/sales-routes.js';
 import i18n from './i18n.js';
 import pinia from './pinia.js';
 import { useIamStore } from './iam/application/iam.store.js';
@@ -63,7 +62,6 @@ const routes = [
   ...suppliersRoutes,
   ...conservationRoutes,
   ...communicationRoutes,
-  ...salesRoutes,
   {
     path: '/:pathMatch(.*)*',
     redirect: '/home',

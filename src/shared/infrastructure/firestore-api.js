@@ -12,7 +12,6 @@ const routes = new Map([
   [apiEndpoints.analytics, 'analytics'],
   [apiEndpoints.supplierAnalytics, 'supplierAnalytics'],
   [apiEndpoints.products, 'products'],
-  [apiEndpoints.sales, 'retailSales'],
   [apiEndpoints.supplierProducts, 'products'],
   [apiEndpoints.inventory, 'inventory'],
   [apiEndpoints.supplierInventory, 'supplierInventory'],
@@ -55,7 +54,7 @@ const listQuery = (resource, profile) => {
     return query(ref, where(supplier ? 'supplierId' : 'minimarketId', '==', supplier ? profile.supplierId : profile.minimarketId));
   }
   if (resource === 'waste') return query(ref, where('ownerId', '==', supplier ? profile.supplierId : profile.minimarketId));
-  if (resource === 'inventory' || resource === 'retailSales' || resource === 'notifications' || resource === 'conservationAlerts' || resource === 'activityHistory' || resource === 'conservationMonitoring') {
+  if (resource === 'inventory' || resource === 'notifications' || resource === 'conservationAlerts' || resource === 'activityHistory' || resource === 'conservationMonitoring') {
     return query(ref, where('minimarketId', '==', profile.minimarketId));
   }
   if (resource === 'supplierInventory' || resource === 'supplierAlerts' || resource === 'supplierConservationMonitoring') {
