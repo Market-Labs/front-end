@@ -12,6 +12,8 @@ export const UserAssembler = {
       supplierId: resource.supplierId || null,
       minimarketId: resource.minimarketId || null,
       createdBy: resource.createdBy || null,
+      tenantId: resource.tenantId || null,
+      accessLevel: resource.accessLevel || 'owner',
     });
   },
 };

@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "MarketGo",
-    "tagline": "Gestión de productos orgánicos"
+    "tagline": "Organic product management"
   },
   "option": {
     "home": "Home",
@@ -61,6 +61,26 @@
     "invalidForm": "Check the required fields and try again."
   },
   "auth": {
+    "access": { "owner": "Owner", "editor": "Editor", "viewer": "Viewer" },
+    "createAccount": "Create account",
+    "creatingAccount": "Creating account...",
+    "signupDescription": "Create a workspace for your business.",
+    "accountType": "Business type",
+    "minimarket": "I run a minimarket",
+    "supplier": "I am a supplier",
+    "fullName": "Full name",
+    "minimarketName": "Minimarket name",
+    "supplierName": "Supplier business name",
+    "acceptTerms": "I accept the terms and conditions",
+    "readTerms": "Read terms and conditions",
+    "termsText": "MarketGo is an educational project. Your account and business data are stored in Firebase for this course demonstration. Do not enter sensitive personal or payment information.",
+    "noAccount": "New to MarketGo?",
+    "alreadyAccount": "Already have an account?",
+    "emailInUse": "This email already has an account.",
+    "weakPassword": "Use a password of at least 6 characters.",
+    "signupError": "Could not create your account. Please try again.",
+    "cleanupRequired": "Account creation was interrupted. Contact the project administrator before retrying.",
+    "signupFirebaseOnly": "Account creation is available when Firebase is enabled.",
     "email": "Email address",
     "password": "Password",
     "signIn": "Sign in",

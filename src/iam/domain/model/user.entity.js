@@ -9,6 +9,8 @@ export class User {
     supplierId = null,
     minimarketId = null,
     createdBy = null,
+    tenantId = null,
+    accessLevel = 'owner',
   }) {
     this.id = id;
     this.name = name;
@@ -19,6 +21,8 @@ export class User {
     this.supplierId = supplierId;
     this.minimarketId = minimarketId;
     this.createdBy = createdBy;
+    this.tenantId = tenantId;
+    this.accessLevel = accessLevel;
   }
 
   get initials() {

@@ -7,6 +7,45 @@
   padding: 24px 16px;
 }
 
+.auth-language {
+  position: absolute;
+  right: 24px;
+  top: 24px;
+}
+
+.signup-panel { max-width: 600px; }
+.signup-panel .auth-brand { margin-bottom: 24px; }
+.signup-panel .auth-intro { margin-bottom: 24px; text-align: left; }
+
+.signup-types { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 12px; }
+.signup-types button {
+  background: #eff3fa;
+  border: 1px solid #a6b9ce;
+  color: #021c45;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  min-height: 48px;
+  padding: 8px;
+}
+.signup-types button:first-child { border-radius: 8px 0 0 8px; }
+.signup-types button:last-child { border-radius: 0 8px 8px 0; }
+.signup-types button.selected { background: #dceafa; border-color: #0d8cfb; color: #023192; }
+.signup-types i { margin-right: 8px; }
+.auth-terms-link {
+  background: none;
+  border: 0;
+  color: #023192;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  justify-self: start;
+  padding: 0;
+}
+.auth-footer { color: #526780; font-size: 14px; margin: 28px 0 0; text-align: center; }
+.auth-footer a { color: #023192; font-weight: 700; }
+
 .auth-panel {
   background: #ffffff;
   border: 1px solid #d9e5f6;

@@ -4,7 +4,7 @@ import es from './locales/es.json';
 
 const i18n = createI18n({
   legacy: false,
-  locale: 'es',
+  locale: typeof window !== 'undefined' && window.localStorage.getItem('marketgo.locale') === 'es' ? 'es' : 'en',
   fallbackLocale: 'en',
   messages: { en, es },
 });

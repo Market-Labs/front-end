@@ -1,8 +1,7 @@
 const column = (key, label, kind) => ({ key, label, kind });
 const money = (value) => Number(Number(value || 0).toFixed(2));
 
-export const buildReport = (type, sources, isSupplier, t) => {
-  const ownerId = isSupplier ? 'sup-2' : 'min-1';
+export const buildReport = (type, sources, isSupplier, t, ownerId = isSupplier ? 'sup-2' : 'min-1') => {
   const products = new Map(sources.products.map((product) => [product.name, product]));
   const suppliers = new Map(sources.suppliers.map((supplier) => [supplier.id, supplier]));
   const orders = sources.orders.filter((order) => isSupplier ? order.supplierId === ownerId : order.minimarketId === ownerId);

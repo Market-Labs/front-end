@@ -6,7 +6,7 @@
         <h2>{{ $t('page.products.title') }}</h2>
         <p>{{ $t('page.products.description') }}</p>
       </div>
-      <pv-button :label="$t('page.products.newProduct')" icon="pi pi-plus" @click="openCreateForm" />
+      <pv-button v-if="canWrite" :label="$t('page.products.newProduct')" icon="pi pi-plus" @click="openCreateForm" />
     </div>
 
     <pv-dialog v-model:visible="showProductForm" modal :header="$t(editingId ? 'page.products.editProduct' : 'page.products.newProduct')" :style="{ width: 'min(520px, calc(100vw - 32px))' }">
@@ -73,7 +73,7 @@
             {{ product.available ? $t('page.products.available') : $t('page.products.unavailable') }}
           </span>
         </footer>
-        <div class="card-actions">
+        <div v-if="canWrite" class="card-actions">
           <pv-button :label="$t('common.edit')" icon="pi pi-pencil" size="small" outlined @click="openEditForm(product)" />
           <pv-button :label="$t('common.delete')" icon="pi pi-trash" size="small" severity="danger" text @click="confirmDelete(product)" />
         </div>
@@ -92,6 +92,7 @@ import { useI18n } from 'vue-i18n';
 
 const productsStore = useProductsStore();
 const iamStore = useIamStore();
+const canWrite = computed(() => iamStore.currentUser?.permissions.includes(iamStore.isSupplier ? 'products:write' : 'inventory:write'));
 const suppliersStore = useSuppliersStore();
 const { t } = useI18n();
 const supplierName = (id) => suppliersStore.suppliers.find((supplier) => supplier.id === id)?.businessName || id || '-';

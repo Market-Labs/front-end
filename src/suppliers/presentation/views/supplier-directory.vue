@@ -6,7 +6,7 @@
         <h2>{{ $t('page.suppliers.title') }}</h2>
         <p>{{ $t('page.suppliers.description') }}</p>
       </div>
-      <pv-button :label="$t('page.suppliers.newSupplier')" icon="pi pi-plus" @click="openSupplierForm" />
+      <pv-button v-if="canWrite" :label="$t('page.suppliers.newSupplier')" icon="pi pi-plus" @click="openSupplierForm" />
     </div>
 
     <pv-dialog v-model:visible="showSupplierForm" modal :header="$t(editingId ? 'page.suppliers.editSupplier' : 'page.suppliers.newSupplier')" :style="{ width: 'min(540px, calc(100vw - 32px))' }">
@@ -69,7 +69,7 @@
           <small>{{ supplier.coverageArea }}</small>
           <strong>{{ supplier.phone }}</strong>
         </footer>
-        <div class="supplier-actions">
+        <div v-if="canWrite" class="supplier-actions">
           <pv-button :label="$t('common.edit')" icon="pi pi-pencil" size="small" outlined @click="openEditForm(supplier)" />
           <pv-button :label="$t('common.delete')" icon="pi pi-trash" size="small" severity="danger" text @click="confirmDelete(supplier)" />
         </div>
@@ -79,12 +79,15 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue';
+import { computed, reactive, ref, onMounted } from 'vue';
+import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useSuppliersStore } from '../../application/suppliers.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useI18n } from 'vue-i18n';
 
 const suppliersStore = useSuppliersStore();
+const iamStore = useIamStore();
+const canWrite = computed(() => iamStore.currentUser?.permissions.includes('inventory:write'));
 const { t } = useI18n();
 const filteredSuppliers = useSearchFilter(() => suppliersStore.activeSuppliers);
 const showSupplierForm = ref(false);

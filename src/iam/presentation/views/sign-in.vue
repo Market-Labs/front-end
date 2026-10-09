@@ -1,5 +1,6 @@
 <template>
   <main class="auth-page">
+    <language-switcher class="auth-language" />
     <section class="auth-panel" aria-labelledby="login-title">
       <div class="auth-brand">
         <img src="/logo-marketgo.png" alt="" />
@@ -31,6 +32,7 @@
           {{ submitting ? t('auth.signingIn') : t('auth.signIn') }}
         </button>
       </form>
+      <p class="auth-footer">{{ t('auth.noAccount') }} <router-link to="/sign-up">{{ t('auth.createAccount') }}</router-link></p>
     </section>
   </main>
 </template>
@@ -40,6 +42,7 @@ import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useIamStore } from '../../application/iam.store.js';
+import LanguageSwitcher from '../../../shared/presentation/components/language-switcher.vue';
 
 const { t } = useI18n();
 const route = useRoute();

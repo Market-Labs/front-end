@@ -1,5 +1,6 @@
 <template>
   <main class="auth-page">
+    <language-switcher class="auth-language" />
     <section class="auth-panel" aria-labelledby="recovery-title">
       <div class="auth-brand">
         <img src="/logo-marketgo.png" alt="" />
@@ -27,6 +28,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { firebaseAuth, isFirebaseMode } from '../../../shared/infrastructure/firebase-client.js';
+import LanguageSwitcher from '../../../shared/presentation/components/language-switcher.vue';
 
 const { t } = useI18n();
 const email = ref('');

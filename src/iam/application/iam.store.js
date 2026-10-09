@@ -53,10 +53,10 @@ export const useIamStore = defineStore('iam', {
     userName: (state) => state.currentUser?.name || 'Invitado',
     userRole: (state) => state.currentUser?.roles?.[0] || 'Sin rol',
     isAdmin: (state) => state.currentUser?.permissions?.includes('users:manage') || false,
-    isMinimarketAdmin: (state) => state.currentUser?.roles?.includes('Administrador de Minimarket') || false,
-    isSupplier: (state) => state.currentUser?.roles?.includes('Proveedor Organico') || false,
-    currentSupplierId: (state) => (state.currentUser?.roles?.includes('Proveedor Organico') ? state.currentUser.supplierId || 'sup-2' : null),
-    currentMinimarketId: (state) => state.currentUser?.minimarketId || 'min-1',
+    isMinimarketAdmin: (state) => Boolean(state.currentUser?.minimarketId || state.currentUser?.roles?.includes('Administrador de Minimarket')),
+    isSupplier: (state) => Boolean(state.currentUser?.supplierId || state.currentUser?.roles?.includes('Proveedor Organico')),
+    currentSupplierId: (state) => state.currentUser?.supplierId || (state.currentUser?.roles?.includes('Proveedor Organico') ? 'sup-2' : null),
+    currentMinimarketId: (state) => state.currentUser?.minimarketId || (state.currentUser?.tenantId ? null : 'min-1'),
   },
   actions: {
     async restoreSession() {
@@ -83,20 +83,40 @@ export const useIamStore = defineStore('iam', {
       if (this.currentUser?.id === id) this.currentUser = user;
       return user;
     },
-    async createUser({ name, email, password }) {
+    async createUser({ name, email, password, accessLevel = 'editor' }) {
       if (!this.currentUser?.permissions.includes('users:manage')) throw new Error('access-denied');
+      if (!['editor', 'viewer'].includes(accessLevel)) throw new Error('invalid-access-level');
+      if (accessLevel === 'editor' && this.currentUser.accessLevel === 'viewer') throw new Error('access-denied');
       const creator = this.currentUser;
+      const permissions = accessLevel === 'viewer' ? ['users:manage']
+        : this.isSupplier
+          ? ['products:write', 'procurements:track', 'users:manage']
+          : ['inventory:write', 'procurements:approve', 'users:manage'];
       const user = await iamApi.createUser({
         name: name.trim(), email: email.trim().toLowerCase(), password,
         role: this.isSupplier ? 'supplier' : 'admin',
         roles: [...creator.roles],
-        permissions: [...creator.permissions],
+        permissions,
         minimarketId: this.isSupplier ? null : creator.minimarketId,
         supplierId: this.isSupplier ? creator.supplierId : null,
         createdBy: creator.id,
+        tenantId: creator.tenantId,
+        accessLevel,
       });
       this.users.push(user);
       return user;
+    },
+    async signUp(payload) {
+      if (!isFirebaseMode) throw new Error('firebase-required');
+      const account = await iamApi.signUp({
+        ...payload,
+        name: payload.name.trim(),
+        email: payload.email.trim().toLowerCase(),
+        businessName: payload.businessName.trim(),
+      });
+      this.currentUser = account.user;
+      this.sessionReady = true;
+      return account.user;
     },
     async signIn(email, password, remember = false) {
       if (isDemoMode) return this.currentUser;

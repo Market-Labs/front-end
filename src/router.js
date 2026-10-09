@@ -30,6 +30,12 @@ const routes = [
     meta: { public: true, titleKey: 'auth.forgotPassword' },
   },
   {
+    path: '/sign-up',
+    name: 'sign-up',
+    component: () => import('./iam/presentation/views/sign-up.vue'),
+    meta: { public: true, titleKey: 'auth.createAccount' },
+  },
+  {
     path: '/',
     redirect: '/home',
   },

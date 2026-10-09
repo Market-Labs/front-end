@@ -37,71 +37,182 @@ service cloud.firestore {
       return active() && account().permissions.hasAny(['users:manage']);
     }
 
+    function canInventoryWrite() {
+      return admin() && account().permissions.hasAny(['inventory:write']);
+    }
+
+    function canSupplierWrite() {
+      return supplier() && account().permissions.hasAny(['products:write']);
+    }
+
+    function canTrack() {
+      return supplier() && account().permissions.hasAny(['procurements:track']);
+    }
+
+    function canApprove() {
+      return admin() && account().permissions.hasAny(['procurements:approve']);
+    }
+
     function sameOrganization(data) {
       return myMinimarket(data) || mySupplier(data);
+    }
+
+    function tenantMember(tenantId) {
+      return active() && account().keys().hasAny(['tenantId'])
+        && account().tenantId == tenantId;
+    }
+
+    function legacyAccount() {
+      return active() && !account().keys().hasAny(['tenantId']);
+    }
+
+    function newOwner(uid, data) {
+      return signedIn() && request.auth.uid == uid && !hasAccount()
+        && data.id == uid && data.email == request.auth.token.email
+        && data.status == 'active' && data.createdBy == null
+        && data.tenantId == uid && data.accessLevel == 'owner'
+        && data.role in ['admin', 'supplier']
+        && (data.role == 'admin' && data.minimarketId == 'min-' + uid && data.supplierId == null
+          || data.role == 'supplier' && data.supplierId == 'sup-' + uid && data.minimarketId == null)
+        && data.roles == (data.role == 'admin' ? ['Administrador de Minimarket'] : ['Proveedor Organico'])
+        && data.permissions == (data.role == 'admin'
+          ? ['inventory:write', 'procurements:approve', 'users:manage']
+          : ['products:write', 'procurements:track', 'users:manage']);
+    }
+
+    match /organizations/{tenantId} {
+      allow get: if tenantMember(tenantId);
+      allow list, update, delete: if false;
+      allow create: if signedIn() && request.auth.uid == tenantId && !hasAccount()
+        && request.resource.data.id == tenantId
+        && request.resource.data.ownerUid == tenantId
+        && request.resource.data.type in ['admin', 'supplier']
+        && request.resource.data.type == getAfter(/databases/$(database)/documents/users/$(tenantId)).data.role
+        && (request.resource.data.type == 'admin'
+          && request.resource.data.minimarketId == 'min-' + tenantId
+          && request.resource.data.supplierId == null
+          || request.resource.data.type == 'supplier'
+          && request.resource.data.supplierId == 'sup-' + tenantId
+          && request.resource.data.minimarketId == null)
+        && getAfter(/databases/$(database)/documents/users/$(tenantId)).data.tenantId == tenantId;
+
+      match /profiles/{id} {
+        allow read: if tenantMember(tenantId);
+        allow create: if signedIn() && request.auth.uid == tenantId && !hasAccount()
+          && id == 'prof-' + tenantId
+          && request.resource.data.id == id && request.resource.data.userId == tenantId
+          && request.resource.data.tenantId == tenantId
+          && request.resource.data.type == (getAfter(/databases/$(database)/documents/users/$(tenantId)).data.role == 'admin' ? 'minimarket' : 'provider')
+          && getAfter(/databases/$(database)/documents/users/$(tenantId)).data.tenantId == tenantId;
+        allow update: if tenantMember(tenantId)
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'businessName', 'email', 'phone', 'address', 'district', 'specialty', 'coverageArea'
+          ]);
+        allow delete: if false;
+      }
+
+      match /suppliers/{id} {
+        allow read: if tenantMember(tenantId);
+        allow create: if tenantMember(tenantId) && canInventoryWrite()
+          && request.resource.data.tenantId == tenantId
+          || signedIn() && request.auth.uid == tenantId && !hasAccount()
+          && id == 'sup-' + tenantId
+          && request.resource.data.id == id
+          && request.resource.data.tenantId == tenantId
+          && getAfter(/databases/$(database)/documents/users/$(tenantId)).data.role == 'supplier';
+        allow update, delete: if tenantMember(tenantId) && canInventoryWrite();
+      }
+
+      match /products/{id} {
+        allow read: if tenantMember(tenantId);
+        allow create: if tenantMember(tenantId)
+          && (canInventoryWrite() || canSupplierWrite() && mySupplier(request.resource.data))
+          && request.resource.data.tenantId == tenantId;
+        allow update: if tenantMember(tenantId)
+          && (canInventoryWrite() || canSupplierWrite() && mySupplier(resource.data))
+          && request.resource.data.tenantId == tenantId;
+        allow delete: if tenantMember(tenantId)
+          && (canInventoryWrite() || canSupplierWrite() && mySupplier(resource.data));
+      }
     }
 
     match /users/{uid} {
       allow get: if active() && (request.auth.uid == uid || sameOrganization(resource.data));
       allow list: if active() && sameOrganization(resource.data);
-      allow create: if managesUsers() && sameOrganization(request.resource.data)
+      allow create: if newOwner(uid, request.resource.data)
+        && getAfter(/databases/$(database)/documents/organizations/$(uid)).data.ownerUid == uid
+        || managesUsers() && sameOrganization(request.resource.data)
         && request.resource.data.id == uid
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.role == account().role
         && request.resource.data.roles == account().roles
-        && request.resource.data.permissions == account().permissions
+        && (!account().keys().hasAny(['tenantId'])
+          && request.resource.data.permissions == account().permissions
+          || account().keys().hasAny(['tenantId'])
+          && request.resource.data.accessLevel in ['editor', 'viewer']
+          && (account().accessLevel != 'viewer' || request.resource.data.accessLevel == 'viewer')
+          && request.resource.data.permissions == (request.resource.data.accessLevel == 'viewer'
+            ? ['users:manage']
+            : request.resource.data.role == 'admin'
+              ? ['inventory:write', 'procurements:approve', 'users:manage']
+              : ['products:write', 'procurements:track', 'users:manage']))
+        && (!account().keys().hasAny(['tenantId'])
+          || request.resource.data.tenantId == account().tenantId)
         && request.resource.data.status == 'active'
         && request.resource.data.keys().hasOnly([
           'id', 'name', 'email', 'role', 'roles', 'permissions', 'status',
-          'minimarketId', 'supplierId', 'createdBy'
+          'minimarketId', 'supplierId', 'tenantId', 'accessLevel', 'createdBy'
         ]);
       allow update: if managesUsers() && sameOrganization(resource.data)
-        && resource.data.keys().hasAny(['createdBy'])
+        && (!account().keys().hasAny(['accessLevel']) || account().accessLevel in ['owner', 'editor'])
+        && resource.data.keys().hasAny(['createdBy']) && resource.data.createdBy != null
+        && uid != request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
         && request.resource.data.status in ['active', 'inactive'];
       allow delete: if false;
     }
 
     match /profiles/{id} {
-      allow read: if active();
+      allow read: if legacyAccount();
       allow update: if active() && resource.data.userId == request.auth.uid
         && request.resource.data.userId == resource.data.userId;
       allow create, delete: if false;
     }
 
     match /products/{id} {
-      allow read: if active();
-      allow create: if admin() || mySupplier(request.resource.data);
-      allow update: if admin() || (mySupplier(resource.data)
-        && request.resource.data.supplierId == resource.data.supplierId);
-      allow delete: if admin() || mySupplier(resource.data);
+      allow read: if legacyAccount();
+      allow create: if legacyAccount() && (canInventoryWrite() || canSupplierWrite() && mySupplier(request.resource.data));
+      allow update: if legacyAccount() && (canInventoryWrite() || (canSupplierWrite() && mySupplier(resource.data)
+        && request.resource.data.supplierId == resource.data.supplierId));
+      allow delete: if legacyAccount() && (canInventoryWrite() || canSupplierWrite() && mySupplier(resource.data));
     }
 
     match /suppliers/{id} {
-      allow read: if active();
-      allow create, update, delete: if admin();
+      allow read: if legacyAccount();
+      allow create, update, delete: if legacyAccount() && canInventoryWrite();
     }
 
     match /inventory/{id} {
       allow read: if myMinimarket(resource.data);
-      allow create: if myMinimarket(request.resource.data);
-      allow update: if myMinimarket(resource.data)
+      allow create: if canInventoryWrite() && myMinimarket(request.resource.data);
+      allow update: if canInventoryWrite() && myMinimarket(resource.data)
         && request.resource.data.minimarketId == resource.data.minimarketId;
-      allow delete: if myMinimarket(resource.data);
+      allow delete: if canInventoryWrite() && myMinimarket(resource.data);
     }
 
     match /supplierInventory/{id} {
       allow read: if mySupplier(resource.data);
-      allow create: if mySupplier(request.resource.data);
-      allow update: if mySupplier(resource.data)
+      allow create: if canSupplierWrite() && mySupplier(request.resource.data);
+      allow update: if canSupplierWrite() && mySupplier(resource.data)
         && request.resource.data.supplierId == resource.data.supplierId;
-      allow delete: if mySupplier(resource.data);
+      allow delete: if canSupplierWrite() && mySupplier(resource.data);
     }
 
     match /requisitions/{id} {
       allow read: if myMinimarket(resource.data) || mySupplier(resource.data);
-      allow create: if myMinimarket(request.resource.data);
-      allow update: if mySupplier(resource.data)
+      allow create: if canInventoryWrite() && myMinimarket(request.resource.data);
+      allow update: if canTrack() && mySupplier(resource.data)
         && request.resource.data.supplierId == resource.data.supplierId
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['status', 'reviewedAt', 'rejectionReason', 'response', 'shippingOrderId'])
@@ -112,9 +223,9 @@ service cloud.firestore {
 
     match /purchaseOrders/{id} {
       allow read: if myMinimarket(resource.data) || mySupplier(resource.data);
-      allow create: if mySupplier(request.resource.data)
+      allow create: if canTrack() && mySupplier(request.resource.data)
         && request.resource.data.status == 'pending-reception';
-      allow update: if myMinimarket(resource.data)
+      allow update: if canApprove() && myMinimarket(resource.data)
         && resource.data.status == 'pending-reception'
         && request.resource.data.status in ['received', 'rejected']
         && request.resource.data.diff(resource.data).affectedKeys()
@@ -125,14 +236,14 @@ service cloud.firestore {
     match /waste/{id} {
       allow read: if active() && (resource.data.ownerId == account().minimarketId && admin()
         || resource.data.ownerId == account().supplierId && supplier());
-      allow create: if active() && (request.resource.data.ownerId == account().minimarketId && admin()
-        || request.resource.data.ownerId == account().supplierId && supplier());
+      allow create: if active() && (request.resource.data.ownerId == account().minimarketId && canInventoryWrite()
+        || request.resource.data.ownerId == account().supplierId && canSupplierWrite());
       allow update, delete: if false;
     }
 
     match /retailSales/{id} {
       allow read: if myMinimarket(resource.data);
-      allow create: if myMinimarket(request.resource.data);
+      allow create: if canInventoryWrite() && myMinimarket(request.resource.data);
       allow update, delete: if false;
     }
 
@@ -156,8 +267,8 @@ service cloud.firestore {
     }
 
     match /summaries/{id} {
-      allow get: if admin() && id in ['dashboard', 'analytics']
-        || supplier() && id in ['supplierDashboard', 'supplierAnalytics'];
+      allow get: if legacyAccount() && (admin() && id in ['dashboard', 'analytics']
+        || supplier() && id in ['supplierDashboard', 'supplierAnalytics']);
       allow list, create, update, delete: if false;
     }
   }

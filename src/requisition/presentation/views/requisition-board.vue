@@ -7,7 +7,7 @@
         <p>{{ $t('page.requisition.description') }}</p>
       </div>
       <pv-button
-        v-if="iamStore.isMinimarketAdmin"
+        v-if="iamStore.isMinimarketAdmin && canCreate"
         :label="$t('page.requisition.newRequest')"
         icon="pi pi-plus"
         @click="showRequisitionForm = true"
@@ -88,7 +88,7 @@
             <div class="action-group">
               <pv-button :label="$t('common.viewDetails')" size="small" icon="pi pi-eye" outlined @click="openDetails(data)" />
               <pv-button
-                v-if="iamStore.isSupplier && data.canBeReviewed"
+                v-if="canReview && data.canBeReviewed"
                 :label="$t('page.requisition.accept')"
                 size="small"
                 icon="pi pi-check"
@@ -96,7 +96,7 @@
                 @click="acceptSupplyRequest(data)"
               />
               <pv-button
-                v-if="iamStore.isSupplier && data.canBeReviewed"
+                v-if="canReview && data.canBeReviewed"
                 :label="$t('page.requisition.reject')"
                 size="small"
                 severity="danger"
@@ -106,7 +106,7 @@
                 @click="rejectSupplyRequest(data)"
               />
               <pv-button
-                v-if="iamStore.isSupplier && data.canGenerateShippingOrder"
+                v-if="canReview && data.canGenerateShippingOrder"
                 :label="$t('page.requisition.createShippingOrder')"
                 size="small"
                 icon="pi pi-truck"
@@ -135,6 +135,8 @@ import { useI18n } from 'vue-i18n';
 const requisitionStore = useRequisitionStore();
 const procurementsStore = useProcurementsStore();
 const iamStore = useIamStore();
+const canCreate = computed(() => iamStore.currentUser?.permissions.includes('inventory:write'));
+const canReview = computed(() => iamStore.currentUser?.permissions.includes('procurements:track'));
 const productsStore = useProductsStore();
 const suppliersStore = useSuppliersStore();
 const { t } = useI18n();

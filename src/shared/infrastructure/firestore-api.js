@@ -44,8 +44,20 @@ const currentProfile = async () => {
   return { uid, ...snapshot.data() };
 };
 
+const organizationCollection = (profile, resource) => (
+  profile.tenantId && ['products', 'suppliers', 'profiles'].includes(resource)
+    ? collection(firestore, 'organizations', profile.tenantId, resource)
+    : collection(firestore, resource)
+);
+
+const organizationDocument = (profile, resource, id) => (
+  profile.tenantId && ['products', 'suppliers', 'profiles'].includes(resource)
+    ? doc(firestore, 'organizations', profile.tenantId, resource, id)
+    : doc(firestore, resource, id)
+);
+
 const listQuery = (resource, profile) => {
-  const ref = collection(firestore, resource);
+  const ref = organizationCollection(profile, resource);
   const supplier = profile.role === 'supplier';
   if (resource === 'users') return query(ref, where(supplier ? 'supplierId' : 'minimarketId', '==', supplier ? profile.supplierId : profile.minimarketId));
   if (resource === 'suppliers') return supplier ? query(ref, where('id', '==', profile.supplierId)) : ref;
@@ -79,21 +91,27 @@ export const firestoreAdapter = async (config) => {
   const resource = routes.get(route);
   const id = path === route ? null : decodeURIComponent(path.slice(route.length + 1));
   const profile = await currentProfile();
-  const ref = id ? doc(firestore, resource, id) : null;
+  const ref = id ? organizationDocument(profile, resource, id) : null;
   let data;
 
   if (method === 'get') {
     if (singletonResources.has(resource)) {
-      const snapshot = await getDoc(doc(firestore, 'summaries', resource));
-      if (!snapshot.exists()) throw new Error(`Missing summary: ${resource}`);
-      data = snapshot.data();
+      if (profile.tenantId) {
+        data = resource.toLowerCase().includes('dashboard')
+          ? { healthScore: 0, indicators: [], activity: [] }
+          : { indicators: [], reportSummaries: {} };
+      } else {
+        const snapshot = await getDoc(doc(firestore, 'summaries', resource));
+        if (!snapshot.exists()) throw new Error(`Missing summary: ${resource}`);
+        data = snapshot.data();
+      }
     } else if (id) {
       const snapshot = await getDoc(ref);
       if (!snapshot.exists()) throw new Error(`Missing document: ${path}`);
       data = { ...snapshot.data(), id: snapshot.id };
     } else {
       const selected = route === apiEndpoints.supplierProducts
-        ? query(collection(firestore, 'products'), where('supplierId', '==', profile.supplierId))
+        ? query(organizationCollection(profile, 'products'), where('supplierId', '==', profile.supplierId))
         : listQuery(resource, profile);
       const snapshot = await getDocs(selected);
       data = snapshot.docs.map((item) => ({ ...item.data(), id: item.id }));
@@ -103,7 +121,8 @@ export const firestoreAdapter = async (config) => {
     if (!payload.id) throw new Error('missing-id');
     if (resource === 'inventory') payload.minimarketId = profile.minimarketId;
     if (resource === 'supplierInventory') payload.supplierId = profile.supplierId;
-    const target = doc(firestore, resource, String(payload.id));
+    if (profile.tenantId && ['products', 'suppliers', 'profiles'].includes(resource)) payload.tenantId = profile.tenantId;
+    const target = organizationDocument(profile, resource, String(payload.id));
     await runTransaction(firestore, async (transaction) => {
       if ((await transaction.get(target)).exists()) throw new Error('duplicate-id');
       transaction.set(target, payload);

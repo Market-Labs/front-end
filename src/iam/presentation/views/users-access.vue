@@ -28,7 +28,7 @@
         </label>
         <label>
           {{ $t('page.iam.role') }}
-          <span class="read-only-value">{{ iamStore.userRole }}</span>
+          <pv-select v-model="createForm.accessLevel" :options="accessOptions" option-label="label" option-value="value" />
         </label>
         <p v-if="createError" class="form-error" role="alert">{{ createError }}</p>
       </form>
@@ -81,7 +81,7 @@
         <pv-column field="email" :header="$t('page.iam.email')" />
         <pv-column :header="$t('page.iam.role')">
           <template #body="{ data }">
-            {{ data.roles[0] }}
+            {{ data.roles[0] }} · {{ $t(`auth.access.${data.accessLevel}`) }}
           </template>
         </pv-column>
         <pv-column :header="$t('common.status')">
@@ -104,7 +104,8 @@ import { isFirebaseMode } from '../../../shared/infrastructure/firebase-client.j
 const iamStore = useIamStore();
 const { t } = useI18n();
 const visibleUsers = computed(() => iamStore.users);
-const editableUsers = computed(() => visibleUsers.value.filter((user) => user.createdBy && user.id !== iamStore.currentUser?.id));
+const editableUsers = computed(() => visibleUsers.value.filter((user) => user.createdBy && user.id !== iamStore.currentUser?.id
+  && iamStore.currentUser?.accessLevel !== 'viewer'));
 const canManageUsers = computed(() => iamStore.currentUser?.permissions.includes('users:manage') || false);
 const filteredUsers = useSearchFilter(() => visibleUsers.value);
 const showUserForm = ref(false);
@@ -113,7 +114,11 @@ const saving = ref(false);
 const creating = ref(false);
 const formError = ref('');
 const createError = ref('');
-const createForm = reactive({ name: '', email: '', password: '' });
+const createForm = reactive({ name: '', email: '', password: '', accessLevel: 'editor' });
+const accessOptions = computed(() => [
+  ...(iamStore.currentUser?.accessLevel === 'viewer' ? [] : [{ label: t('auth.access.editor'), value: 'editor' }]),
+  { label: t('auth.access.viewer'), value: 'viewer' },
+]);
 const roleOptions = computed(() => [...new Set(visibleUsers.value.flatMap((user) => user.roles))]);
 const statusOptions = computed(() => [
   { label: t('status.active'), value: 'active' },
@@ -143,6 +148,7 @@ const openCreateForm = () => {
   createForm.name = '';
   createForm.email = '';
   createForm.password = '';
+  createForm.accessLevel = accessOptions.value[0]?.value || 'viewer';
   createError.value = '';
   showCreateForm.value = true;
 };

@@ -5,6 +5,7 @@ import { browserLocalPersistence, browserSessionPersistence, setPersistence, sig
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firestore, isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 import { provisionFirebaseUser } from './firebase-user-provisioning.js';
+import { registerFirebaseAccount } from './firebase-account-registration.js';
 
 export class IamApi extends BaseApi {
   async signIn(credentials) {
@@ -38,7 +39,7 @@ export class IamApi extends BaseApi {
   }
 
   async signUp(payload) {
-    if (isFirebaseMode) throw new Error('admin-provisioning-required');
+    if (isFirebaseMode) return { user: UserAssembler.toEntity(await registerFirebaseAccount(payload)) };
     const response = await this.http.post(`${apiEndpoints.auth}/sign-up`, payload);
     return response.data;
   }

@@ -6,7 +6,7 @@ import {
 import { doc, setDoc } from 'firebase/firestore';
 import { firebaseConfig, firestore } from '../../shared/infrastructure/firebase-client.js';
 
-export const provisionFirebaseUser = async ({ name, email, password, role, roles, permissions, minimarketId, supplierId, createdBy }) => {
+export const provisionFirebaseUser = async ({ name, email, password, role, roles, permissions, minimarketId, supplierId, tenantId, accessLevel, createdBy }) => {
   const secondaryApp = initializeApp(firebaseConfig, `marketgo-provision-${crypto.randomUUID()}`);
   const secondaryAuth = getAuth(secondaryApp);
   let createdUser;
@@ -17,7 +17,8 @@ export const provisionFirebaseUser = async ({ name, email, password, role, roles
     const record = {
       id: createdUser.uid,
       name, email, role, roles, permissions,
-      status: 'active', minimarketId, supplierId, createdBy,
+      status: 'active', minimarketId, supplierId, accessLevel, createdBy,
+      ...(tenantId ? { tenantId } : {}),
     };
     await setDoc(doc(firestore, 'users', createdUser.uid), record);
     return record;

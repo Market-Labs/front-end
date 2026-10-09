@@ -6,7 +6,7 @@
         <h2>{{ $t('page.profiles.title') }}</h2>
         <p>{{ $t('page.profiles.description') }}</p>
       </div>
-      <pv-button :label="$t('page.profiles.updateProfile')" icon="pi pi-pencil" @click="openContactForm" />
+      <pv-button v-if="ownProfile" :label="$t('page.profiles.updateProfile')" icon="pi pi-pencil" @click="openContactForm" />
     </div>
 
     <pv-dialog v-model:visible="showContactForm" modal :header="$t('page.profiles.updateProfile')" :style="{ width: '520px' }">

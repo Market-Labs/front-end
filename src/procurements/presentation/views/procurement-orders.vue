@@ -7,7 +7,7 @@
         <p>{{ $t('page.procurements.description') }}</p>
       </div>
       <pv-button
-        v-if="iamStore.isSupplier"
+        v-if="canCreate"
         :label="$t('page.procurements.createOrder')"
         icon="pi pi-plus"
         @click="showOrderForm = true"
@@ -85,7 +85,7 @@
             <div class="action-group">
               <pv-button :label="$t('common.viewDetails')" size="small" icon="pi pi-eye" outlined @click="openDetails(data)" />
               <pv-button
-                v-if="iamStore.isMinimarketAdmin && data.canBeReviewed"
+                v-if="canReview && data.canBeReviewed"
                 :label="$t('page.procurements.acceptReception')"
                 size="small"
                 icon="pi pi-check"
@@ -93,7 +93,7 @@
                 @click="acceptReception(data)"
               />
               <pv-button
-                v-if="iamStore.isMinimarketAdmin && data.canBeReviewed"
+                v-if="canReview && data.canBeReviewed"
                 :label="$t('page.procurements.rejectReception')"
                 size="small"
                 severity="danger"
@@ -124,6 +124,8 @@ import { useI18n } from 'vue-i18n';
 const procurementsStore = useProcurementsStore();
 const inventoryStore = useInventoryStore();
 const iamStore = useIamStore();
+const canCreate = computed(() => iamStore.currentUser?.permissions.includes('procurements:track'));
+const canReview = computed(() => iamStore.currentUser?.permissions.includes('procurements:approve'));
 const profilesStore = useProfilesStore();
 const productsStore = useProductsStore();
 const { t } = useI18n();

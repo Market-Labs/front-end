@@ -100,7 +100,7 @@ const generateReport = async (type) => {
   try {
     await analyticsStore.fetchReportSources(iamStore.isSupplier);
     if (!analyticsStore.reportSources) throw new Error('missing-report-data');
-    generatedReport.value = buildReport(type, analyticsStore.reportSources, iamStore.isSupplier, t);
+    generatedReport.value = buildReport(type, analyticsStore.reportSources, iamStore.isSupplier, t, iamStore.isSupplier ? iamStore.currentSupplierId : iamStore.currentMinimarketId);
   } catch { error.value = t('page.analytics.reportError'); }
   finally { generating.value = false; }
 };
@@ -118,7 +118,7 @@ onMounted(() => analyticsStore.fetchReportSources(iamStore.isSupplier));
 watch(locale, () => {
   if (generatedReport.value && analyticsStore.reportSources) {
     const generatedAt = generatedReport.value.generatedAt;
-    generatedReport.value = { ...buildReport(generatedReport.value.type, analyticsStore.reportSources, iamStore.isSupplier, t), generatedAt };
+    generatedReport.value = { ...buildReport(generatedReport.value.type, analyticsStore.reportSources, iamStore.isSupplier, t, iamStore.isSupplier ? iamStore.currentSupplierId : iamStore.currentMinimarketId), generatedAt };
   }
 });
 </script>

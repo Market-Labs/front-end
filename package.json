@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:firebase": "vite --mode firebase",
     "server": "json-server --watch server/db.json --routes server/routes.json --port 3000",
     "dev:mock": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "vite build",

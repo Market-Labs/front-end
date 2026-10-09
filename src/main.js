@@ -4,6 +4,7 @@ import App from './App.vue'
 import router from './router.js'
 import pinia from './pinia.js'
 import i18n from './i18n.js'
+document.documentElement.lang = i18n.global.locale.value
 import PrimeVue from 'primevue/config'
 import Material from '@primeuix/themes/material'
 import ToastService from 'primevue/toastservice'

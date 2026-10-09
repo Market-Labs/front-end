@@ -26,6 +26,8 @@ const options = [
 
 const setLocale = (value) => {
   locale.value = value;
+  window.localStorage.setItem('marketgo.locale', value);
+  document.documentElement.lang = value;
   const title = route.meta.titleKey ? t(route.meta.titleKey) : route.meta.title || 'App';
   document.title = `MarketGo - ${title}`;
 };
