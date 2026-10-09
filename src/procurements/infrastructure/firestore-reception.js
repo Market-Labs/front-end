@@ -26,7 +26,7 @@ export const receiveOrderInFirestore = async (order, products, administratorId) 
       throw new Error('invalid-order-status');
     }
     const currentItems = [];
-    for (const entry of planned) currentItems.push(await transaction.get(entry.ref));
+    for (const entry of planned) currentItems.push(entry.existing ? await transaction.get(entry.ref) : null);
 
     planned.forEach((entry, index) => {
       const snapshot = currentItems[index];
@@ -39,7 +39,6 @@ export const receiveOrderInFirestore = async (order, products, administratorId) 
           status: stock <= Number(current.minimumStock) ? 'risk' : 'healthy',
         });
       } else {
-        if (snapshot.exists()) throw new Error('inventory-changed');
         transaction.set(entry.ref, {
           id: entry.ref.id,
           minimarketId: order.minimarketId,

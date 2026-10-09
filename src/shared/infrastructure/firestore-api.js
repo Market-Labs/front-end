@@ -1,5 +1,5 @@
 import {
-  collection, deleteDoc, doc, getDoc, getDocs, query, runTransaction, updateDoc, where,
+  collection, deleteDoc, doc, getDoc, getDocs, query, runTransaction, setDoc, updateDoc, where,
 } from 'firebase/firestore';
 import { apiEndpoints } from './api-endpoints.js';
 import { firebaseAuth, firestore } from './firebase-client.js';
@@ -35,6 +35,7 @@ const singletonResources = new Set([
 ]);
 
 const emptyRoutes = new Set([apiEndpoints.donations]);
+const createWithoutRead = new Set(['inventory', 'supplierInventory', 'requisitions', 'purchaseOrders', 'waste']);
 const payloadFrom = (data) => typeof data === 'string' ? JSON.parse(data) : data;
 
 const currentProfile = async () => {
@@ -134,10 +135,14 @@ export const firestoreAdapter = async (config) => {
     if (resource === 'supplierInventory') payload.supplierId = profile.supplierId;
     if (profile.tenantId && ['products', 'suppliers', 'profiles'].includes(resource)) payload.tenantId = profile.tenantId;
     const target = organizationDocument(profile, resource, String(payload.id));
-    await runTransaction(firestore, async (transaction) => {
-      if ((await transaction.get(target)).exists()) throw new Error('duplicate-id');
-      transaction.set(target, payload);
-    });
+    if (createWithoutRead.has(resource)) {
+      await setDoc(target, payload);
+    } else {
+      await runTransaction(firestore, async (transaction) => {
+        if ((await transaction.get(target)).exists()) throw new Error('duplicate-id');
+        transaction.set(target, payload);
+      });
+    }
     data = payload;
   } else if (method === 'patch' && id && !singletonResources.has(resource)) {
     await updateDoc(ref, payloadFrom(config.data));

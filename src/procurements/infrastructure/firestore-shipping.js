@@ -28,10 +28,9 @@ export const createShippingOrderInFirestore = async (request, products, supplier
 
   await runTransaction(firestore, async (transaction) => {
     const requestSnapshot = await transaction.get(requestRef);
-    const orderSnapshot = await transaction.get(orderRef);
     const current = requestSnapshot.data();
     if (!requestSnapshot.exists() || current.status !== 'accepted'
-      || current.shippingOrderId || current.supplierId !== supplierId || orderSnapshot.exists()) {
+      || current.shippingOrderId || current.supplierId !== supplierId) {
       throw new Error('invalid-request-status');
     }
     transaction.set(orderRef, order);
