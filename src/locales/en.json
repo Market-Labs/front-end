@@ -159,6 +159,10 @@
       "registerStock": "Register stock",
       "registerWaste": "Record waste",
       "registerOutput": "Record stock output",
+      "registerOffer": "Create offer",
+      "offerPrice": "Offer price",
+      "offerEndDate": "Offer end date",
+      "offerSummary": "{count} active offers",
       "selectLot": "Select lot",
       "units": "units",
       "wasteReason": "Waste reason",
@@ -167,6 +171,9 @@
       "selectReason": "Select reason",
       "wasteReasons": { "expiration": "Waste due to expiration", "conservation": "Waste due to conservation", "handling": "Waste due to handling" },
       "lot": "Lot",
+      "expired": "Expired",
+      "nearExpiration": "Expiring soon",
+      "lowStock": "Low stock",
       "minimumStock": "Minimum stock"
     },
     "products": {
@@ -285,7 +292,14 @@
       "description": "Review conservation, expiration, stock and order alerts.",
       "viewSuppliers": "View suppliers",
       "unread": "{count} unread",
-      "markRead": "Mark as read"
+      "markRead": "Mark as read",
+      "expirationTitle": "Lot expiration",
+      "expiredBody": "{product}, lot {lot}, has expired. Review its stock.",
+      "expiringBody": "{product}, lot {lot}, expires in {days} days.",
+      "lowStockTitle": "Low stock",
+      "lowStockBody": "{product}, lot {lot}, has reached minimum stock.",
+      "conservationTitle": "Conservation risk",
+      "conservationBody": "Check {zone} and product {product}."
     },
     "roleDashboard": {
       "eyebrow": "Dashboard",

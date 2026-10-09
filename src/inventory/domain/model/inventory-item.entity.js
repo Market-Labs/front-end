@@ -1,6 +1,7 @@
 export class InventoryItem {
-  constructor({ id, productName, stock, minimumStock, lotCode, expirationDate, status, stockUpdates = [] }) {
+  constructor({ id, productId, productName, stock, minimumStock, lotCode, expirationDate, status, stockUpdates = [], offers = [] }) {
     this.id = id;
+    this.productId = productId;
     this.productName = productName;
     this.stock = stock;
     this.minimumStock = minimumStock;
@@ -8,6 +9,7 @@ export class InventoryItem {
     this.expirationDate = expirationDate;
     this.status = status;
     this.stockUpdates = stockUpdates;
+    this.offers = offers;
   }
 
   get isLowStock() {

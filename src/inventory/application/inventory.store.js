@@ -4,6 +4,8 @@ import { InventoryItem } from '../domain/model/inventory-item.entity.js';
 import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 import { registerWasteInFirestore } from '../infrastructure/firestore-waste.js';
 import { registerStockOutputInFirestore } from '../infrastructure/firestore-stock-output.js';
+import { registerOfferInFirestore } from '../infrastructure/firestore-offer.js';
+import { reconcileOffers } from '../domain/model/offer-policy.js';
 
 const inventoryApi = new InventoryApi();
 
@@ -31,6 +33,20 @@ export const useInventoryStore = defineStore('inventory', {
     lowStockCount: (state) => state.items.filter((item) => item.isLowStock).length,
   },
   actions: {
+    async registerOffer({ itemId, ownerId, quantity, offerPrice, endDate }) {
+      const item = this.items.find((entry) => entry.id === itemId);
+      if (!item || !Number.isInteger(quantity) || quantity <= 0 || !Number.isFinite(offerPrice) || offerPrice <= 0) {
+        throw new Error('invalid-offer');
+      }
+      const updated = isFirebaseMode
+        ? await registerOfferInFirestore({ itemId, ownerId, quantity, offerPrice, endDate })
+        : await inventoryApi.updateItem(itemId, { offers: [...item.offers, {
+          id: `offer-${crypto.randomUUID()}`, inventoryItemId: itemId, lotCode: item.lotCode,
+          quantity, offerPrice, startDate: new Date().toISOString().slice(0, 10), endDate, status: 'active',
+        }] });
+      Object.assign(item, updated);
+      return updated;
+    },
     async fetchWaste(isSupplier = false) {
       try {
         this.waste = await inventoryApi.getWaste(isSupplier);
@@ -48,15 +64,16 @@ export const useInventoryStore = defineStore('inventory', {
         return record;
       }
       const before = item.stock;
+      const beforeOffers = item.offers;
       const stock = before - quantity;
-      const updated = await inventoryApi.updateItem(item.id, { stock, status: stock <= item.minimumStock ? 'risk' : 'healthy' }, isSupplier);
+      const updated = await inventoryApi.updateItem(item.id, { stock, status: stock <= item.minimumStock ? 'risk' : 'healthy', offers: reconcileOffers(item.offers, stock) }, isSupplier);
       Object.assign(item, updated);
       try {
         const record = await inventoryApi.createWaste({ id: `waste-${crypto.randomUUID()}`, ownerId, productName: item.productName, lotCode: item.lotCode, quantity, unit: 'units', reason, recordedAt: new Date().toISOString() });
         this.waste.unshift(record);
         return record;
       } catch (error) {
-        const restored = await inventoryApi.updateItem(item.id, { stock: before, status: before <= item.minimumStock ? 'risk' : 'healthy' }, isSupplier);
+        const restored = await inventoryApi.updateItem(item.id, { stock: before, status: before <= item.minimumStock ? 'risk' : 'healthy', offers: beforeOffers }, isSupplier);
         Object.assign(item, restored);
         throw error;
       }
@@ -80,6 +97,7 @@ export const useInventoryStore = defineStore('inventory', {
           stock: item.stock - quantity,
           status: item.stock - quantity <= item.minimumStock ? 'risk' : 'healthy',
           stockUpdates: [...item.stockUpdates, movement],
+          offers: reconcileOffers(item.offers, item.stock - quantity),
         });
       Object.assign(item, updated);
       return updated;

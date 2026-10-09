@@ -2,6 +2,11 @@ import { defineStore } from 'pinia';
 import { CommunicationApi } from '../infrastructure/communication-api.js';
 import { Message } from '../domain/model/message.entity.js';
 import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
+import { useInventoryStore } from '../../inventory/application/inventory.store.js';
+import { useConservationStore } from '../../conservation/application/conservation.store.js';
+import { operationalAlerts } from '../domain/model/operational-alerts.js';
+import i18n from '../../i18n.js';
+import { useIamStore } from '../../iam/application/iam.store.js';
 
 const communicationApi = new CommunicationApi();
 
@@ -15,6 +20,7 @@ const demoMessages = [
 export const useCommunicationStore = defineStore('communication', {
   state: () => ({
     messages: isFirebaseMode ? [] : demoMessages,
+    ownerKey: null,
     loading: false,
     error: null,
   }),
@@ -25,7 +31,19 @@ export const useCommunicationStore = defineStore('communication', {
     async fetchMessages(isSupplier = false) {
       this.loading = true;
       try {
-        this.messages = await communicationApi.getNotifications(isSupplier);
+        const ownerKey = useIamStore().currentUser?.id || null;
+        const inventory = useInventoryStore();
+        const conservation = useConservationStore();
+        const [messages] = await Promise.all([
+          communicationApi.getNotifications(isSupplier),
+          inventory.fetchInventory(isSupplier),
+          conservation.fetchMonitoring(isSupplier),
+        ]);
+        const previous = new Map((this.ownerKey === ownerKey ? this.messages : []).map((message) => [message.id, message]));
+        const generated = operationalAlerts(inventory.items, conservation.records, i18n.global.t);
+        this.messages = [...messages, ...generated.filter((alert) => !messages.some((message) => message.body === alert.body))]
+          .map((message) => new Message({ ...message, read: previous.get(message.id)?.read ?? message.read, starred: previous.get(message.id)?.starred ?? message.starred }));
+        this.ownerKey = ownerKey;
       } catch (error) {
         this.error = isFirebaseMode ? 'No se pudo cargar alertas desde Firestore.' : 'No se pudo cargar alertas. Se muestran datos demo.';
         this.messages = isSupplier || isFirebaseMode ? [] : demoMessages;

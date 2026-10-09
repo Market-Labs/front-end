@@ -1,5 +1,6 @@
 import demoData from './demo-data.json';
 import { apiEndpoints } from './api-endpoints.js';
+import { expiringLots } from '../../inventory/domain/model/expiration-policy.js';
 
 const resources = new Map([
   [apiEndpoints.health, demoData.health],
@@ -13,8 +14,8 @@ const resources = new Map([
   [apiEndpoints.inventory, demoData.inventory],
   [apiEndpoints.supplierInventory, demoData.supplierInventory],
   [apiEndpoints.inventorySearch, demoData.inventory],
-  [apiEndpoints.lots, []],
-  [apiEndpoints.expirations, []],
+  [apiEndpoints.lots, demoData.inventory],
+  [apiEndpoints.expirations, expiringLots(demoData.inventory)],
   [apiEndpoints.requisitions, demoData.requisitions],
   [apiEndpoints.procurements, demoData.purchaseOrders],
   [apiEndpoints.suppliers, demoData.suppliers],

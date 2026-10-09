@@ -1,5 +1,6 @@
 import { doc, runTransaction } from 'firebase/firestore';
 import { firestore } from '../../shared/infrastructure/firebase-client.js';
+import { reconcileOffers } from '../domain/model/offer-policy.js';
 
 export const registerWasteInFirestore = async ({ item, quantity, reason, ownerId, isSupplier }) => {
   const inventoryRef = doc(firestore, isSupplier ? 'supplierInventory' : 'inventory', item.id);
@@ -17,7 +18,7 @@ export const registerWasteInFirestore = async ({ item, quantity, reason, ownerId
     const current = snapshot.data();
     const stock = Number(current.stock) - quantity;
     if (stock < 0) throw new Error('insufficient-stock');
-    const changes = { stock, status: stock <= Number(current.minimumStock) ? 'risk' : 'healthy' };
+    const changes = { stock, status: stock <= Number(current.minimumStock) ? 'risk' : 'healthy', offers: reconcileOffers(current.offers, stock) };
     transaction.update(inventoryRef, changes);
     transaction.set(wasteRef, record);
     return { ...current, ...changes };

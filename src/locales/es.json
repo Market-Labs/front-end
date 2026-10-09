@@ -159,6 +159,10 @@
       "registerStock": "Registrar stock",
       "registerWaste": "Registrar merma",
       "registerOutput": "Registrar salida",
+      "registerOffer": "Registrar oferta",
+      "offerPrice": "Precio de oferta",
+      "offerEndDate": "Fin de la oferta",
+      "offerSummary": "{count} ofertas activas",
       "selectLot": "Selecciona un lote",
       "units": "unidades",
       "wasteReason": "Motivo de merma",
@@ -167,6 +171,9 @@
       "selectReason": "Selecciona un motivo",
       "wasteReasons": { "expiration": "Merma por vencimiento", "conservation": "Merma por conservación", "handling": "Merma por manipulación" },
       "lot": "Lote",
+      "expired": "Vencido",
+      "nearExpiration": "Próximo a vencer",
+      "lowStock": "Stock bajo",
       "minimumStock": "Stock mínimo"
     },
     "products": {
@@ -285,7 +292,14 @@
       "description": "Revisa las alertas de conservación, vencimiento, stock y pedidos.",
       "viewSuppliers": "Ver proveedores",
       "unread": "{count} sin leer",
-      "markRead": "Marcar como leída"
+      "markRead": "Marcar como leída",
+      "expirationTitle": "Vencimiento de lote",
+      "expiredBody": "{product}, lote {lot}, está vencido. Revisa su stock.",
+      "expiringBody": "{product}, lote {lot}, vence en {days} días.",
+      "lowStockTitle": "Stock bajo",
+      "lowStockBody": "{product}, lote {lot}, alcanzó el stock mínimo.",
+      "conservationTitle": "Conservación en riesgo",
+      "conservationBody": "Revisa {zone} y el producto {product}."
     },
     "roleDashboard": {
       "eyebrow": "Dashboard",

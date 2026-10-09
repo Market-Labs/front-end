@@ -3,6 +3,7 @@ import {
 } from 'firebase/firestore';
 import { apiEndpoints } from './api-endpoints.js';
 import { firebaseAuth, firestore } from './firebase-client.js';
+import { expiringLots } from '../../inventory/domain/model/expiration-policy.js';
 
 const routes = new Map([
   [apiEndpoints.users, 'users'],
@@ -33,7 +34,7 @@ const singletonResources = new Set([
   'dashboard', 'supplierDashboard', 'analytics', 'supplierAnalytics',
 ]);
 
-const emptyRoutes = new Set([apiEndpoints.lots, apiEndpoints.expirations, apiEndpoints.donations]);
+const emptyRoutes = new Set([apiEndpoints.donations]);
 const payloadFrom = (data) => typeof data === 'string' ? JSON.parse(data) : data;
 
 const currentProfile = async () => {
@@ -83,6 +84,16 @@ export const firestoreAdapter = async (config) => {
   }
   if (emptyRoutes.has(path) && method === 'get') {
     return { data: [], status: 200, statusText: 'OK', headers: {}, config };
+  }
+
+  if ([apiEndpoints.lots, apiEndpoints.expirations].includes(path) && method === 'get') {
+    const profile = await currentProfile();
+    const snapshot = await getDocs(listQuery('inventory', profile));
+    const lots = snapshot.docs.map((item) => ({ ...item.data(), id: item.id }));
+    return {
+      data: path === apiEndpoints.expirations ? expiringLots(lots) : lots,
+      status: 200, statusText: 'OK', headers: {}, config,
+    };
   }
 
   const route = [...routes.keys()].sort((a, b) => b.length - a.length)

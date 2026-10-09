@@ -6,7 +6,7 @@
         <h2>{{ $t('page.inventory.title') }}</h2>
         <p>{{ $t('page.inventory.description') }}</p>
       </div>
-      <div v-if="canWrite" class="view-actions"><pv-button :label="$t(iamStore.isSupplier ? 'page.inventory.registerWaste' : 'page.inventory.registerOutput')" icon="pi pi-minus" outlined @click="openWasteForm" /><pv-button :label="$t('page.inventory.registerStock')" icon="pi pi-plus" @click="openStockForm" /></div>
+      <div v-if="canWrite" class="view-actions"><pv-button v-if="!iamStore.isSupplier" :label="$t('page.inventory.registerOffer')" icon="pi pi-tag" outlined @click="openOfferForm" /><pv-button :label="$t(iamStore.isSupplier ? 'page.inventory.registerWaste' : 'page.inventory.registerOutput')" icon="pi pi-minus" outlined @click="openWasteForm" /><pv-button :label="$t('page.inventory.registerStock')" icon="pi pi-plus" @click="openStockForm" /></div>
     </div>
 
     <pv-dialog v-model:visible="showStockForm" modal :header="$t('page.inventory.registerStock')" :style="{ width: '520px' }">
@@ -43,6 +43,18 @@
       </template>
     </pv-dialog>
 
+    <pv-dialog v-model:visible="showOfferForm" modal :header="$t('page.inventory.registerOffer')" :style="{ width: 'min(520px, calc(100vw - 32px))' }">
+      <form class="entity-form" @submit.prevent="saveOffer">
+        <label>{{ $t('page.inventory.lot') }}<pv-select v-model="offerForm.itemId" :options="offerableLots" option-label="label" option-value="id" :placeholder="$t('page.inventory.selectLot')" /></label>
+        <p v-if="selectedOfferItem" class="waste-lot">{{ selectedOfferItem.lotCode }} · {{ selectedOfferItem.stock }} {{ $t('page.inventory.units') }}</p>
+        <label>{{ $t('common.quantity') }}<pv-input-text v-model="offerForm.quantity" type="number" min="1" step="1" /></label>
+        <label>{{ $t('page.inventory.offerPrice') }}<pv-input-text v-model="offerForm.offerPrice" type="number" min="0.01" step="0.01" /></label>
+        <label>{{ $t('page.inventory.offerEndDate') }}<pv-input-text v-model="offerForm.endDate" type="date" /></label>
+        <p v-if="offerError" class="form-error" role="alert">{{ offerError }}</p>
+      </form>
+      <template #footer><pv-button :label="$t('common.cancel')" text @click="showOfferForm = false" /><pv-button :label="$t('common.save')" icon="pi pi-save" :loading="savingOffer" @click="saveOffer" /></template>
+    </pv-dialog>
+
     <pv-dialog v-model:visible="showWasteForm" modal :header="$t(iamStore.isSupplier ? 'page.inventory.registerWaste' : 'page.inventory.registerOutput')" :style="{ width: 'min(520px, calc(100vw - 32px))' }">
       <form class="entity-form" @submit.prevent="saveWaste">
         <label>{{ $t('page.inventory.lot') }}<pv-select v-model="wasteForm.itemId" :options="inventoryStore.items.filter((item) => item.stock > 0)" option-label="productName" option-value="id" :placeholder="$t('page.inventory.selectLot')" /></label>
@@ -63,9 +75,8 @@
         <pv-column field="expirationDate" :header="$t('common.expiration')" />
         <pv-column :header="$t('common.status')">
           <template #body="{ data }">
-            <span :class="['status-badge', data.status === 'risk' ? 'status-risk' : 'status-healthy']">
-              {{ $t(`status.${data.status}`) }}
-            </span>
+            <span :class="['status-badge', lotStatus(data) === 'healthy' ? 'status-healthy' : 'status-risk']">{{ $t(lotStatus(data) === 'healthy' ? `status.${data.status}` : `page.inventory.${lotStatus(data)}`) }}</span>
+            <small v-if="activeOffers(data).length" class="offer-summary">{{ $t('page.inventory.offerSummary', { count: activeOffers(data).length }) }}</small>
           </template>
         </pv-column>
       </pv-data-table>
@@ -80,6 +91,7 @@ import { useSearchFilter } from '../../../shared/application/use-search-filter.j
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useProductsStore } from '../../../products/application/products.store.js';
 import { useI18n } from 'vue-i18n';
+import { daysUntilExpiration } from '../../domain/model/expiration-policy.js';
 
 const inventoryStore = useInventoryStore();
 const iamStore = useIamStore();
@@ -90,8 +102,24 @@ const availableProducts = computed(() => iamStore.isSupplier
   ? productsStore.products.filter((product) => product.supplierId === iamStore.currentSupplierId)
   : productsStore.products);
 const filteredItems = useSearchFilter(() => inventoryStore.items);
+const lotStatus = (item) => {
+  const days = daysUntilExpiration(item.expirationDate);
+  if (days !== null && days < 0) return 'expired';
+  if (days !== null && days <= 5) return 'nearExpiration';
+  return item.status === 'risk' ? 'lowStock' : 'healthy';
+};
 const showStockForm = ref(false);
 const showWasteForm = ref(false);
+const showOfferForm = ref(false);
+const savingOffer = ref(false);
+const offerError = ref('');
+const offerForm = reactive({ itemId: null, quantity: '', offerPrice: '', endDate: '' });
+const selectedOfferItem = computed(() => inventoryStore.items.find((item) => item.id === offerForm.itemId));
+const offerableLots = computed(() => inventoryStore.items.filter((item) => {
+  const days = daysUntilExpiration(item.expirationDate);
+  return Number(item.stock) > 0 && days !== null && days >= 0;
+}).map((item) => ({ id: item.id, label: `${item.productName} · ${item.lotCode}` })));
+const activeOffers = (item) => (item.offers || []).filter((offer) => offer.status === 'active' && offer.endDate >= new Date().toISOString().slice(0, 10));
 const savingWaste = ref(false);
 const wasteError = ref('');
 const wasteForm = reactive({ itemId: null, quantity: '', reason: null });
@@ -120,6 +148,33 @@ const openWasteForm = () => {
   wasteError.value = '';
   showWasteForm.value = true;
 };
+const openOfferForm = () => {
+  Object.assign(offerForm, { itemId: null, quantity: '', offerPrice: '', endDate: '' });
+  offerError.value = '';
+  showOfferForm.value = true;
+};
+const saveOffer = async () => {
+  const item = selectedOfferItem.value;
+  const quantity = Number(offerForm.quantity);
+  const offerPrice = Number(offerForm.offerPrice);
+  const product = productsStore.products.find((entry) => entry.id === item?.productId || entry.name === item?.productName);
+  const reserved = item ? activeOffers(item).reduce((sum, offer) => sum + Number(offer.quantity), 0) : 0;
+  const today = new Date().toISOString().slice(0, 10);
+  if (!item || !product || !Number.isInteger(quantity) || quantity <= 0 || quantity > item.stock - reserved || offerForm.offerPrice === '' || !Number.isFinite(offerPrice) || offerPrice <= 0 || offerPrice >= Number(product.price) || offerForm.endDate < today || offerForm.endDate > item.expirationDate) {
+    offerError.value = t('common.invalidForm');
+    return;
+  }
+  savingOffer.value = true;
+  offerError.value = '';
+  try {
+    await inventoryStore.registerOffer({ itemId: item.id, ownerId: iamStore.currentMinimarketId, quantity, offerPrice, endDate: offerForm.endDate });
+    showOfferForm.value = false;
+  } catch {
+    offerError.value = t('common.errorSaving');
+  } finally {
+    savingOffer.value = false;
+  }
+};
 const saveWaste = async () => {
   const quantity = Number(wasteForm.quantity);
   if (!selectedWasteItem.value || !Number.isInteger(quantity) || quantity <= 0 || quantity > selectedWasteItem.value.stock || !wasteForm.reason) {
@@ -145,14 +200,14 @@ const saveStock = async () => {
   const product = availableProducts.value.find((entry) => entry.id === stockForm.productId);
   const stock = Number(stockForm.stock);
   const minimumStock = Number(stockForm.minimumStock);
-  if (!product || !stockForm.lotCode.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(stockForm.expirationDate) || stockForm.stock === '' || stockForm.minimumStock === '' || !Number.isInteger(stock) || stock < 0 || !Number.isInteger(minimumStock) || minimumStock < 0) {
+  if (!product || !stockForm.lotCode.trim() || daysUntilExpiration(stockForm.expirationDate) === null || daysUntilExpiration(stockForm.expirationDate) < 0 || stockForm.stock === '' || stockForm.minimumStock === '' || !Number.isInteger(stock) || stock < 0 || !Number.isInteger(minimumStock) || minimumStock < 0 || inventoryStore.items.some((item) => item.lotCode?.toLowerCase() === stockForm.lotCode.trim().toLowerCase())) {
     formError.value = t('common.invalidForm');
     return;
   }
   saving.value = true;
   formError.value = '';
   try {
-    await inventoryStore.registerStock({ productName: product.name, lotCode: stockForm.lotCode.trim(), expirationDate: stockForm.expirationDate, stock, minimumStock }, iamStore.isSupplier);
+    await inventoryStore.registerStock({ productId: product.id, productName: product.name, lotCode: stockForm.lotCode.trim(), expirationDate: stockForm.expirationDate, stock, minimumStock }, iamStore.isSupplier);
     showStockForm.value = false;
   } catch {
     formError.value = t('common.errorSaving');
@@ -190,6 +245,7 @@ onMounted(() => {
 }
 .view-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .waste-lot { color: #526780; font-size: 13px; margin: 0; }
+.offer-summary { color: #526780; display: block; font-size: 12px; margin-top: 4px; }
 
 .view-header span {
   color: #0d8cfb;

@@ -29,7 +29,8 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useCommunicationStore } from '../../application/communication.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
@@ -39,10 +40,12 @@ const communicationStore = useCommunicationStore();
 const iamStore = useIamStore();
 const filteredMessages = useSearchFilter(() => communicationStore.messages);
 const router = useRouter();
+const { locale } = useI18n();
 
 onMounted(() => {
   communicationStore.fetchMessages(iamStore.isSupplier);
 });
+watch(locale, () => communicationStore.fetchMessages(iamStore.isSupplier));
 </script>
 
 <style scoped>
