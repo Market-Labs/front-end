@@ -61,7 +61,7 @@
     "invalidForm": "Check the required fields and try again."
   },
   "auth": {
-    "access": { "owner": "Owner", "editor": "Editor", "viewer": "Viewer" },
+    "access": { "owner": "Administrator", "administrator": "Administrator", "collaborator": "Collaborator", "editor": "Collaborator", "viewer": "Collaborator" },
     "createAccount": "Create account",
     "creatingAccount": "Creating account...",
     "signupDescription": "Create a workspace for your business.",

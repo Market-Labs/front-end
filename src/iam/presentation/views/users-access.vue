@@ -51,7 +51,7 @@
         <div class="form-row">
           <label>
             {{ $t('page.iam.role') }}
-            <span v-if="isFirebaseMode" class="read-only-value">{{ selectedUser?.roles[0] || '-' }}</span>
+            <pv-select v-if="isFirebaseMode" v-model="userForm.accessLevel" :options="accessOptions" option-label="label" option-value="value" :placeholder="$t('page.iam.selectRole')" />
             <pv-select v-else v-model="userForm.role" :options="roleOptions" :placeholder="$t('page.iam.selectRole')" />
           </label>
           <label>
@@ -81,7 +81,7 @@
         <pv-column field="email" :header="$t('page.iam.email')" />
         <pv-column :header="$t('page.iam.role')">
           <template #body="{ data }">
-            {{ data.roles[0] }} · {{ $t(`auth.access.${data.accessLevel}`) }}
+            {{ isFirebaseMode ? accessLabel(data.accessLevel) : data.roles[0] }}
           </template>
         </pv-column>
         <pv-column :header="$t('common.status')">
@@ -104,9 +104,8 @@ import { isFirebaseMode } from '../../../shared/infrastructure/firebase-client.j
 const iamStore = useIamStore();
 const { t } = useI18n();
 const visibleUsers = computed(() => iamStore.users);
-const editableUsers = computed(() => visibleUsers.value.filter((user) => user.createdBy && user.id !== iamStore.currentUser?.id
-  && iamStore.currentUser?.accessLevel !== 'viewer'));
-const canManageUsers = computed(() => iamStore.currentUser?.permissions.includes('users:manage') || false);
+const editableUsers = computed(() => visibleUsers.value.filter((user) => user.createdBy && user.id !== iamStore.currentUser?.id));
+const canManageUsers = computed(() => iamStore.isAdmin);
 const filteredUsers = useSearchFilter(() => visibleUsers.value);
 const showUserForm = ref(false);
 const showCreateForm = ref(false);
@@ -114,11 +113,13 @@ const saving = ref(false);
 const creating = ref(false);
 const formError = ref('');
 const createError = ref('');
-const createForm = reactive({ name: '', email: '', password: '', accessLevel: 'editor' });
+const createForm = reactive({ name: '', email: '', password: '', accessLevel: 'collaborator' });
 const accessOptions = computed(() => [
-  ...(iamStore.currentUser?.accessLevel === 'viewer' ? [] : [{ label: t('auth.access.editor'), value: 'editor' }]),
-  { label: t('auth.access.viewer'), value: 'viewer' },
+  { label: t('auth.access.administrator'), value: 'administrator' },
+  { label: t('auth.access.collaborator'), value: 'collaborator' },
 ]);
+const accessRole = (value) => ['owner', 'administrator'].includes(value) ? 'administrator' : 'collaborator';
+const accessLabel = (value) => t(`auth.access.${accessRole(value)}`);
 const roleOptions = computed(() => [...new Set(visibleUsers.value.flatMap((user) => user.roles))]);
 const statusOptions = computed(() => [
   { label: t('status.active'), value: 'active' },
@@ -127,18 +128,21 @@ const statusOptions = computed(() => [
 const userForm = reactive({
   userId: null,
   role: null,
+  accessLevel: 'collaborator',
   status: 'active',
 });
 const selectedUser = computed(() => editableUsers.value.find((user) => user.id === userForm.userId));
 
 watch(selectedUser, (user) => {
   userForm.role = user?.roles?.[0] || null;
+  userForm.accessLevel = accessRole(user?.accessLevel);
   userForm.status = user?.status || 'active';
 });
 
 const openUserForm = () => {
   userForm.userId = null;
   userForm.role = null;
+  userForm.accessLevel = 'collaborator';
   userForm.status = 'active';
   formError.value = '';
   showUserForm.value = true;
@@ -148,7 +152,7 @@ const openCreateForm = () => {
   createForm.name = '';
   createForm.email = '';
   createForm.password = '';
-  createForm.accessLevel = accessOptions.value[0]?.value || 'viewer';
+  createForm.accessLevel = 'collaborator';
   createError.value = '';
   showCreateForm.value = true;
 };
@@ -176,7 +180,9 @@ const saveNewUser = async () => {
 };
 
 const saveUser = async () => {
-  if (!selectedUser.value || !roleOptions.value.includes(userForm.role) || !['active', 'inactive'].includes(userForm.status)) {
+  if (!selectedUser.value || (isFirebaseMode
+    ? !['administrator', 'collaborator'].includes(userForm.accessLevel)
+    : !roleOptions.value.includes(userForm.role)) || !['active', 'inactive'].includes(userForm.status)) {
     formError.value = t('common.invalidForm');
     return;
   }
@@ -184,7 +190,7 @@ const saveUser = async () => {
   formError.value = '';
   try {
     if (isFirebaseMode) {
-      await iamStore.updateUser(selectedUser.value.id, { status: userForm.status });
+      await iamStore.updateUser(selectedUser.value.id, { status: userForm.status, accessLevel: userForm.accessLevel });
     } else {
       const matchingRole = iamStore.users.find((user) => user.roles.includes(userForm.role));
       await iamStore.updateUser(selectedUser.value.id, { roles: [userForm.role], status: userForm.status, permissions: matchingRole?.permissions || [] });
@@ -199,7 +205,9 @@ const saveUser = async () => {
 
 const summaryCards = computed(() => [
   { label: 'page.iam.activeUsers', value: visibleUsers.value.filter((user) => user.status === 'active').length, icon: 'pi pi-users' },
-  { label: 'page.iam.definedRoles', value: roleOptions.value.length, icon: 'pi pi-id-card' },
+  { label: 'page.iam.definedRoles', value: isFirebaseMode
+    ? new Set(visibleUsers.value.map((user) => accessRole(user.accessLevel))).size
+    : roleOptions.value.length, icon: 'pi pi-id-card' },
   { label: 'page.iam.keyPermissions', value: new Set(visibleUsers.value.flatMap((user) => user.permissions)).size, icon: 'pi pi-shield' },
 ]);
 

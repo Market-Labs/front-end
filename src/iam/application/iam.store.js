@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { IamApi } from '../infrastructure/iam-api.js';
 import { User } from '../domain/model/user.entity.js';
+import { isAdministrator, permissionsForRole } from '../domain/model/access-role.js';
 import { isDemoMode } from '../../shared/infrastructure/demo-mode.js';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -52,7 +53,8 @@ export const useIamStore = defineStore('iam', {
     isAuthenticated: (state) => Boolean(state.currentUser),
     userName: (state) => state.currentUser?.name || 'Invitado',
     userRole: (state) => state.currentUser?.roles?.[0] || 'Sin rol',
-    isAdmin: (state) => state.currentUser?.permissions?.includes('users:manage') || false,
+    isAdmin: (state) => isAdministrator(state.currentUser?.accessLevel)
+      && (state.currentUser?.permissions?.includes('users:manage') || false),
     isMinimarketAdmin: (state) => Boolean(state.currentUser?.minimarketId || state.currentUser?.roles?.includes('Administrador de Minimarket')),
     isSupplier: (state) => Boolean(state.currentUser?.supplierId || state.currentUser?.roles?.includes('Proveedor Organico')),
     currentSupplierId: (state) => state.currentUser?.supplierId || (state.currentUser?.roles?.includes('Proveedor Organico') ? 'sup-2' : null),
@@ -78,20 +80,23 @@ export const useIamStore = defineStore('iam', {
       this.sessionReady = true;
     },
     async updateUser(id, changes) {
+      if (isFirebaseMode) {
+        if (!this.isAdmin || !['administrator', 'collaborator'].includes(changes.accessLevel)) {
+          throw new Error('access-denied');
+        }
+        const permissions = permissionsForRole(this.isSupplier ? 'supplier' : 'admin', changes.accessLevel);
+        changes = { ...changes, permissions };
+      }
       const user = await iamApi.updateUser(id, changes);
       this.users = this.users.map((entry) => entry.id === id ? user : entry);
       if (this.currentUser?.id === id) this.currentUser = user;
       return user;
     },
-    async createUser({ name, email, password, accessLevel = 'editor' }) {
-      if (!this.currentUser?.permissions.includes('users:manage')) throw new Error('access-denied');
-      if (!['editor', 'viewer'].includes(accessLevel)) throw new Error('invalid-access-level');
-      if (accessLevel === 'editor' && this.currentUser.accessLevel === 'viewer') throw new Error('access-denied');
+    async createUser({ name, email, password, accessLevel = 'collaborator' }) {
+      if (!this.isAdmin) throw new Error('access-denied');
+      if (!['administrator', 'collaborator'].includes(accessLevel)) throw new Error('invalid-access-level');
       const creator = this.currentUser;
-      const permissions = accessLevel === 'viewer' ? ['users:manage']
-        : this.isSupplier
-          ? ['products:write', 'procurements:track', 'users:manage']
-          : ['inventory:write', 'procurements:approve', 'users:manage'];
+      const permissions = permissionsForRole(this.isSupplier ? 'supplier' : 'admin', accessLevel);
       const user = await iamApi.createUser({
         name: name.trim(), email: email.trim().toLowerCase(), password,
         role: this.isSupplier ? 'supplier' : 'admin',

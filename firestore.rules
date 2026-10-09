@@ -34,7 +34,19 @@ service cloud.firestore {
     }
 
     function managesUsers() {
-      return active() && account().permissions.hasAny(['users:manage']);
+      return active() && account().permissions.hasAny(['users:manage'])
+        && account().keys().hasAny(['accessLevel'])
+        && account().accessLevel in ['owner', 'administrator'];
+    }
+
+    function permissionsFor(accessLevel, role) {
+      return role == 'admin'
+        ? (accessLevel == 'administrator'
+          ? ['inventory:write', 'procurements:approve', 'users:manage']
+          : ['inventory:write', 'procurements:approve'])
+        : (accessLevel == 'administrator'
+          ? ['products:write', 'procurements:track', 'users:manage']
+          : ['products:write', 'procurements:track']);
     }
 
     function canInventoryWrite() {
@@ -147,29 +159,26 @@ service cloud.firestore {
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.role == account().role
         && request.resource.data.roles == account().roles
+        && request.resource.data.accessLevel in ['administrator', 'collaborator']
+        && request.resource.data.permissions == permissionsFor(
+          request.resource.data.accessLevel, request.resource.data.role)
         && (!account().keys().hasAny(['tenantId'])
-          && request.resource.data.permissions == account().permissions
+          && !request.resource.data.keys().hasAny(['tenantId'])
           || account().keys().hasAny(['tenantId'])
-          && request.resource.data.accessLevel in ['editor', 'viewer']
-          && (account().accessLevel != 'viewer' || request.resource.data.accessLevel == 'viewer')
-          && request.resource.data.permissions == (request.resource.data.accessLevel == 'viewer'
-            ? ['users:manage']
-            : request.resource.data.role == 'admin'
-              ? ['inventory:write', 'procurements:approve', 'users:manage']
-              : ['products:write', 'procurements:track', 'users:manage']))
-        && (!account().keys().hasAny(['tenantId'])
-          || request.resource.data.tenantId == account().tenantId)
+          && request.resource.data.tenantId == account().tenantId)
         && request.resource.data.status == 'active'
         && request.resource.data.keys().hasOnly([
           'id', 'name', 'email', 'role', 'roles', 'permissions', 'status',
           'minimarketId', 'supplierId', 'tenantId', 'accessLevel', 'createdBy'
         ]);
       allow update: if managesUsers() && sameOrganization(resource.data)
-        && (!account().keys().hasAny(['accessLevel']) || account().accessLevel in ['owner', 'editor'])
         && resource.data.keys().hasAny(['createdBy']) && resource.data.createdBy != null
         && uid != request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
-        && request.resource.data.status in ['active', 'inactive'];
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'accessLevel', 'permissions'])
+        && request.resource.data.status in ['active', 'inactive']
+        && request.resource.data.accessLevel in ['administrator', 'collaborator']
+        && request.resource.data.permissions == permissionsFor(
+          request.resource.data.accessLevel, resource.data.role);
       allow delete: if false;
     }
 

@@ -61,7 +61,7 @@
     "invalidForm": "Revisa los campos obligatorios e inténtalo de nuevo."
   },
   "auth": {
-    "access": { "owner": "Propietario", "editor": "Editor", "viewer": "Consulta" },
+    "access": { "owner": "Administrador", "administrator": "Administrador", "collaborator": "Colaborador", "editor": "Colaborador", "viewer": "Colaborador" },
     "createAccount": "Crear cuenta",
     "creatingAccount": "Creando cuenta...",
     "signupDescription": "Crea un espacio para tu negocio.",
