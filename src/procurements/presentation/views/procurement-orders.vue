@@ -10,21 +10,29 @@
         v-if="canCreate"
         :label="$t('page.procurements.createOrder')"
         icon="pi pi-plus"
-        @click="showOrderForm = true"
+        @click="openManualOrder"
       />
     </div>
 
-    <pv-dialog v-model:visible="showOrderForm" modal :header="$t('page.procurements.createOrder')" :style="{ width: 'min(640px, calc(100vw - 32px))' }">
+    <pv-dialog v-model:visible="showOrderForm" modal :header="$t('page.procurements.createOrder')" :style="{ width: 'min(640px, calc(100vw - 32px))' }" @hide="closeOrderForm">
       <form class="entity-form" @submit.prevent>
+        <label v-if="linkedRequest">{{ $t('page.requisition.request') }}<span class="read-only-value">{{ linkedRequest.id }}</span></label>
         <label>
           {{ $t('page.procurements.supplier') }}
           <span class="read-only-value">{{ iamStore.userName }}</span>
         </label>
-        <label>
+        <label v-if="linkedRequest">{{ $t('common.minimarket') }}<span class="read-only-value">{{ linkedRequest.minimarket || linkedRequest.minimarketId }}</span></label>
+        <label v-else>
           {{ $t('common.minimarket') }}
           <pv-select v-model="orderForm.minimarketId" :options="minimarkets" option-label="businessName" option-value="id" :placeholder="$t('page.procurements.selectMinimarket')" />
         </label>
-        <div class="items-field">
+        <div v-if="linkedRequest" class="detail-scroll">
+          <table class="detail-table">
+            <thead><tr><th>{{ $t('common.product') }}</th><th>{{ $t('common.quantity') }}</th><th>{{ $t('common.unitPrice') }}</th></tr></thead>
+            <tbody><tr v-for="(item, index) in linkedItems" :key="index"><td>{{ item.productName }}</td><td>{{ item.quantity }}</td><td>{{ formatMoney(item.unitPrice) }}</td></tr></tbody>
+          </table>
+        </div>
+        <div v-else class="items-field">
           <strong>{{ $t('common.items') }}</strong>
           <div v-for="(item, index) in orderForm.items" :key="item.key" class="item-row">
             <label>{{ $t('common.product') }}<pv-select v-model="item.productId" :options="availableProducts(index)" option-label="name" option-value="id" :placeholder="$t('page.procurements.selectProduct')" /></label>
@@ -39,7 +47,7 @@
         <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
       </form>
       <template #footer>
-        <pv-button :label="$t('common.cancel')" text @click="showOrderForm = false" />
+        <pv-button :label="$t('common.cancel')" text @click="closeOrderForm" />
         <pv-button :label="$t('common.save')" icon="pi pi-save" :loading="saving" @click="saveOrder" />
       </template>
     </pv-dialog>
@@ -112,7 +120,9 @@
 
 <script setup>
 import { computed, reactive, ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useProcurementsStore } from '../../application/procurements.store.js';
+import { useRequisitionStore } from '../../../requisition/application/requisition.store.js';
 import { useInventoryStore } from '../../../inventory/application/inventory.store.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { isFirebaseMode } from '../../../shared/infrastructure/firebase-client.js';
@@ -122,6 +132,9 @@ import { useProductsStore } from '../../../products/application/products.store.j
 import { useI18n } from 'vue-i18n';
 
 const procurementsStore = useProcurementsStore();
+const requisitionStore = useRequisitionStore();
+const route = useRoute();
+const router = useRouter();
 const inventoryStore = useInventoryStore();
 const iamStore = useIamStore();
 const canCreate = computed(() => iamStore.currentUser?.permissions.includes('procurements:track'));
@@ -132,6 +145,7 @@ const { t } = useI18n();
 const visibleOrders = computed(() => procurementsStore.visibleForUser(iamStore.currentUser));
 const filteredOrders = useSearchFilter(() => visibleOrders.value);
 const showOrderForm = ref(false);
+const linkedRequest = ref(null);
 const saving = ref(false);
 const formError = ref('');
 const actionError = ref('');
@@ -148,6 +162,21 @@ const orderForm = reactive({
   shippingDate: new Date().toISOString().slice(0, 10),
   items: [newItem()],
 });
+const linkedItems = computed(() => linkedRequest.value?.items.map((item) => ({
+  productName: item.productName,
+  quantity: Number(item.quantity),
+  unitPrice: Number(item.unitPrice ?? productsStore.products.find((product) => product.name === item.productName && product.supplierId === iamStore.currentSupplierId)?.price ?? 0),
+})) || []);
+const openManualOrder = () => {
+  linkedRequest.value = null;
+  formError.value = '';
+  showOrderForm.value = true;
+};
+const closeOrderForm = () => {
+  showOrderForm.value = false;
+  linkedRequest.value = null;
+  if (route.query.requestId) router.replace({ path: '/procurements' });
+};
 const addItem = () => orderForm.items.push(newItem());
 const removeItem = (index) => orderForm.items.splice(index, 1);
 const availableProducts = (index) => {
@@ -159,6 +188,7 @@ const openDetails = (order) => {
   showDetails.value = true;
 };
 const estimatedTotal = computed(() => {
+  if (linkedRequest.value) return formatMoney(linkedItems.value.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0));
   const total = orderForm.items.reduce((sum, item) => {
     const product = productsStore.products.find((entry) => entry.id === item.productId);
     const quantity = Number(item.quantity);
@@ -168,6 +198,26 @@ const estimatedTotal = computed(() => {
 });
 
 const saveOrder = async () => {
+  if (linkedRequest.value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(orderForm.shippingDate) || linkedItems.value.length === 0
+      || linkedItems.value.some((item) => !Number.isInteger(item.quantity) || item.quantity <= 0 || !Number.isFinite(item.unitPrice) || item.unitPrice <= 0)) {
+      formError.value = t('common.invalidForm');
+      return;
+    }
+    saving.value = true;
+    formError.value = '';
+    try {
+      const orderId = await procurementsStore.createFromSupplyRequest(linkedRequest.value, productsStore.products, orderForm.shippingDate);
+      if (isFirebaseMode) await requisitionStore.fetchRequisitions();
+      else await requisitionStore.linkShippingOrder(linkedRequest.value.id, orderId);
+      closeOrderForm();
+    } catch {
+      formError.value = t('common.errorSaving');
+    } finally {
+      saving.value = false;
+    }
+    return;
+  }
   const minimarket = minimarkets.value.find((entry) => entry.id === orderForm.minimarketId);
   const items = orderForm.items.filter((line) => line.productId || line.quantity !== '').map((line) => {
     const product = productsStore.products.find((entry) => entry.id === line.productId && entry.supplierId === iamStore.currentSupplierId);
@@ -226,15 +276,23 @@ const rejectReception = async (order) => {
   }
 };
 
-onMounted(() => {
-  procurementsStore.fetchOrders();
+onMounted(async () => {
+  const tasks = [procurementsStore.fetchOrders()];
   if (iamStore.isMinimarketAdmin) {
-    inventoryStore.fetchInventory();
-    productsStore.fetchProducts();
+    tasks.push(inventoryStore.fetchInventory(), productsStore.fetchProducts());
   }
   if (iamStore.isSupplier) {
-    profilesStore.fetchProfiles();
-    productsStore.fetchProducts();
+    tasks.push(profilesStore.fetchProfiles(), productsStore.fetchProducts(), requisitionStore.fetchRequisitions());
+  }
+  await Promise.all(tasks);
+  if (typeof route.query.requestId === 'string' && canCreate.value) {
+    const request = requisitionStore.visibleForUser(iamStore.currentUser)
+      .find((entry) => entry.id === route.query.requestId && entry.canGenerateShippingOrder);
+    if (request) {
+      linkedRequest.value = request;
+      formError.value = '';
+      showOrderForm.value = true;
+    }
   }
 });
 </script>

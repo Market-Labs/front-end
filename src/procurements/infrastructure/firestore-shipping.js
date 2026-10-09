@@ -1,7 +1,7 @@
 import { doc, runTransaction } from 'firebase/firestore';
 import { firestore } from '../../shared/infrastructure/firebase-client.js';
 
-export const createShippingOrderInFirestore = async (request, products, supplierId) => {
+export const createShippingOrderInFirestore = async (request, products, supplierId, shippingDate) => {
   const items = request.items.map((item) => ({
     productName: item.productName,
     quantity: Number(item.quantity),
@@ -21,7 +21,7 @@ export const createShippingOrderInFirestore = async (request, products, supplier
     status: 'pending-reception',
     total: Number(items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0).toFixed(2)),
     createdAt: new Date().toISOString().slice(0, 10),
-    shippingDate: new Date().toISOString().slice(0, 10),
+    shippingDate,
     observations: 'Orden de envio generada desde una solicitud aceptada.',
     items,
   };

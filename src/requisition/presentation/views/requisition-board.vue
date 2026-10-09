@@ -124,16 +124,15 @@
 <script setup>
 import { computed, reactive, ref, onMounted } from 'vue';
 import { useRequisitionStore } from '../../application/requisition.store.js';
-import { useProcurementsStore } from '../../../procurements/application/procurements.store.js';
+import { useRouter } from 'vue-router';
 import { useIamStore } from '../../../iam/application/iam.store.js';
-import { isFirebaseMode } from '../../../shared/infrastructure/firebase-client.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useProductsStore } from '../../../products/application/products.store.js';
 import { useSuppliersStore } from '../../../suppliers/application/suppliers.store.js';
 import { useI18n } from 'vue-i18n';
 
 const requisitionStore = useRequisitionStore();
-const procurementsStore = useProcurementsStore();
+const router = useRouter();
 const iamStore = useIamStore();
 const canCreate = computed(() => iamStore.currentUser?.permissions.includes('inventory:write'));
 const canReview = computed(() => iamStore.currentUser?.permissions.includes('procurements:track'));
@@ -205,15 +204,10 @@ const runAction = async (request, action) => {
 };
 const acceptSupplyRequest = (request) => runAction(request, () => requisitionStore.acceptRequest(request.id, iamStore.currentSupplierId));
 const rejectSupplyRequest = (request) => runAction(request, () => requisitionStore.rejectRequest(request.id));
-const createShippingOrder = (request) => runAction(request, async () => {
-  const orderId = await procurementsStore.createFromSupplyRequest(request, productsStore.products);
-  if (isFirebaseMode) await requisitionStore.fetchRequisitions();
-  else await requisitionStore.linkShippingOrder(request.id, orderId);
-});
+const createShippingOrder = (request) => router.push({ path: '/procurements', query: { requestId: request.id } });
 
 onMounted(() => {
   requisitionStore.fetchRequisitions();
-  procurementsStore.fetchOrders();
   productsStore.fetchProducts();
   if (iamStore.isMinimarketAdmin) {
     suppliersStore.fetchSuppliers();

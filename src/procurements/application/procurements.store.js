@@ -46,10 +46,10 @@ export const useProcurementsStore = defineStore('procurements', {
       }
       return this.orders.filter((order) => order.minimarketId === (user.minimarketId || 'min-1'));
     },
-    async createFromSupplyRequest(request, products = []) {
+    async createFromSupplyRequest(request, products = [], shippingDate = new Date().toISOString().slice(0, 10)) {
       if (request.status !== 'accepted' || request.shippingOrderId) throw new Error('invalid-request-status');
       if (isFirebaseMode) {
-        const resource = await createShippingOrderInFirestore(request, products, useIamStore().currentSupplierId);
+        const resource = await createShippingOrderInFirestore(request, products, useIamStore().currentSupplierId, shippingDate);
         this.orders.unshift(new ProcurementOrder(resource));
         return resource.id;
       }
@@ -67,7 +67,7 @@ export const useProcurementsStore = defineStore('procurements', {
           supplier: request.supplier,
           minimarket: 'Minimarket Verde Sur',
           total: Number(total.toFixed(2)),
-          shippingDate: new Date().toISOString().slice(0, 10),
+          shippingDate,
           observations: 'Orden de envio generada desde una solicitud aceptada.',
           items,
       });
