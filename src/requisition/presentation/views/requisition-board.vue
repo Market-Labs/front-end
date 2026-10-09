@@ -18,7 +18,7 @@
       <form class="entity-form" @submit.prevent>
         <label>
           {{ $t('page.requisition.supplier') }}
-          <pv-select v-model="requisitionForm.supplierId" :options="suppliersStore.suppliers" option-label="businessName" option-value="id" :placeholder="$t('page.requisition.selectSupplier')" />
+          <pv-select v-model="requisitionForm.supplierId" :options="suppliersStore.activeSuppliers" option-label="businessName" option-value="id" :placeholder="$t('page.requisition.selectSupplier')" />
         </label>
         <div class="items-field">
           <strong>{{ $t('common.items') }}</strong>
@@ -31,7 +31,7 @@
               {{ $t('common.quantity') }}
               <pv-input-text v-model="item.quantity" type="number" min="1" step="1" placeholder="1" />
             </label>
-            <pv-button v-if="requisitionForm.items.length > 3" type="button" icon="pi pi-trash" text severity="danger" :aria-label="$t('common.removeItem')" :title="$t('common.removeItem')" @click="removeItem(index)" />
+            <pv-button v-if="requisitionForm.items.length > 1" type="button" icon="pi pi-trash" text severity="danger" :aria-label="$t('common.removeItem')" :title="$t('common.removeItem')" @click="removeItem(index)" />
           </div>
           <pv-button type="button" :label="$t('common.addItem')" icon="pi pi-plus" text @click="addItem" />
         </div>
@@ -153,11 +153,11 @@ const busyRequestId = ref(null);
 const showDetails = ref(false);
 const selectedRequestId = ref(null);
 const selectedRequest = computed(() => requisitionStore.requisitions.find((request) => request.id === selectedRequestId.value));
-let nextItemKey = 3;
+let nextItemKey = 0;
 const newItem = () => ({ key: nextItemKey++, productId: null, quantity: '' });
 const requisitionForm = reactive({
   supplierId: null,
-  items: [newItem(), newItem(), newItem()],
+  items: [newItem()],
   reason: null,
 });
 const addItem = () => requisitionForm.items.push(newItem());
@@ -172,12 +172,12 @@ const openDetails = (request) => {
 };
 
 const saveRequest = async () => {
-  const supplier = suppliersStore.suppliers.find((entry) => entry.id === requisitionForm.supplierId);
-  const items = requisitionForm.items.map((line) => {
+  const supplier = suppliersStore.activeSuppliers.find((entry) => entry.id === requisitionForm.supplierId);
+  const items = requisitionForm.items.filter((line) => line.productId || line.quantity !== '').map((line) => {
     const product = productsStore.products.find((entry) => entry.id === line.productId && entry.supplierId === requisitionForm.supplierId);
     return product && { productName: product.name, quantity: Number(line.quantity), unitPrice: product.price };
   });
-  if (!supplier || !requisitionForm.reason || items.length < 3 || items.some((item) => !item || !Number.isInteger(item.quantity) || item.quantity <= 0) || new Set(items.map((item) => item?.productName)).size !== items.length) {
+  if (!supplier || !requisitionForm.reason || items.length === 0 || items.some((item) => !item || !Number.isInteger(item.quantity) || item.quantity <= 0) || new Set(items.map((item) => item?.productName)).size !== items.length) {
     formError.value = t('common.invalidForm');
     return;
   }
@@ -188,7 +188,7 @@ const saveRequest = async () => {
     showRequisitionForm.value = false;
     requisitionForm.supplierId = null;
     requisitionForm.reason = null;
-    requisitionForm.items = [newItem(), newItem(), newItem()];
+    requisitionForm.items = [newItem()];
   } catch {
     formError.value = t('common.errorSaving');
   } finally {

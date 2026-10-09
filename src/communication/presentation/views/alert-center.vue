@@ -14,7 +14,7 @@
 
     <div class="message-list">
       <article v-for="message in filteredMessages" :key="message.id" :class="{ unread: !message.read }">
-        <button type="button" @click="communicationStore.toggleStarred(message.id)">
+        <button type="button" class="star-button" @click="communicationStore.toggleStarred(message.id)">
           <i :class="message.starred ? 'pi pi-star-fill' : 'pi pi-star'"></i>
         </button>
         <div>
@@ -22,7 +22,7 @@
           <p>{{ message.body }}</p>
           <small>{{ message.sender }} - {{ message.sentAt }}</small>
         </div>
-        <pv-button v-if="!message.read" :label="$t('page.alerts.markRead')" text @click="communicationStore.markAsRead(message.id)" />
+        <pv-button v-if="!message.read" class="read-action" :label="$t('page.alerts.markRead')" text @click="communicationStore.markAsRead(message.id)" />
       </article>
     </div>
   </section>
@@ -108,7 +108,7 @@ onMounted(() => {
   border-color: #fc6910;
 }
 
-.message-list button {
+.message-list .star-button {
   background: #eff3fa;
   border: 1px solid #d9e5f6;
   border-radius: 8px;
@@ -116,6 +116,26 @@ onMounted(() => {
   cursor: pointer;
   height: 40px;
   width: 40px;
+  flex: 0 0 40px;
+}
+
+.message-list article > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.message-list .read-action {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .message-list article {
+    flex-wrap: wrap;
+  }
+  .message-list .read-action {
+    margin-left: 56px;
+  }
 }
 
 .message-list strong {

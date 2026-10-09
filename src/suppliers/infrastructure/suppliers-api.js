@@ -11,4 +11,8 @@ export class SuppliersApi extends BaseApi {
     const response = await this.http.post(apiEndpoints.suppliers, supplier);
     return SupplierAssembler.toEntity(response.data);
   }
+  async updateSupplier(id, changes) {
+    const response = await this.http.patch(`${apiEndpoints.suppliers}/${encodeURIComponent(id)}`, changes);
+    return SupplierAssembler.toEntity(response.data);
+  }
 }

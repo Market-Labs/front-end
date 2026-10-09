@@ -28,3 +28,9 @@ test('waste report includes only waste records', () => {
   assert.equal(report.rows.length, 1);
   assert.equal(report.rows[0].reason, 'page.inventory.wasteReasons.expiration');
 });
+
+test('supplier report hides inactive suppliers without changing historical orders', () => {
+  const inactive = { id: 'sup-3', businessName: 'Inactive', status: 'inactive' };
+  const report = buildReport('Proveedores', { ...sources, suppliers: [...sources.suppliers, inactive] }, false, t);
+  assert.deepEqual(report.rows.map((row) => row.id), ['sup-2']);
+});

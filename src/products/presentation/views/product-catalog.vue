@@ -22,7 +22,7 @@
         <label v-if="!editingId && productForm.category">{{ $t('common.id') }}<span class="read-only-value">{{ productsStore.nextIdForCategory(productForm.category) }}</span></label>
         <label v-if="!editingId && iamStore.isMinimarketAdmin">
           {{ $t('common.supplier') }}
-          <pv-select v-model="productForm.supplierId" :options="suppliersStore.suppliers" option-label="businessName" option-value="id" :placeholder="$t('page.products.selectSupplier')" />
+          <pv-select v-model="productForm.supplierId" :options="suppliersStore.activeSuppliers" option-label="businessName" option-value="id" :placeholder="$t('page.products.selectSupplier')" />
         </label>
         <label v-if="!editingId && iamStore.isSupplier">{{ $t('common.supplier') }}<span class="read-only-value">{{ supplierName(iamStore.currentSupplierId) }}</span></label>
         <label v-if="!editingId">
@@ -137,7 +137,7 @@ const saveProduct = async () => {
   const description = productForm.description.trim();
   const quantity = Number(productForm.quantity);
   if (!description || !Number.isFinite(price) || price <= 0 || (!editingId.value && (
-    !productForm.name.trim() || !categoryOptions.includes(productForm.category) || !productForm.supplierId ||
+    !productForm.name.trim() || !categoryOptions.includes(productForm.category) || !suppliersStore.activeSuppliers.some((supplier) => supplier.id === productForm.supplierId) ||
     !/^\d{4}-\d{2}-\d{2}$/.test(productForm.expirationDate) || !Number.isInteger(quantity) || quantity < 0
   ))) {
     formError.value = t('page.products.invalidForm');

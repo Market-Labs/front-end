@@ -9,7 +9,7 @@
       <pv-button :label="$t('page.suppliers.newSupplier')" icon="pi pi-plus" @click="openSupplierForm" />
     </div>
 
-    <pv-dialog v-model:visible="showSupplierForm" modal :header="$t('page.suppliers.newSupplier')" :style="{ width: '540px' }">
+    <pv-dialog v-model:visible="showSupplierForm" modal :header="$t(editingId ? 'page.suppliers.editSupplier' : 'page.suppliers.newSupplier')" :style="{ width: 'min(540px, calc(100vw - 32px))' }">
       <form class="entity-form" @submit.prevent>
         <label>
           {{ $t('page.suppliers.businessName') }}
@@ -51,6 +51,15 @@
       </template>
     </pv-dialog>
 
+    <pv-dialog v-model:visible="showDeleteDialog" modal :header="$t('page.suppliers.deleteSupplier')" :style="{ width: 'min(460px, calc(100vw - 32px))' }">
+      <p>{{ $t('page.suppliers.deleteConfirmation', { name: deletingSupplier?.businessName || '' }) }}</p>
+      <p v-if="deleteError" class="form-error" role="alert">{{ deleteError }}</p>
+      <template #footer>
+        <pv-button :label="$t('common.cancel')" text @click="showDeleteDialog = false" />
+        <pv-button :label="$t('common.delete')" icon="pi pi-trash" severity="danger" :loading="saving" @click="deactivateSupplier" />
+      </template>
+    </pv-dialog>
+
     <div class="supplier-grid">
       <article v-for="supplier in filteredSuppliers" :key="supplier.id">
         <span>{{ supplier.ruc }}</span>
@@ -60,6 +69,10 @@
           <small>{{ supplier.coverageArea }}</small>
           <strong>{{ supplier.phone }}</strong>
         </footer>
+        <div class="supplier-actions">
+          <pv-button :label="$t('common.edit')" icon="pi pi-pencil" size="small" outlined @click="openEditForm(supplier)" />
+          <pv-button :label="$t('common.delete')" icon="pi pi-trash" size="small" severity="danger" text @click="confirmDelete(supplier)" />
+        </div>
       </article>
     </div>
   </section>
@@ -73,10 +86,14 @@ import { useI18n } from 'vue-i18n';
 
 const suppliersStore = useSuppliersStore();
 const { t } = useI18n();
-const filteredSuppliers = useSearchFilter(() => suppliersStore.suppliers);
+const filteredSuppliers = useSearchFilter(() => suppliersStore.activeSuppliers);
 const showSupplierForm = ref(false);
+const showDeleteDialog = ref(false);
+const editingId = ref(null);
+const deletingSupplier = ref(null);
 const saving = ref(false);
 const formError = ref('');
+const deleteError = ref('');
 const supplierForm = reactive({
   businessName: '',
   ruc: '',
@@ -88,9 +105,35 @@ const supplierForm = reactive({
 });
 
 const openSupplierForm = () => {
+  editingId.value = null;
   Object.keys(supplierForm).forEach((key) => { supplierForm[key] = ''; });
   formError.value = '';
   showSupplierForm.value = true;
+};
+const openEditForm = (supplier) => {
+  editingId.value = supplier.id;
+  Object.keys(supplierForm).forEach((key) => { supplierForm[key] = supplier[key] || ''; });
+  formError.value = '';
+  showSupplierForm.value = true;
+};
+const confirmDelete = (supplier) => {
+  deletingSupplier.value = supplier;
+  deleteError.value = '';
+  showDeleteDialog.value = true;
+};
+const deactivateSupplier = async () => {
+  if (!deletingSupplier.value) return;
+  saving.value = true;
+  deleteError.value = '';
+  try {
+    await suppliersStore.deactivateSupplier(deletingSupplier.value.id);
+    showDeleteDialog.value = false;
+    deletingSupplier.value = null;
+  } catch {
+    deleteError.value = t('common.errorDeleting');
+  } finally {
+    saving.value = false;
+  }
 };
 const saveSupplier = async () => {
   const data = Object.fromEntries(Object.entries(supplierForm).map(([key, value]) => [key, value.trim()]));
@@ -101,8 +144,10 @@ const saveSupplier = async () => {
   saving.value = true;
   formError.value = '';
   try {
-    await suppliersStore.createSupplier(data);
+    if (editingId.value) await suppliersStore.updateSupplier(editingId.value, data);
+    else await suppliersStore.createSupplier(data);
     showSupplierForm.value = false;
+    editingId.value = null;
   } catch {
     formError.value = t('common.errorSaving');
   } finally {
@@ -166,6 +211,13 @@ footer small {
 
 .supplier-grid article {
   padding: 22px;
+}
+
+.supplier-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 footer {

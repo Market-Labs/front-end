@@ -34,7 +34,7 @@ export const buildReport = (type, sources, isSupplier, t) => {
       break;
     case 'Proveedores':
       columns = [c('id', 'common.id'), c('supplier', 'common.supplier'), c('ruc', 'page.analytics.ruc'), c('specialty', 'page.suppliers.specialty'), c('coverage', 'page.suppliers.coverage'), c('orders', 'page.analytics.orders'), c('received', 'page.analytics.received'), c('amount', 'page.analytics.amount', 'money')];
-      rows = sources.suppliers.filter((supplier) => !isSupplier || supplier.id === ownerId).map((supplier) => {
+      rows = sources.suppliers.filter((supplier) => supplier.status !== 'inactive' && (!isSupplier || supplier.id === ownerId)).map((supplier) => {
         const related = orders.filter((order) => order.supplierId === supplier.id);
         return { id: supplier.id, supplier: supplier.businessName, ruc: supplier.ruc, specialty: supplier.specialty, coverage: supplier.coverageArea, orders: related.length, received: related.filter((order) => order.status === 'received').length, amount: money(related.filter((order) => order.status === 'received').reduce((sum, order) => sum + Number(order.total), 0)) };
       });

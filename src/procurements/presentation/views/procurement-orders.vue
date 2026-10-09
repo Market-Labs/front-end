@@ -29,7 +29,7 @@
           <div v-for="(item, index) in orderForm.items" :key="item.key" class="item-row">
             <label>{{ $t('common.product') }}<pv-select v-model="item.productId" :options="availableProducts(index)" option-label="name" option-value="id" :placeholder="$t('page.procurements.selectProduct')" /></label>
             <label>{{ $t('common.quantity') }}<pv-input-text v-model="item.quantity" type="number" min="1" step="1" placeholder="1" /></label>
-            <pv-button v-if="orderForm.items.length > 3" type="button" icon="pi pi-trash" text severity="danger" :aria-label="$t('common.removeItem')" :title="$t('common.removeItem')" @click="removeItem(index)" />
+            <pv-button v-if="orderForm.items.length > 1" type="button" icon="pi pi-trash" text severity="danger" :aria-label="$t('common.removeItem')" :title="$t('common.removeItem')" @click="removeItem(index)" />
           </div>
           <pv-button type="button" :label="$t('common.addItem')" icon="pi pi-plus" text @click="addItem" />
         </div>
@@ -138,13 +138,13 @@ const showDetails = ref(false);
 const selectedOrderId = ref(null);
 const selectedOrder = computed(() => procurementsStore.orders.find((order) => order.id === selectedOrderId.value));
 const formatMoney = (value) => `S/ ${Number(value || 0).toFixed(2)}`;
-let nextItemKey = 3;
+let nextItemKey = 0;
 const newItem = () => ({ key: nextItemKey++, productId: null, quantity: '' });
 const minimarkets = computed(() => profilesStore.profiles.filter((profile) => profile.type === 'minimarket'));
 const orderForm = reactive({
   minimarketId: null,
   shippingDate: new Date().toISOString().slice(0, 10),
-  items: [newItem(), newItem(), newItem()],
+  items: [newItem()],
 });
 const addItem = () => orderForm.items.push(newItem());
 const removeItem = (index) => orderForm.items.splice(index, 1);
@@ -167,11 +167,11 @@ const estimatedTotal = computed(() => {
 
 const saveOrder = async () => {
   const minimarket = minimarkets.value.find((entry) => entry.id === orderForm.minimarketId);
-  const items = orderForm.items.map((line) => {
+  const items = orderForm.items.filter((line) => line.productId || line.quantity !== '').map((line) => {
     const product = productsStore.products.find((entry) => entry.id === line.productId && entry.supplierId === iamStore.currentSupplierId);
     return product && { productName: product.name, quantity: Number(line.quantity), unitPrice: product.price };
   });
-  if (!minimarket || !/^\d{4}-\d{2}-\d{2}$/.test(orderForm.shippingDate) || items.length < 3 || items.some((item) => !item || !Number.isInteger(item.quantity) || item.quantity <= 0) || new Set(items.map((item) => item?.productName)).size !== items.length) {
+  if (!minimarket || !/^\d{4}-\d{2}-\d{2}$/.test(orderForm.shippingDate) || items.length === 0 || items.some((item) => !item || !Number.isInteger(item.quantity) || item.quantity <= 0) || new Set(items.map((item) => item?.productName)).size !== items.length) {
     formError.value = t('common.invalidForm');
     return;
   }
@@ -181,7 +181,7 @@ const saveOrder = async () => {
     await procurementsStore.createOrder({ supplierId: iamStore.currentSupplierId, minimarketId: minimarket.id, supplier: iamStore.userName, minimarket: minimarket.businessName, shippingDate: orderForm.shippingDate, items, total: Number(items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0).toFixed(2)) });
     showOrderForm.value = false;
     orderForm.minimarketId = null;
-    orderForm.items = [newItem(), newItem(), newItem()];
+    orderForm.items = [newItem()];
   } catch {
     formError.value = t('common.errorSaving');
   } finally {

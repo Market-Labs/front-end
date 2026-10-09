@@ -26,6 +26,7 @@
   "/api/v1/minimarkets/:minimarketId/purchase-orders": "/purchaseOrders",
   "/api/v1/minimarkets/:minimarketId/purchase-orders/:id": "/purchaseOrders/:id",
   "/api/v1/suppliers": "/suppliers",
+  "/api/v1/suppliers/:id": "/suppliers/:id",
   "/api/v1/minimarkets/:minimarketId/conservation/monitoring": "/conservationMonitoring",
   "/api/v1/suppliers/:supplierId/conservation/monitoring": "/supplierConservationMonitoring",
   "/api/v1/minimarkets/:minimarketId/communication/messages": "/notifications",
