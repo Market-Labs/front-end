@@ -205,9 +205,7 @@ const saveUser = async () => {
 
 const summaryCards = computed(() => [
   { label: 'page.iam.activeUsers', value: visibleUsers.value.filter((user) => user.status === 'active').length, icon: 'pi pi-users' },
-  { label: 'page.iam.definedRoles', value: isFirebaseMode
-    ? new Set(visibleUsers.value.map((user) => accessRole(user.accessLevel))).size
-    : roleOptions.value.length, icon: 'pi pi-id-card' },
+  { label: 'page.iam.definedRoles', value: isFirebaseMode ? accessOptions.value.length : roleOptions.value.length, icon: 'pi pi-id-card' },
   { label: 'page.iam.keyPermissions', value: new Set(visibleUsers.value.flatMap((user) => user.permissions)).size, icon: 'pi pi-shield' },
 ]);
 
