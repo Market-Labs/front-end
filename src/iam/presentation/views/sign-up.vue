@@ -25,7 +25,8 @@
         <input id="signup-name" v-model.trim="name" type="text" autocomplete="name" required maxlength="120" />
 
         <label for="signup-email">{{ t('auth.email') }}</label>
-        <input id="signup-email" v-model.trim="email" type="email" autocomplete="email" required placeholder="you@example.com" />
+        <input id="signup-email" v-model.trim="email" type="email" autocomplete="email" required placeholder="you@example.com" :aria-invalid="Boolean(emailError)" @input="emailError = ''" />
+        <p v-if="emailError" class="auth-error" role="alert">{{ emailError }}</p>
 
         <label for="signup-business">{{ t(type === 'admin' ? 'auth.minimarketName' : 'auth.supplierName') }}</label>
         <input id="signup-business" v-model.trim="businessName" type="text" autocomplete="organization" required maxlength="120" />
@@ -73,11 +74,17 @@ const acceptedTerms = ref(false);
 const showTerms = ref(false);
 const submitting = ref(false);
 const error = ref('');
+const emailError = ref('');
 
 const submit = async () => {
   error.value = '';
+  emailError.value = '';
   if (!acceptedTerms.value || !name.value || !businessName.value || password.value.length < 6) {
     error.value = t('common.invalidForm');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(email.value)) {
+    emailError.value = t('auth.invalidEmail');
     return;
   }
   submitting.value = true;
@@ -85,9 +92,19 @@ const submit = async () => {
     await iamStore.signUp({ type: type.value, name: name.value, email: email.value, businessName: businessName.value, password: password.value });
     await router.replace('/home');
   } catch (cause) {
-    error.value = cause.code === 'auth/email-already-in-use' ? t('auth.emailInUse')
-      : cause.code === 'auth/weak-password' ? t('auth.weakPassword')
-        : cause.message === 'signup-cleanup-required' ? t('auth.cleanupRequired') : t('auth.signupError');
+    if (cause.code === 'auth/invalid-email') {
+      emailError.value = t('auth.invalidEmail');
+    } else if (cause.code === 'auth/email-already-in-use') {
+      emailError.value = t('auth.emailInUse');
+    } else if (cause.code === 'auth/weak-password') {
+      error.value = t('auth.weakPassword');
+    } else if (cause.code === 'permission-denied') {
+      error.value = t('auth.setupDenied');
+    } else if (cause.code === 'auth/network-request-failed' || cause.code === 'unavailable') {
+      error.value = t('auth.networkError');
+    } else {
+      error.value = t(cause.message === 'signup-cleanup-required' ? 'auth.cleanupRequired' : 'auth.signupError');
+    }
   } finally {
     submitting.value = false;
   }
