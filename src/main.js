@@ -26,7 +26,7 @@ import Toast from 'primevue/toast'
 import Toolbar from 'primevue/toolbar'
 import Tooltip from 'primevue/tooltip'
 
-createApp(App)
+const app = createApp(App)
   .use(i18n)
   .use(PrimeVue, {
     theme: {
@@ -57,4 +57,5 @@ createApp(App)
   .component('pv-toast', Toast)
   .component('pv-toolbar', Toolbar)
   .directive('tooltip', Tooltip)
-  .mount('#app')
+
+router.isReady().then(() => app.mount('#app'))
