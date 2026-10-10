@@ -1,3 +1,4 @@
+<template>
   <section class="communication-view">
     <div class="view-header">
       <div>
@@ -48,7 +49,11 @@ watch(locale, () => communicationStore.fetchMessages(iamStore.isSupplier));
 </script>
 
 <style scoped>
-@@ -57,7 +45,7 @@ watch(locale, () => communicationStore.fetchMessages(iamStore.isSupplier));
+.communication-view {
+  display: grid;
+  gap: 18px;
+}
+
 .view-header,
 .message-list article {
   background: #ffffff;
@@ -56,7 +61,11 @@ watch(locale, () => communicationStore.fetchMessages(iamStore.isSupplier));
   border-radius: 8px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
 }
-@@ -69,28 +57,22 @@ watch(locale, () => communicationStore.fetchMessages(iamStore.isSupplier));
+
+.view-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
   padding: 24px;
 }
 
@@ -85,16 +94,26 @@ watch(locale, () => communicationStore.fetchMessages(iamStore.isSupplier));
   font-weight: 700;
   margin: 0;
 }
-@@ -108,47 +90,27 @@ watch(locale, () => communicationStore.fetchMessages(iamStore.isSupplier));
+
+.message-list {
+  display: grid;
+  gap: 12px;
+}
+
+.message-list article {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  padding: 18px;
 }
 
 .message-list article.unread {
   border-color: #fc6910;
 }
 
-.message-list button {
-  background: #f9fbf8;
-  border: 1px solid #e8ede9;
+.message-list .star-button {
+  background: #eff3fa;
+  border: 1px solid #d9e5f6;
   border-radius: 8px;
   color: #fc6910;
   cursor: pointer;
@@ -133,3 +152,5 @@ watch(locale, () => communicationStore.fetchMessages(iamStore.isSupplier));
   display: block;
   font-weight: 700;
   margin: 4px 0 0;
+}
+</style>

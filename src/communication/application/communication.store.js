@@ -15,7 +15,7 @@ const demoMessages = [
   new Message({ id: 'alert-2', sender: 'Sistema MarketGo', receiver: 'Minimarket Verde Sur', subject: 'Vencimiento cercano', body: 'Yogurt organico vence en 5 dias.', read: false, starred: false, sentAt: '2026-09-18 10:05' }),
   new Message({ id: 'alert-3', sender: 'Sistema MarketGo', receiver: 'Minimarket Verde Sur', subject: 'Stock bajo', body: 'Leche organica se acerca al stock minimo.', read: false, starred: false, sentAt: '2026-09-18 10:30' }),
   new Message({ id: 'alert-4', sender: 'Sistema MarketGo', receiver: 'Minimarket Verde Sur', subject: 'Orden pendiente', body: 'Anita Gamboa tiene una orden por confirmar.', read: true, starred: false, sentAt: '2026-09-18 11:20' }),
-  ];
+];
 
 export const useCommunicationStore = defineStore('communication', {
   state: () => ({
@@ -50,3 +50,12 @@ export const useCommunicationStore = defineStore('communication', {
       } finally {
         this.loading = false;
       }
+    },
+    markAsRead(id) {
+      this.messages.find((message) => message.id === id)?.markAsRead();
+    },
+    toggleStarred(id) {
+      this.messages.find((message) => message.id === id)?.toggleStarred();
+    },
+  },
+});
