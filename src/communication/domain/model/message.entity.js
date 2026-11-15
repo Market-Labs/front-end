@@ -1,3 +1,6 @@
+/**
+ * Domain entity representing an internal notification or alert message.
+ */
 export class Message {
   constructor({
     id,
