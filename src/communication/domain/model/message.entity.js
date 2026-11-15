@@ -34,4 +34,17 @@ export class Message {
   toggleStarred() {
     this.starred = !this.starred;
   }
+
+  toPlainObject() {
+    return {
+      id: this.id,
+      sender: this.sender,
+      receiver: this.receiver,
+      subject: this.subject,
+      body: this.body,
+      read: this.read,
+      starred: this.starred,
+      sentAt: this.sentAt,
+    };
+  }
 }
