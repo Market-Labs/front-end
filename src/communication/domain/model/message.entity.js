@@ -23,6 +23,10 @@ export class Message {
     this.read = true;
   }
 
+  markAsUnread() {
+    this.read = false;
+  }
+
   toggleStarred() {
     this.starred = !this.starred;
   }
