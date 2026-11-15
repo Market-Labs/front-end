@@ -4,7 +4,7 @@ MarketGo Frontend is the Vue 3 single-page application for the MarketGo organic 
 
 The application follows a DDD-oriented structure by bounded context. Each feature keeps its own `application`, `domain`, `infrastructure` and `presentation` layers. Shared HTTP behavior, layout, routing helpers, reusable UI and endpoint configuration are centralized in the `shared` context.
 
-## Architecturee
+## Architecture
 
 - `iam`: identity and access management, sign-in, sign-up, session, users, roles and permissions.
 - `profiles`: minimarket and supplier profile lookup and update workflow.
