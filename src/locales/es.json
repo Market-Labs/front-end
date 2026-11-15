@@ -25,6 +25,7 @@
   "common": {
     "demoReadOnly": "Vista de demostración: datos ficticios. No es posible guardar cambios.",
     "search_placeholder": "Buscar en esta página",
+    "fullId": "ID completo",
     "coming_soon": "Este apartado aún no está disponible.",
     "view_all": "Ver todo",
     "save": "Guardar",
@@ -115,6 +116,7 @@
   "dashboardRole": {
     "inventory": "Inventario",
     "availableUnits": "unidades disponibles",
+    "stockWarnings": "{expired} unidades vencidas ({lots} lotes) · {near} lotes próximos a vencer",
     "requests": "Abastecimiento",
     "createdByMinimarket": "enviadas por el minimarket",
     "shipments": "Envíos",
@@ -148,8 +150,12 @@
       "eyebrow": "Resumen de MarketGo",
       "title": "Control de productos orgánicos",
       "description": "Consulta el inventario, los pedidos y las alertas de tu operación.",
-      "health": "estado general",
-      "activity": "Actividad reciente",
+      "health": "lotes vigentes",
+      "healthFormula": "Con stock y sin vencer / total de lotes con stock",
+      "expiredLot": "Lote vencido",
+      "expiringLot": "Vencimiento cercano",
+      "noRecentActivity": "No hay actividad reciente con fecha verificable.",
+      "activity": "Estado actual y actividad reciente",
       "summary": "Resumen operativo"
     },
     "inventory": {
@@ -284,7 +290,11 @@
       "zone": "Zona",
       "temperature": "Temperatura (°C)",
       "humidity": "Humedad (%)",
-      "record": "Registro"
+      "record": "Registro",
+      "stale": "Datos desactualizados",
+      "staleHelp": "La última medición tiene más de 24 horas o no tiene una fecha válida. Comprueba el sensor.",
+      "lastUpdated": "Última actualización {age}",
+      "unknownDate": "Fecha de medición desconocida"
     },
     "alerts": {
       "eyebrow": "Alertas",
@@ -293,6 +303,11 @@
       "viewSuppliers": "Ver proveedores",
       "unread": "{count} sin leer",
       "markRead": "Marcar como leída",
+      "historical": "Registro histórico; comprueba el estado actual antes de actuar",
+      "addStar": "Destacar alerta: {subject}",
+      "removeStar": "Quitar alerta destacada: {subject}",
+      "staleMonitoringTitle": "Medición desactualizada",
+      "staleMonitoringBody": "Comprueba el sensor de {zone}; la última medición tiene más de 24 horas.",
       "expirationTitle": "Vencimiento de lote",
       "expiredBody": "{product}, lote {lot}, está vencido. Revisa su stock.",
       "expiringBody": "{product}, lote {lot}, vence en {days} días.",

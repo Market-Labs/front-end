@@ -46,7 +46,7 @@
         <div class="topbar-actions">
           <div class="search-box">
             <i class="pi pi-search"></i>
-            <input v-model="searchQuery" :placeholder="t('common.search_placeholder')" type="search" />
+            <input v-model="searchQuery" :placeholder="t('common.search_placeholder')" :aria-label="t('common.search_placeholder')" type="search" />
           </div>
           <button type="button" class="icon-button" aria-label="Notifications" @click="router.push('/communication')">
             <i class="pi pi-bell"></i>

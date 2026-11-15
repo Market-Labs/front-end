@@ -48,9 +48,10 @@
       </template>
     </pv-dialog>
 
-    <pv-dialog v-model:visible="showDetails" modal :header="`${$t('page.requisition.request')} ${selectedRequest?.id || ''}`" :style="{ width: 'min(680px, calc(100vw - 32px))' }">
+    <pv-dialog v-model:visible="showDetails" modal :header="`${$t('page.requisition.request')} ${formatRequestId(selectedRequest?.id)}`" :style="{ width: 'min(680px, calc(100vw - 32px))' }">
       <template v-if="selectedRequest">
         <dl class="detail-meta">
+          <div><dt>{{ $t('common.fullId') }}</dt><dd>{{ selectedRequest.id }}</dd></div>
           <div><dt>{{ $t('page.requisition.supplier') }}</dt><dd>{{ selectedRequest.supplier }}</dd></div>
           <div><dt>{{ $t('page.requisition.requester') }}</dt><dd>{{ selectedRequest.requester }}</dd></div>
           <div><dt>{{ $t('common.status') }}</dt><dd>{{ $t(`status.${selectedRequest.status}`) }}</dd></div>
@@ -72,7 +73,7 @@
     <p v-if="actionError" class="form-error" role="alert">{{ actionError }}</p>
     <div class="table-card">
       <pv-data-table :value="filteredRequisitions" class="marketgo-datatable" responsive-layout="scroll">
-        <pv-column field="id" :header="$t('page.requisition.request')" />
+        <pv-column :header="$t('page.requisition.request')"><template #body="{ data }"><span :title="data.id">{{ formatRequestId(data.id) }}</span></template></pv-column>
         <pv-column field="itemCount" :header="$t('common.items')" />
         <pv-column field="supplier" :header="$t('page.requisition.supplier')" />
         <pv-column field="requester" :header="$t('page.requisition.requester')" />
@@ -139,6 +140,14 @@ const canReview = computed(() => iamStore.currentUser?.permissions.includes('pro
 const productsStore = useProductsStore();
 const suppliersStore = useSuppliersStore();
 const { t } = useI18n();
+const formatRequestId = (id) => {
+  const value = String(id || '');
+  if (!value) return '';
+  const numeric = /^req-(\d+)$/i.exec(value);
+  if (numeric) return `REQ-${numeric[1].padStart(5, '0')}`;
+  const uuid = /^req-([0-9a-f-]+)$/i.exec(value)?.[1].replaceAll('-', '');
+  return uuid?.length === 32 ? `REQ-${uuid.slice(0, 8).toUpperCase()}` : value;
+};
 const reasonOptions = computed(() => [
   t('page.requisition.restockReason'),
   t('page.requisition.demandReason'),

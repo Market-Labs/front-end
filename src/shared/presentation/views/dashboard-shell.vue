@@ -7,8 +7,9 @@
         <p>{{ roleDescription }}</p>
       </div>
       <div class="hero-stat">
-        <strong>{{ overviewStore.healthScore }}%</strong>
+        <strong>{{ stockSummary.totalLots ? `${stockSummary.freshRate}%` : '--' }}</strong>
         <span>{{ $t('page.dashboard.health') }}</span>
+        <small>{{ $t('page.dashboard.healthFormula') }}</small>
       </div>
     </section>
 
@@ -25,6 +26,7 @@
       <span>{{ metric.label }}</span>
       <strong>{{ metric.value }}</strong>
       <small>{{ metric.detail }}</small>
+      <small v-if="metric.note" class="stock-warning">{{ metric.note }}</small>
     </button>
 
     <section class="panel-card activity-card">
@@ -33,14 +35,15 @@
         <button type="button" @click="router.push('/communication')">{{ $t('common.view_all') }}</button>
       </div>
       <div class="timeline">
-        <article v-for="event in filteredActivity" :key="event.title">
+        <article v-for="event in filteredActivity" :key="`${event.title}-${event.detail}`">
           <span :class="['status-dot', event.kind]"></span>
           <div>
             <strong>{{ event.title }}</strong>
             <p>{{ event.detail }}</p>
           </div>
-          <time>{{ event.time }}</time>
+          <time :datetime="event.time">{{ formatDateTime(event.time, locale) }}</time>
         </article>
+        <p v-if="!filteredActivity.length" class="empty-activity">{{ $t('page.dashboard.noRecentActivity') }}</p>
       </div>
     </section>
 
@@ -68,7 +71,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useDashboardOverviewStore } from '../../application/dashboard-overview.store.js';
@@ -78,18 +81,38 @@ import { useRequisitionStore } from '../../../requisition/application/requisitio
 import { useProcurementsStore } from '../../../procurements/application/procurements.store.js';
 import { useInventoryStore } from '../../../inventory/application/inventory.store.js';
 import { useProductsStore } from '../../../products/application/products.store.js';
+import { daysUntilExpiration } from '../../../inventory/domain/model/expiration-policy.js';
+import { formatDateTime, parseDateTime } from '../../domain/model/date-time.js';
 
 const router = useRouter();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const overviewStore = useDashboardOverviewStore();
 const iamStore = useIamStore();
 const requisitionStore = useRequisitionStore();
 const procurementsStore = useProcurementsStore();
 const inventoryStore = useInventoryStore();
 const productsStore = useProductsStore();
+const now = ref(new Date());
+
+const stockSummary = computed(() => {
+  const lots = inventoryStore.items.filter((item) => Number(item.stock) > 0);
+  const withDays = lots.map((item) => ({ item, days: daysUntilExpiration(item.expirationDate, now.value) }));
+  const usable = withDays.filter(({ days }) => days !== null && days >= 0);
+  const expired = withDays.filter(({ days }) => days !== null && days < 0);
+  const near = usable.filter(({ days }) => days <= 5);
+  return {
+    usableUnits: usable.reduce((sum, { item }) => sum + Number(item.stock), 0),
+    expiredUnits: expired.reduce((sum, { item }) => sum + Number(item.stock), 0),
+    expiredLots: expired.length,
+    nearLots: near.length,
+    totalLots: lots.length,
+    freshRate: lots.length ? Math.round(usable.length / lots.length * 100) : 0,
+    expiring: [...expired, ...near].sort((a, b) => a.days - b.days),
+  };
+});
 
 const adminIndicators = computed(() => [
-  { label: t('dashboardRole.inventory'), value: inventoryStore.items.reduce((sum, item) => sum + Number(item.stock || 0), 0), detail: t('dashboardRole.availableUnits'), icon: 'pi pi-box', route: '/inventory' },
+  { label: t('dashboardRole.inventory'), value: stockSummary.value.usableUnits, detail: t('dashboardRole.availableUnits'), note: t('dashboardRole.stockWarnings', { expired: stockSummary.value.expiredUnits, lots: stockSummary.value.expiredLots, near: stockSummary.value.nearLots }), icon: 'pi pi-box', route: '/inventory' },
   { label: t('dashboardRole.requests'), value: requisitionStore.visibleForUser(iamStore.currentUser).length, detail: t('dashboardRole.createdByMinimarket'), icon: 'pi pi-list-check', route: '/requisition' },
   { label: t('dashboardRole.shipments'), value: procurementsStore.visibleForUser(iamStore.currentUser).filter((order) => order.status === 'pending-reception').length, detail: t('dashboardRole.pendingReception'), icon: 'pi pi-truck', route: '/procurements' },
 ]);
@@ -117,20 +140,40 @@ const roleDescription = computed(() => (iamStore.isSupplier
   : t('dashboardRole.adminDescription')));
 
 const filteredIndicators = useSearchFilter(() => roleIndicators.value);
-const filteredActivity = useSearchFilter(() => overviewStore.activity);
+const activity = computed(() => {
+  const current = stockSummary.value.expiring.slice(0, 3).map(({ item, days }) => ({
+    title: t(days < 0 ? 'page.dashboard.expiredLot' : 'page.dashboard.expiringLot'),
+    detail: t(days < 0 ? 'page.alerts.expiredBody' : 'page.alerts.expiringBody', {
+      product: item.productName, lot: item.lotCode, days,
+    }),
+    kind: 'warning', time: now.value.toISOString(),
+  }));
+  const dated = overviewStore.activity.filter((event) => {
+    const timestamp = event.createdAt || event.time;
+    if (typeof timestamp !== 'string' || !/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(timestamp)) return false;
+    const date = parseDateTime(timestamp);
+    const age = date && now.value.getTime() - date.getTime();
+    return age !== null && age >= 0 && age <= 7 * 24 * 60 * 60 * 1000;
+  });
+  return [...current, ...dated.map((event) => ({ ...event, time: event.createdAt || event.time }))].slice(0, 5);
+});
+const filteredActivity = useSearchFilter(() => activity.value);
 const filteredModules = useSearchFilter(() => modules.value);
 
 const goToMetric = (metric) => {
   if (metric.route) router.push(metric.route);
 };
 
+let clock;
 onMounted(() => {
+  clock = setInterval(() => { now.value = new Date(); }, 60000);
   overviewStore.fetchOverview(iamStore.isSupplier);
   requisitionStore.fetchRequisitions();
   procurementsStore.fetchOrders();
   inventoryStore.fetchInventory(iamStore.isSupplier);
   productsStore.fetchProducts();
 });
+onUnmounted(() => clearInterval(clock));
 </script>
 
 <style scoped>
@@ -208,6 +251,10 @@ onMounted(() => {
   font-size: 12px;
   font-weight: 800;
 }
+
+.hero-stat small { color: #eff3fa; font-size: 10px; line-height: 1.25; max-width: 120px; text-align: center; margin-top: 5px; }
+.metric-card.compact .stock-warning { color: #a94719; line-height: 1.3; }
+.empty-activity { color: #526780; font-size: 13px; margin: 0; }
 
 .metric-card.compact {
   border: 1px solid #d9e5f6;

@@ -25,6 +25,7 @@
   "common": {
     "demoReadOnly": "Demo view: sample data. Changes cannot be saved.",
     "search_placeholder": "Search this page",
+    "fullId": "Full ID",
     "coming_soon": "This section is not available yet.",
     "view_all": "View all",
     "save": "Save",
@@ -115,6 +116,7 @@
   "dashboardRole": {
     "inventory": "Inventory",
     "availableUnits": "available units",
+    "stockWarnings": "{expired} expired units ({lots} lots) · {near} lots expiring soon",
     "requests": "Supply",
     "createdByMinimarket": "sent by the minimarket",
     "shipments": "Shipments",
@@ -148,8 +150,12 @@
       "eyebrow": "MarketGo overview",
       "title": "Organic product overview",
       "description": "Check inventory, orders and alerts for your operation.",
-      "health": "overall status",
-      "activity": "Recent activity",
+      "health": "current lots",
+      "healthFormula": "In stock and unexpired / all lots in stock",
+      "expiredLot": "Expired lot",
+      "expiringLot": "Expiring lot",
+      "noRecentActivity": "No recent activity with a verifiable date.",
+      "activity": "Current status and recent activity",
       "summary": "Operational summary"
     },
     "inventory": {
@@ -284,7 +290,11 @@
       "zone": "Zone",
       "temperature": "Temperature (°C)",
       "humidity": "Humidity (%)",
-      "record": "Record"
+      "record": "Record",
+      "stale": "Outdated data",
+      "staleHelp": "The last measurement is over 24 hours old or has no valid date. Check the sensor.",
+      "lastUpdated": "Last updated {age}",
+      "unknownDate": "Measurement date unknown"
     },
     "alerts": {
       "eyebrow": "Alerts",
@@ -293,6 +303,11 @@
       "viewSuppliers": "View suppliers",
       "unread": "{count} unread",
       "markRead": "Mark as read",
+      "historical": "Historical record; check the current status before acting",
+      "addStar": "Star alert: {subject}",
+      "removeStar": "Remove star from alert: {subject}",
+      "staleMonitoringTitle": "Outdated measurement",
+      "staleMonitoringBody": "Check the sensor in {zone}; the last reading is over 24 hours old.",
       "expirationTitle": "Lot expiration",
       "expiredBody": "{product}, lot {lot}, has expired. Review its stock.",
       "expiringBody": "{product}, lot {lot}, expires in {days} days.",

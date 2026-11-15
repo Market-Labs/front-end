@@ -14,13 +14,14 @@
 
     <div class="message-list">
       <article v-for="message in filteredMessages" :key="message.id" :class="{ unread: !message.read }">
-        <button type="button" class="star-button" @click="communicationStore.toggleStarred(message.id)">
-          <i :class="message.starred ? 'pi pi-star-fill' : 'pi pi-star'"></i>
+        <button type="button" class="star-button" :aria-label="$t(message.starred ? 'page.alerts.removeStar' : 'page.alerts.addStar', { subject: message.subject })" :aria-pressed="message.starred" @click="communicationStore.toggleStarred(message.id)">
+          <i :class="message.starred ? 'pi pi-star-fill' : 'pi pi-star'" aria-hidden="true"></i>
         </button>
         <div>
+          <small v-if="isHistorical(message.sentAt)" class="historical-label">{{ $t('page.alerts.historical') }}</small>
           <strong>{{ message.subject }}</strong>
           <p>{{ message.body }}</p>
-          <small>{{ message.sender }} - {{ message.sentAt }}</small>
+          <small>{{ message.sender }} - <time :datetime="toIsoDateTime(message.sentAt)">{{ formatDateTime(message.sentAt, locale) }}</time></small>
         </div>
         <pv-button v-if="!message.read" class="read-action" :label="$t('page.alerts.markRead')" text @click="communicationStore.markAsRead(message.id)" />
       </article>
@@ -35,12 +36,18 @@ import { useRouter } from 'vue-router';
 import { useCommunicationStore } from '../../application/communication.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
+import { formatDateTime, parseDateTime } from '../../../shared/domain/model/date-time.js';
 
 const communicationStore = useCommunicationStore();
 const iamStore = useIamStore();
 const filteredMessages = useSearchFilter(() => communicationStore.messages);
 const router = useRouter();
 const { locale } = useI18n();
+const toIsoDateTime = (value) => parseDateTime(value)?.toISOString();
+const isHistorical = (value) => {
+  const date = parseDateTime(value);
+  return date && Date.now() - date.getTime() > 7 * 24 * 60 * 60 * 1000;
+};
 
 onMounted(() => {
   communicationStore.fetchMessages(iamStore.isSupplier);
@@ -144,6 +151,12 @@ watch(locale, () => communicationStore.fetchMessages(iamStore.isSupplier));
 .message-list strong {
   color: #021c45;
   font-weight: 950;
+}
+
+.message-list .historical-label {
+  color: #7a5a20;
+  font-size: 12px;
+  margin: 0 0 4px;
 }
 
 .message-list p,

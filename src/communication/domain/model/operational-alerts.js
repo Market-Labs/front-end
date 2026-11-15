@@ -1,4 +1,5 @@
 import { expiringLots } from '../../../inventory/domain/model/expiration-policy.js';
+import { isMonitoringStale } from '../../../shared/domain/model/date-time.js';
 
 export const operationalAlerts = (inventory, monitoring, translate, now = new Date()) => [
   ...expiringLots(inventory, now).map((item) => ({
@@ -13,9 +14,14 @@ export const operationalAlerts = (inventory, monitoring, translate, now = new Da
     subject: translate('page.alerts.lowStockTitle'),
     body: translate('page.alerts.lowStockBody', { product: item.productName, lot: item.lotCode }),
   })),
-  ...monitoring.filter((record) => record.status === 'risk').map((record) => ({
+  ...monitoring.filter((record) => isMonitoringStale(record.recordedAt, now)).map((record) => ({
+    id: `generated-stale-${record.id}`,
+    subject: translate('page.alerts.staleMonitoringTitle'),
+    body: translate('page.alerts.staleMonitoringBody', { zone: record.zone }),
+  })),
+  ...monitoring.filter((record) => !isMonitoringStale(record.recordedAt, now) && record.status === 'risk').map((record) => ({
     id: `generated-conservation-${record.id}`,
     subject: translate('page.alerts.conservationTitle'),
     body: translate('page.alerts.conservationBody', { zone: record.zone, product: record.productName }),
   })),
-].map((alert) => ({ ...alert, sender: 'Sistema MarketGo', read: false, starred: false, sentAt: now.toLocaleString() }));
+].map((alert) => ({ ...alert, sender: 'Sistema MarketGo', read: false, starred: false, sentAt: now.toISOString() }));
