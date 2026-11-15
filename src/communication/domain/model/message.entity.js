@@ -5,8 +5,8 @@ export class Message {
     this.receiver = receiver;
     this.subject = subject;
     this.body = body;
-    this.read = read;
-    this.starred = starred;
+    this.read = Boolean(read);
+    this.starred = Boolean(starred);
     this.sentAt = sentAt;
   }
 
