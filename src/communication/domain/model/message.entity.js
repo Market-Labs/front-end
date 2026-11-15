@@ -1,5 +1,14 @@
 export class Message {
-  constructor({ id, sender, receiver, subject, body, read = false, starred = false, sentAt } = {}) {
+  constructor({
+    id,
+    sender = 'Sistema MarketGo',
+    receiver = '',
+    subject = 'Notificacion',
+    body = '',
+    read = false,
+    starred = false,
+    sentAt = '',
+  } = {}) {
     this.id = id;
     this.sender = sender;
     this.receiver = receiver;
