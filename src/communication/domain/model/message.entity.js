@@ -19,6 +19,10 @@ export class Message {
     this.sentAt = sentAt;
   }
 
+  isUnread() {
+    return !this.read;
+  }
+
   markAsRead() {
     this.read = true;
   }
