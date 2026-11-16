@@ -24,4 +24,4 @@ Los reportes PDF/XLSX se construyen en el navegador con las fuentes que devuelve
 
 ## Publicación
 
-La API publicada responde en `/api/v1/health`, pero actualmente no envía `Access-Control-Allow-Origin` para `https://front-end-tan-kappa-94.vercel.app`. El responsable del backend debe agregar ese origen exacto a CORS de producción y volver a publicar el backend. Después, configurar/verificar `VITE_API_BASE_URL` en Vercel y volver a publicar el frontend. Las pruebas de extremo a extremo con cuentas reales quedan para esa fase; no usar datos de prueba en la base de producción.
+La API publicada responde en `/api/v1/health` y permite por CORS el origen `https://front-end-tan-kappa-94.vercel.app`. El frontend publicado usa `VITE_API_BASE_URL=https://marketgo-backend.vercel.app/`. Se verificó el inicio de sesión de las cuentas de minimarket y proveedor en Vercel; ambas muestran sus paneles y datos iniciales vacíos. Las operaciones de escritura y el flujo completo de abastecimiento requieren verificación con datos reales.
