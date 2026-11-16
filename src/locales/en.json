@@ -271,6 +271,7 @@
       "description": "Manage the minimarket contacts you work with.",
       "newClient": "New client",
       "editClient": "Edit client",
+      "examples": { "businessName": "Green Market", "address": "123 Main Street", "district": "District, city" },
       "empty": "No clients added yet.",
       "loadError": "Could not load clients.",
       "saveError": "Could not save the client. Please try again."

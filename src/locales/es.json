@@ -271,6 +271,7 @@
       "description": "Gestiona los contactos de minimarkets con los que trabajas.",
       "newClient": "Nuevo cliente",
       "editClient": "Editar cliente",
+      "examples": { "businessName": "Minimarket Verde Sur", "address": "Av. Principal 123", "district": "Distrito, ciudad" },
       "empty": "Aún no agregaste clientes.",
       "loadError": "No se pudieron cargar los clientes.",
       "saveError": "No se pudo guardar el cliente. Inténtalo de nuevo."

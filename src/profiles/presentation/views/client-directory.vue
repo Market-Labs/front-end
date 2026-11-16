@@ -11,11 +11,11 @@
 
     <pv-dialog v-model:visible="showForm" modal :header="$t(editingId ? 'page.clients.editClient' : 'page.clients.newClient')" :style="{ width: 'min(540px, calc(100vw - 32px))' }">
       <form class="client-form" @submit.prevent="saveClient">
-        <label>{{ $t('page.suppliers.businessName') }}<pv-input-text v-model.trim="clientForm.businessName" required /></label>
-        <label>{{ $t('page.suppliers.email') }}<pv-input-text v-model.trim="clientForm.email" type="email" required /></label>
-        <label>{{ $t('page.suppliers.phone') }}<pv-input-text v-model.trim="clientForm.phone" required /></label>
-        <label>{{ $t('page.suppliers.address') }}<pv-input-text v-model.trim="clientForm.address" required /></label>
-        <label>{{ $t('page.profiles.zone') }}<pv-input-text v-model.trim="clientForm.district" required /></label>
+        <label>{{ $t('page.suppliers.businessName') }}<pv-input-text v-model.trim="clientForm.businessName" :placeholder="$t('page.clients.examples.businessName')" required /></label>
+        <label>{{ $t('page.suppliers.email') }}<pv-input-text v-model.trim="clientForm.email" type="email" placeholder="contacto@minimarket.pe" required /></label>
+        <label>{{ $t('page.suppliers.phone') }}<pv-input-text v-model.trim="clientForm.phone" placeholder="999 999 999" required /></label>
+        <label>{{ $t('page.suppliers.address') }}<pv-input-text v-model.trim="clientForm.address" :placeholder="$t('page.clients.examples.address')" required /></label>
+        <label>{{ $t('page.profiles.zone') }}<pv-input-text v-model.trim="clientForm.district" :placeholder="$t('page.clients.examples.district')" required /></label>
         <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
         <div class="form-actions">
           <pv-button :label="$t('common.cancel')" text type="button" @click="showForm = false" />
