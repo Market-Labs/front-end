@@ -1,11 +1,11 @@
 const column = (key, label, kind) => ({ key, label, kind });
 const money = (value) => Number(Number(value || 0).toFixed(2));
 
-export const buildReport = (type, sources, isSupplier, t, ownerId = isSupplier ? 'sup-2' : 'min-1') => {
+export const buildReport = (type, sources, isSupplier, t, ownerId) => {
   const products = new Map(sources.products.map((product) => [product.name, product]));
   const suppliers = new Map(sources.suppliers.map((supplier) => [supplier.id, supplier]));
   const orders = sources.orders.filter((order) => isSupplier ? order.supplierId === ownerId : order.minimarketId === ownerId);
-  const visibleWaste = sources.waste.filter((record) => record.ownerId === ownerId);
+  const visibleWaste = sources.waste;
   const title = t(`page.analytics.reportNames.${type}`);
   const c = (key, labelKey, kind) => column(key, t(labelKey), kind);
   let columns = [];
@@ -33,8 +33,8 @@ export const buildReport = (type, sources, isSupplier, t, ownerId = isSupplier ?
       break;
     case 'Proveedores':
       columns = [c('id', 'common.id'), c('supplier', 'common.supplier'), c('ruc', 'page.analytics.ruc'), c('specialty', 'page.suppliers.specialty'), c('coverage', 'page.suppliers.coverage'), c('orders', 'page.analytics.orders'), c('received', 'page.analytics.received'), c('amount', 'page.analytics.amount', 'money')];
-      rows = sources.suppliers.filter((supplier) => supplier.status !== 'inactive' && (!isSupplier || supplier.id === ownerId)).map((supplier) => {
-        const related = orders.filter((order) => order.supplierId === supplier.id);
+      rows = sources.suppliers.filter((supplier) => supplier.status !== 'inactive' && (!isSupplier || supplier.supplierOrganizationId === ownerId)).map((supplier) => {
+        const related = orders.filter((order) => order.supplierId === supplier.supplierOrganizationId);
         return { id: supplier.id, supplier: supplier.businessName, ruc: supplier.ruc, specialty: supplier.specialty, coverage: supplier.coverageArea, orders: related.length, received: related.filter((order) => order.status === 'received').length, amount: money(related.filter((order) => order.status === 'received').reduce((sum, order) => sum + Number(order.total), 0)) };
       });
       break;

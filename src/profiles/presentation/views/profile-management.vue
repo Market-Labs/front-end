@@ -6,10 +6,10 @@
         <h2>{{ $t('page.profiles.title') }}</h2>
         <p>{{ $t('page.profiles.description') }}</p>
       </div>
-      <pv-button v-if="ownProfile" :label="$t('page.profiles.updateProfile')" icon="pi pi-pencil" @click="openContactForm" />
+      <pv-button :label="$t(ownProfile ? 'page.profiles.updateProfile' : 'page.profiles.createProfile')" icon="pi pi-pencil" @click="openContactForm" />
     </div>
 
-    <pv-dialog v-model:visible="showContactForm" modal :header="$t('page.profiles.updateProfile')" :style="{ width: '520px' }">
+    <pv-dialog v-model:visible="showContactForm" modal :header="$t(ownProfile ? 'page.profiles.updateProfile' : 'page.profiles.createProfile')" :style="{ width: '520px' }">
       <form class="contact-form" @submit.prevent="saveContact">
         <label>{{ $t('common.name') }}<pv-input-text v-model.trim="contactForm.businessName" required /></label>
         <label>{{ $t('page.suppliers.email') }}<pv-input-text v-model.trim="contactForm.email" type="email" required /></label>
@@ -63,7 +63,7 @@ import { useIamStore } from '../../../iam/application/iam.store.js';
 const profilesStore = useProfilesStore();
 const iamStore = useIamStore();
 const { t } = useI18n();
-const ownProfile = computed(() => profilesStore.profiles.find((profile) => profile.userId === iamStore.currentUser?.id));
+const ownProfile = computed(() => profilesStore.profiles.find((profile) => profile.organizationId === iamStore.currentUser?.organizationId));
 const filteredProfiles = useSearchFilter(() => ownProfile.value ? [ownProfile.value] : []);
 const showContactForm = ref(false);
 const saving = ref(false);
@@ -71,8 +71,7 @@ const feedback = ref('');
 const contactForm = reactive({ businessName: '', email: '', phone: '', address: '', area: '', specialty: '' });
 
 const openContactForm = () => {
-  if (!ownProfile.value) return;
-  const profile = ownProfile.value;
+  const profile = ownProfile.value || { businessName: iamStore.currentUser?.organizationName, email: iamStore.currentUser?.email, phone: '', address: '', displayArea: '', specialty: '' };
   Object.assign(contactForm, {
     businessName: profile.businessName,
     email: profile.email || '',
@@ -86,17 +85,19 @@ const openContactForm = () => {
 };
 
 const saveContact = async () => {
-  if (!ownProfile.value || saving.value) return;
+  if (saving.value) return;
   saving.value = true;
   try {
-    await profilesStore.updateContact(ownProfile.value.id, {
+    const payload = {
       businessName: contactForm.businessName,
       email: contactForm.email,
       phone: contactForm.phone,
       address: contactForm.address,
       [iamStore.isSupplier ? 'coverageArea' : 'district']: contactForm.area,
       ...(iamStore.isSupplier ? { specialty: contactForm.specialty } : {}),
-    });
+    };
+    if (ownProfile.value) await profilesStore.updateContact(ownProfile.value.id, payload);
+    else await profilesStore.createContact(payload);
     showContactForm.value = false;
   } catch (error) {
     feedback.value = t('page.profiles.saveError');

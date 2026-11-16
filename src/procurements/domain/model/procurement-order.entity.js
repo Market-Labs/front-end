@@ -2,8 +2,8 @@ export class ProcurementOrder {
   constructor({
     id,
     supplyRequestId = null,
-    supplierId = 'sup-2',
-    minimarketId = 'min-1',
+    supplierId = null,
+    minimarketId = null,
     supplier,
     minimarket,
     status,

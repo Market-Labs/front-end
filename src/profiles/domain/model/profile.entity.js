@@ -1,7 +1,8 @@
 export class Profile {
-  constructor({ id, userId, type, businessName, email, phone, address, district, specialty, coverageArea }) {
+  constructor({ id, userId, organizationId, type, businessName, email, phone, address, district, specialty, coverageArea }) {
     this.id = id;
     this.userId = userId;
+    this.organizationId = organizationId;
     this.type = type;
     this.businessName = businessName;
     this.email = email;

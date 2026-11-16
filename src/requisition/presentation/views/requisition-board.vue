@@ -174,7 +174,8 @@ const addItem = () => requisitionForm.items.push(newItem());
 const removeItem = (index) => requisitionForm.items.splice(index, 1);
 const availableProducts = (index) => {
   const selected = new Set(requisitionForm.items.filter((_, itemIndex) => itemIndex !== index).map((item) => item.productId));
-  return productsStore.products.filter((product) => !selected.has(product.id) && product.supplierId === requisitionForm.supplierId);
+  const supplier = suppliersStore.activeSuppliers.find((entry) => entry.id === requisitionForm.supplierId);
+  return productsStore.products.filter((product) => !selected.has(product.id) && product.organizationId === supplier?.supplierOrganizationId);
 };
 const openDetails = (request) => {
   selectedRequestId.value = request.id;
@@ -184,17 +185,17 @@ const openDetails = (request) => {
 const saveRequest = async () => {
   const supplier = suppliersStore.activeSuppliers.find((entry) => entry.id === requisitionForm.supplierId);
   const items = requisitionForm.items.filter((line) => line.productId || line.quantity !== '').map((line) => {
-    const product = productsStore.products.find((entry) => entry.id === line.productId && entry.supplierId === requisitionForm.supplierId);
+    const product = productsStore.products.find((entry) => entry.id === line.productId && entry.organizationId === supplier?.supplierOrganizationId);
     return product && { productName: product.name, quantity: Number(line.quantity), unitPrice: product.price };
   });
-  if (!supplier || !requisitionForm.reason || items.length === 0 || items.some((item) => !item || !Number.isInteger(item.quantity) || item.quantity <= 0) || new Set(items.map((item) => item?.productName)).size !== items.length) {
+  if (!supplier?.supplierOrganizationId || !requisitionForm.reason || items.length === 0 || items.some((item) => !item || !Number.isInteger(item.quantity) || item.quantity <= 0) || new Set(items.map((item) => item?.productName)).size !== items.length) {
     formError.value = t('common.invalidForm');
     return;
   }
   saving.value = true;
   formError.value = '';
   try {
-    await requisitionStore.createRequest({ minimarketId: iamStore.currentMinimarketId, supplierId: supplier.id, requesterId: iamStore.currentUser.id, requester: iamStore.userName, supplier: supplier.businessName, productName: items[0].productName, quantity: items[0].quantity, reason: requisitionForm.reason, items });
+    await requisitionStore.createRequest({ supplierOrganizationId: supplier.supplierOrganizationId, supplier: supplier.businessName, reason: requisitionForm.reason, items });
     showRequisitionForm.value = false;
     requisitionForm.supplierId = null;
     requisitionForm.reason = null;

@@ -33,7 +33,7 @@
 
         <label for="signup-password">{{ t('auth.password') }}</label>
         <div class="password-field">
-          <input id="signup-password" v-model="password" :type="showPassword ? 'text' : 'password'" autocomplete="new-password" required minlength="6" />
+          <input id="signup-password" v-model="password" :type="showPassword ? 'text' : 'password'" autocomplete="new-password" required minlength="8" />
           <button type="button" :aria-label="showPassword ? t('auth.hidePassword') : t('auth.showPassword')" @click="showPassword = !showPassword">
             <i :class="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
           </button>
@@ -43,10 +43,9 @@
         <button class="auth-terms-link" type="button" @click="showTerms = !showTerms">{{ t('auth.readTerms') }}</button>
         <p v-if="showTerms" class="auth-notice">{{ t('auth.termsText') }}</p>
         <p v-if="error" class="auth-error" role="alert">{{ error }}</p>
-        <button class="auth-submit" type="submit" :disabled="submitting || !isFirebaseMode">
+        <button class="auth-submit" type="submit" :disabled="submitting">
           {{ submitting ? t('auth.creatingAccount') : t('auth.createAccount') }}
         </button>
-        <p v-if="!isFirebaseMode" class="auth-notice">{{ t('auth.signupFirebaseOnly') }}</p>
       </form>
       <p class="auth-footer">{{ t('auth.alreadyAccount') }} <router-link to="/login">{{ t('auth.signIn') }}</router-link></p>
     </section>
@@ -58,7 +57,6 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useIamStore } from '../../application/iam.store.js';
-import { isFirebaseMode } from '../../../shared/infrastructure/firebase-client.js';
 import LanguageSwitcher from '../../../shared/presentation/components/language-switcher.vue';
 
 const { t } = useI18n();
@@ -79,7 +77,7 @@ const emailError = ref('');
 const submit = async () => {
   error.value = '';
   emailError.value = '';
-  if (!acceptedTerms.value || !name.value || !businessName.value || password.value.length < 6) {
+  if (!acceptedTerms.value || !name.value || !businessName.value || password.value.length < 8) {
     error.value = t('common.invalidForm');
     return;
   }
@@ -89,22 +87,13 @@ const submit = async () => {
   }
   submitting.value = true;
   try {
-    await iamStore.signUp({ type: type.value, name: name.value, email: email.value, businessName: businessName.value, password: password.value });
+    await iamStore.signUp({ type: type.value, name: name.value, email: email.value, businessName: businessName.value, password: password.value, acceptedTerms: acceptedTerms.value });
     await router.replace('/home');
   } catch (cause) {
-    if (cause.code === 'auth/invalid-email') {
-      emailError.value = t('auth.invalidEmail');
-    } else if (cause.code === 'auth/email-already-in-use') {
-      emailError.value = t('auth.emailInUse');
-    } else if (cause.code === 'auth/weak-password') {
-      error.value = t('auth.weakPassword');
-    } else if (cause.code === 'permission-denied') {
-      error.value = t('auth.setupDenied');
-    } else if (cause.code === 'auth/network-request-failed' || cause.code === 'unavailable') {
-      error.value = t('auth.networkError');
-    } else {
-      error.value = t(cause.message === 'signup-cleanup-required' ? 'auth.cleanupRequired' : 'auth.signupError');
-    }
+    if (cause.response?.status === 409) emailError.value = t('auth.emailInUse');
+    else if (cause.response?.status === 503) error.value = t('auth.backendDatabaseUnavailable');
+    else if (!cause.response) error.value = t('auth.networkError');
+    else error.value = t('auth.signupError');
   } finally {
     submitting.value = false;
   }

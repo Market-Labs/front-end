@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ProductsApi } from '../infrastructure/products-api.js';
 import { Product } from '../domain/model/product.entity.js';
-import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
+import { useIamStore } from '../../iam/application/iam.store.js';
 
 const productsApi = new ProductsApi();
 
@@ -32,7 +32,7 @@ const demoProducts = [
 
 export const useProductsStore = defineStore('products', {
   state: () => ({
-    products: isFirebaseMode ? [] : demoProducts,
+    products: [],
     loading: false,
     saving: false,
     error: null,
@@ -44,10 +44,10 @@ export const useProductsStore = defineStore('products', {
     async fetchProducts() {
       this.loading = true;
       try {
-        this.products = await productsApi.getProducts();
+        this.products = await productsApi.getProducts(useIamStore().isSupplier);
       } catch (error) {
-        this.error = isFirebaseMode ? 'No se pudo cargar el catalogo desde Firestore.' : 'No se pudo cargar catalogo. Se muestran datos demo.';
-        this.products = isFirebaseMode ? [] : demoProducts;
+        this.error = 'No se pudo cargar el catálogo desde la API.';
+        this.products = [];
       } finally {
         this.loading = false;
       }
@@ -56,11 +56,11 @@ export const useProductsStore = defineStore('products', {
       this.saving = true;
       this.error = null;
       try {
-        const product = await productsApi.createProduct({ ...data, id: nextProductId(this.products, data.category) });
+        const product = await productsApi.createProduct(data);
         this.products.push(product);
         return product;
       } catch (error) {
-        this.error = 'No se pudo guardar el producto en la API de prueba.';
+        this.error = 'No se pudo guardar el producto en la API.';
         throw error;
       } finally {
         this.saving = false;
@@ -74,7 +74,7 @@ export const useProductsStore = defineStore('products', {
         this.products = this.products.map((entry) => entry.id === id ? product : entry);
         return product;
       } catch (error) {
-        this.error = 'No se pudo actualizar el producto en la API de prueba.';
+        this.error = 'No se pudo actualizar el producto en la API.';
         throw error;
       } finally {
         this.saving = false;
@@ -87,7 +87,7 @@ export const useProductsStore = defineStore('products', {
         await productsApi.deleteProduct(id);
         this.products = this.products.filter((entry) => entry.id !== id);
       } catch (error) {
-        this.error = 'No se pudo eliminar el producto de la API de prueba.';
+        this.error = 'No se pudo eliminar el producto de la API.';
         throw error;
       } finally {
         this.saving = false;

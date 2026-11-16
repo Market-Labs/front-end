@@ -1,9 +1,10 @@
 export class Requisition {
   constructor({
     id,
-    minimarketId = 'min-1',
-    supplierId = 'sup-2',
-    requesterId = 'usr-admin',
+    minimarketId = null,
+    supplierId = null,
+    supplierOrganizationId = null,
+    requesterId = null,
     requester,
     supplier,
     productName,
@@ -19,7 +20,7 @@ export class Requisition {
   }) {
     this.id = id;
     this.minimarketId = minimarketId;
-    this.supplierId = supplierId;
+    this.supplierId = supplierOrganizationId || supplierId;
     this.requesterId = requesterId;
     this.requester = requester;
     this.supplier = supplier;

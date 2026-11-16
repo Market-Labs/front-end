@@ -1,9 +1,6 @@
 import axios from 'axios';
 import { platformApiBaseUrl } from './api-endpoints.js';
-import { isDemoMode } from './demo-mode.js';
-import { demoAdapter } from './demo-api.js';
-import { isFirebaseMode } from './firebase-client.js';
-import { firestoreAdapter } from './firestore-api.js';
+import { clearSessionToken, sessionToken, setApiUser } from './api-session.js';
 
 export class BaseApi {
   #http;
@@ -12,11 +9,10 @@ export class BaseApi {
     this.#http = axios.create({
       baseURL: platformApiBaseUrl,
       headers: { 'Content-Type': 'application/json' },
-      adapter: isDemoMode ? demoAdapter : isFirebaseMode ? firestoreAdapter : undefined,
     });
 
     this.#http.interceptors.request.use((config) => {
-      const token = window.localStorage.getItem('marketgo.auth.token');
+      const token = sessionToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -25,7 +21,14 @@ export class BaseApi {
 
     this.#http.interceptors.response.use(
       (response) => response,
-      (error) => Promise.reject(error),
+      (error) => {
+        if (error.response?.status === 401) {
+          clearSessionToken();
+          setApiUser(null);
+          if (!['/login', '/sign-up'].includes(window.location.pathname)) window.location.assign('/login');
+        }
+        return Promise.reject(error);
+      },
     );
   }
 

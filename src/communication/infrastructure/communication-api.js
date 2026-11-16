@@ -7,4 +7,22 @@ export class CommunicationApi extends BaseApi {
     const response = await this.http.get(isSupplier ? apiEndpoints.supplierAlerts : apiEndpoints.conservationAlerts);
     return response.data.map(MessageAssembler.toEntity);
   }
+  async getMessages(box = 'all') {
+    const response = await this.http.get(apiEndpoints.notifications, { params: { box } });
+    return response.data.map(MessageAssembler.toEntity);
+  }
+  async sendMessage({ receiverOrganizationId, subject, body, idempotencyKey = crypto.randomUUID() }) {
+    const response = await this.http.post(apiEndpoints.notifications,
+      { receiverOrganizationId, subject, body, idempotencyKey });
+    return MessageAssembler.toEntity(response.data);
+  }
+  async updateAlert(id, changes, isSupplier = false) {
+    const endpoint = isSupplier ? apiEndpoints.supplierAlerts : apiEndpoints.conservationAlerts;
+    const response = await this.http.patch(`${endpoint}/${id}`, changes);
+    return MessageAssembler.toEntity(response.data);
+  }
+  async updateMessage(id, changes) {
+    const response = await this.http.patch(`${apiEndpoints.notifications}/${id}`, changes);
+    return MessageAssembler.toEntity(response.data);
+  }
 }

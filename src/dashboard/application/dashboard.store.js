@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { DashboardApi } from '../infrastructure/dashboard-api.js';
 import { DashboardIndicator } from '../domain/model/dashboard-indicator.entity.js';
-import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 
 const dashboardApi = new DashboardApi();
 
@@ -14,7 +13,7 @@ const demoIndicators = [
 
 export const useDashboardStore = defineStore('dashboard', {
   state: () => ({
-    indicators: isFirebaseMode ? [] : demoIndicators,
+    indicators: [],
     loading: false,
     error: null,
   }),
@@ -25,8 +24,8 @@ export const useDashboardStore = defineStore('dashboard', {
       try {
         this.indicators = await dashboardApi.getIndicators(isSupplier);
       } catch (error) {
-        this.error = isFirebaseMode ? 'No se pudo cargar el dashboard desde Firestore.' : 'No se pudo cargar el dashboard desde la API. Se muestran datos demo.';
-        this.indicators = isSupplier || isFirebaseMode ? [] : demoIndicators;
+        this.error = 'No se pudo cargar el dashboard desde la API.';
+        this.indicators = [];
       } finally {
         this.loading = false;
       }

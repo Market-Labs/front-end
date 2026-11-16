@@ -12,6 +12,10 @@
     <pv-dialog v-model:visible="showSupplierForm" modal :header="$t(editingId ? 'page.suppliers.editSupplier' : 'page.suppliers.newSupplier')" :style="{ width: 'min(540px, calc(100vw - 32px))' }">
       <form class="entity-form" @submit.prevent>
         <label>
+          {{ $t('common.supplier') }}
+          <pv-select v-model="supplierForm.supplierOrganizationId" :options="registeredSuppliers" option-label="businessName" option-value="organizationId" :placeholder="$t('page.suppliers.newSupplier')" />
+        </label>
+        <label>
           {{ $t('page.suppliers.businessName') }}
           <pv-input-text v-model="supplierForm.businessName" placeholder="Anita Gamboa" />
         </label>
@@ -84,9 +88,12 @@ import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useSuppliersStore } from '../../application/suppliers.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useI18n } from 'vue-i18n';
+import { useProfilesStore } from '../../../profiles/application/profiles.store.js';
 
 const suppliersStore = useSuppliersStore();
 const iamStore = useIamStore();
+const profilesStore = useProfilesStore();
+const registeredSuppliers = computed(() => profilesStore.profiles.filter((profile) => profile.type === 'supplier'));
 const canWrite = computed(() => iamStore.currentUser?.permissions.includes('inventory:write'));
 const { t } = useI18n();
 const filteredSuppliers = useSearchFilter(() => suppliersStore.activeSuppliers);
@@ -98,6 +105,7 @@ const saving = ref(false);
 const formError = ref('');
 const deleteError = ref('');
 const supplierForm = reactive({
+  supplierOrganizationId: null,
   businessName: '',
   ruc: '',
   email: '',
@@ -139,7 +147,7 @@ const deactivateSupplier = async () => {
   }
 };
 const saveSupplier = async () => {
-  const data = Object.fromEntries(Object.entries(supplierForm).map(([key, value]) => [key, value.trim()]));
+  const data = Object.fromEntries(Object.entries(supplierForm).map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value]));
   if (Object.values(data).some((value) => !value) || !/^\S+@\S+\.\S+$/.test(data.email) || !/^\d{11}$/.test(data.ruc)) {
     formError.value = t('common.invalidForm');
     return;
@@ -160,6 +168,7 @@ const saveSupplier = async () => {
 
 onMounted(() => {
   suppliersStore.fetchSuppliers();
+  profilesStore.fetchProfiles();
 });
 </script>
 

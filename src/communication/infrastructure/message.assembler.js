@@ -5,7 +5,7 @@ export const MessageAssembler = {
     return new Message({
       id: resource.id,
       sender: resource.sender || 'Sistema MarketGo',
-      receiver: resource.receiver || 'Minimarket Verde Sur',
+      receiver: resource.receiver || '',
       subject: resource.subject || resource.title,
       body: resource.body || resource.message,
       read: resource.read,

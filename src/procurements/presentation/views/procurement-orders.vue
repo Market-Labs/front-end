@@ -6,12 +6,6 @@
         <h2>{{ iamStore.isMinimarketAdmin ? $t('option.reception') : $t('page.procurements.title') }}</h2>
         <p>{{ $t('page.procurements.description') }}</p>
       </div>
-      <pv-button
-        v-if="canCreate"
-        :label="$t('page.procurements.createOrder')"
-        icon="pi pi-plus"
-        @click="openManualOrder"
-      />
     </div>
 
     <pv-dialog v-model:visible="showOrderForm" modal :header="$t('page.procurements.createOrder')" :style="{ width: 'min(640px, calc(100vw - 32px))' }" @hide="closeOrderForm">
@@ -49,6 +43,30 @@
       <template #footer>
         <pv-button :label="$t('common.cancel')" text @click="closeOrderForm" />
         <pv-button :label="$t('common.save')" icon="pi pi-save" :loading="saving" @click="saveOrder" />
+      </template>
+    </pv-dialog>
+
+    <pv-dialog v-model:visible="showReception" modal :header="$t('page.procurements.acceptReception')" :style="{ width: 'min(700px, calc(100vw - 32px))' }">
+      <form class="entity-form" @submit.prevent="saveReception">
+        <div v-for="(line, index) in receptionLines" :key="index" class="items-field">
+          <strong>{{ line.productName }} · {{ line.quantity }} {{ $t('page.products.units') }}</strong>
+          <div v-for="(lot, lotIndex) in line.lots" :key="lot.key">
+            <label>{{ $t('page.inventory.lot') }}<pv-input-text v-model.trim="lot.lotCode" required /></label>
+            <div class="form-row">
+              <label>{{ $t('common.expiration') }}<pv-input-text v-model="lot.expirationDate" type="date" required /></label>
+              <label>{{ $t('common.quantity') }}<pv-input-text v-model.number="lot.quantity" type="number" min="1" required /></label>
+            </div>
+            <pv-button v-if="line.lots.length > 1" :label="$t('common.removeItem')" icon="pi pi-trash" text severity="danger" @click="line.lots.splice(lotIndex, 1)" />
+          </div>
+          <pv-button :label="$t('page.procurements.addLot')" icon="pi pi-plus" text @click="line.lots.push(newReceptionLot())" />
+          <label>{{ $t('common.category') }}<pv-input-text v-model.trim="line.category" required /></label>
+          <label>{{ $t('common.description') }}<pv-input-text v-model.trim="line.description" required /></label>
+        </div>
+        <p v-if="actionError" class="form-error" role="alert">{{ actionError }}</p>
+      </form>
+      <template #footer>
+        <pv-button :label="$t('common.cancel')" text @click="showReception = false" />
+        <pv-button :label="$t('common.save')" icon="pi pi-save" :loading="!!busyOrderId" @click="saveReception" />
       </template>
     </pv-dialog>
 
@@ -98,7 +116,7 @@
                 size="small"
                 icon="pi pi-check"
                 :loading="busyOrderId === data.id"
-                @click="acceptReception(data)"
+                @click="openReception(data)"
               />
               <pv-button
                 v-if="canReview && data.canBeReviewed"
@@ -125,7 +143,6 @@ import { useProcurementsStore } from '../../application/procurements.store.js';
 import { useRequisitionStore } from '../../../requisition/application/requisition.store.js';
 import { useInventoryStore } from '../../../inventory/application/inventory.store.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
-import { isFirebaseMode } from '../../../shared/infrastructure/firebase-client.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useProfilesStore } from '../../../profiles/application/profiles.store.js';
 import { useProductsStore } from '../../../products/application/products.store.js';
@@ -153,6 +170,10 @@ const busyOrderId = ref(null);
 const showDetails = ref(false);
 const selectedOrderId = ref(null);
 const selectedOrder = computed(() => procurementsStore.orders.find((order) => order.id === selectedOrderId.value));
+const showReception = ref(false);
+const receptionOrder = ref(null);
+const receptionLines = ref([]);
+const newReceptionLot = (quantity = 0, expirationDate = '') => ({ key: crypto.randomUUID(), lotCode: '', expirationDate, quantity });
 const formatMoney = (value) => `S/ ${Number(value || 0).toFixed(2)}`;
 let nextItemKey = 0;
 const newItem = () => ({ key: nextItemKey++, productId: null, quantity: '' });
@@ -165,7 +186,7 @@ const orderForm = reactive({
 const linkedItems = computed(() => linkedRequest.value?.items.map((item) => ({
   productName: item.productName,
   quantity: Number(item.quantity),
-  unitPrice: Number(item.unitPrice ?? productsStore.products.find((product) => product.name === item.productName && product.supplierId === iamStore.currentSupplierId)?.price ?? 0),
+  unitPrice: Number(item.unitPrice ?? productsStore.products.find((product) => product.name === item.productName && product.organizationId === iamStore.currentSupplierId)?.price ?? 0),
 })) || []);
 const openManualOrder = () => {
   linkedRequest.value = null;
@@ -208,8 +229,7 @@ const saveOrder = async () => {
     formError.value = '';
     try {
       const orderId = await procurementsStore.createFromSupplyRequest(linkedRequest.value, productsStore.products, orderForm.shippingDate);
-      if (isFirebaseMode) await requisitionStore.fetchRequisitions();
-      else await requisitionStore.linkShippingOrder(linkedRequest.value.id, orderId);
+      await requisitionStore.fetchRequisitions();
       closeOrderForm();
     } catch {
       formError.value = t('common.errorSaving');
@@ -240,23 +260,36 @@ const saveOrder = async () => {
     saving.value = false;
   }
 };
-const acceptReception = async (order) => {
-  if (busyOrderId.value) return;
+const openReception = (order) => {
+  receptionOrder.value = order;
+  receptionLines.value = order.items.map((item) => {
+    const product = productsStore.products.find((entry) => entry.name === item.productName);
+    return { productName: item.productName, orderedQuantity: item.quantity,
+      lots: [newReceptionLot(item.quantity, product?.expirationDate || '')],
+      category: product?.category || '', description: product?.description || '' };
+  });
+  actionError.value = '';
+  showReception.value = true;
+};
+const saveReception = async () => {
+  const order = receptionOrder.value;
+  if (!order || busyOrderId.value) return;
+  const lots = receptionLines.value.flatMap((line) => line.lots);
+  if (receptionLines.value.some((line) => !line.category || !line.description || !line.lots.length ||
+    line.lots.reduce((sum, lot) => sum + Number(lot.quantity || 0), 0) !== Number(line.orderedQuantity)) ||
+    lots.some((lot) => !lot.lotCode || !lot.expirationDate || !Number.isInteger(Number(lot.quantity)) || Number(lot.quantity) <= 0) ||
+    new Set(lots.map((lot) => lot.lotCode.toLowerCase())).size !== lots.length) {
+    actionError.value = t('common.invalidForm');
+    return;
+  }
   busyOrderId.value = order.id;
   actionError.value = '';
-  let changes = [];
   try {
-    if (isFirebaseMode) {
-      await procurementsStore.acceptReception(order.id, productsStore.products);
-    } else {
-      changes = await inventoryStore.receiveShipmentItems(order.items, productsStore.products, order.id);
-      try {
-        await procurementsStore.acceptReception(order.id);
-      } catch (error) {
-        await inventoryStore.restoreShipment(changes);
-        throw error;
-      }
-    }
+    await procurementsStore.acceptReception(order.id, receptionLines.value.map((line, index) => ({
+      lineIndex: index, productId: null, category: line.category, description: line.description,
+      lots: line.lots.map((lot) => ({ lotCode: lot.lotCode, expirationDate: lot.expirationDate, quantity: Number(lot.quantity) })),
+    })));
+    showReception.value = false;
   } catch {
     actionError.value = t('page.procurements.receptionError');
   } finally {

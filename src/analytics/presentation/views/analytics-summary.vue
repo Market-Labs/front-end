@@ -70,7 +70,8 @@ const exporting = ref(false);
 const error = ref('');
 const reportElement = ref(null);
 const reportTypes = ['Inventario', 'Abastecimiento', 'Mermas', 'Conservacion', 'Proveedores'];
-const filteredReports = useSearchFilter(() => reportTypes.map((key) => ({ key, label: t(`page.analytics.reportNames.${key}`) })));
+const filteredReports = useSearchFilter(() => reportTypes.filter((key) => !iamStore.isSupplier || key !== 'Proveedores')
+  .map((key) => ({ key, label: t(`page.analytics.reportNames.${key}`) })));
 const visibleReports = computed(() => filteredReports.value.map((item) => item.key));
 const money = (value) => `S/ ${Number(value || 0).toFixed(2)}`;
 const displayDate = (value) => new Date(value).toLocaleString(locale.value === 'es' ? 'es-PE' : 'en-US');
@@ -80,7 +81,7 @@ const filteredIndicators = useSearchFilter(() => {
   const ownerId = iamStore.isSupplier ? iamStore.currentSupplierId : iamStore.currentMinimarketId;
   const orders = sources.orders.filter((order) => iamStore.isSupplier ? order.supplierId === ownerId : order.minimarketId === ownerId);
   const stock = sources.inventory.reduce((sum, item) => sum + Number(item.stock || 0), 0);
-  const waste = sources.waste.filter((item) => item.ownerId === ownerId).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const waste = sources.waste.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const receivedOrders = orders.filter((order) => order.status === 'received').length;
   const normal = sources.conservation.filter((item) => item.status === 'healthy').length;
   const score = sources.conservation.length ? Math.round(normal / sources.conservation.length * 100) : 0;

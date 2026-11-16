@@ -14,7 +14,6 @@
 
         <div class="auth-label-row">
           <label for="login-password">{{ t('auth.password') }}</label>
-          <router-link to="/forgot-password">{{ t('auth.forgotPassword') }}</router-link>
         </div>
         <div class="password-field">
           <input id="login-password" v-model="password" :type="showPassword ? 'text' : 'password'" autocomplete="current-password" required />

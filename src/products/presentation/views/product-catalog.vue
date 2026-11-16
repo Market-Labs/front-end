@@ -19,7 +19,6 @@
           {{ $t('common.category') }}
           <pv-select v-model="productForm.category" :options="categoryOptions" :placeholder="$t('page.products.selectCategory')" />
         </label>
-        <label v-if="!editingId && productForm.category">{{ $t('common.id') }}<span class="read-only-value">{{ productsStore.nextIdForCategory(productForm.category) }}</span></label>
         <label v-if="!editingId && iamStore.isMinimarketAdmin">
           {{ $t('common.supplier') }}
           <pv-select v-model="productForm.supplierId" :options="suppliersStore.activeSuppliers" option-label="businessName" option-value="id" :placeholder="$t('page.products.selectSupplier')" />
@@ -68,12 +67,12 @@
         <p>{{ product.description }}</p>
         <p class="supplier-name">{{ $t('common.supplier') }}: {{ supplierName(product.supplierId) }}</p>
         <footer>
-          <small>{{ product.quantity }} {{ $t('page.products.units') }}</small>
+          <small v-if="product.quantity !== null">{{ product.quantity }} {{ $t('page.products.units') }}</small>
           <span :class="['status-badge', product.available ? 'status-approved' : 'status-rejected']">
             {{ product.available ? $t('page.products.available') : $t('page.products.unavailable') }}
           </span>
         </footer>
-        <div v-if="canWrite" class="card-actions">
+        <div v-if="canWrite && product.organizationId === iamStore.currentUser?.organizationId" class="card-actions">
           <pv-button :label="$t('common.edit')" icon="pi pi-pencil" size="small" outlined @click="openEditForm(product)" />
           <pv-button :label="$t('common.delete')" icon="pi pi-trash" size="small" severity="danger" text @click="confirmDelete(product)" />
         </div>
@@ -95,7 +94,7 @@ const iamStore = useIamStore();
 const canWrite = computed(() => iamStore.currentUser?.permissions.includes(iamStore.isSupplier ? 'products:write' : 'inventory:write'));
 const suppliersStore = useSuppliersStore();
 const { t } = useI18n();
-const supplierName = (id) => suppliersStore.suppliers.find((supplier) => supplier.id === id)?.businessName || id || '-';
+const supplierName = (id) => suppliersStore.suppliers.find((supplier) => supplier.supplierOrganizationId === id || supplier.id === id)?.businessName || (id === iamStore.currentSupplierId ? iamStore.currentUser?.organizationName : id) || '-';
 const visibleProducts = computed(() => iamStore.isSupplier
   ? productsStore.products.filter((product) => product.supplierId === iamStore.currentSupplierId)
   : productsStore.products);
@@ -138,7 +137,7 @@ const saveProduct = async () => {
   const description = productForm.description.trim();
   const quantity = Number(productForm.quantity);
   if (!description || !Number.isFinite(price) || price <= 0 || (!editingId.value && (
-    !productForm.name.trim() || !categoryOptions.includes(productForm.category) || !suppliersStore.activeSuppliers.some((supplier) => supplier.id === productForm.supplierId) ||
+    !productForm.name.trim() || !categoryOptions.includes(productForm.category) || (!iamStore.isSupplier && !suppliersStore.activeSuppliers.some((supplier) => supplier.id === productForm.supplierId)) ||
     !/^\d{4}-\d{2}-\d{2}$/.test(productForm.expirationDate) || !Number.isInteger(quantity) || quantity < 0
   ))) {
     formError.value = t('page.products.invalidForm');
@@ -173,7 +172,7 @@ const deleteProduct = async () => {
 
 onMounted(() => {
   productsStore.fetchProducts();
-  suppliersStore.fetchSuppliers();
+  if (iamStore.isMinimarketAdmin) suppliersStore.fetchSuppliers();
 });
 </script>
 

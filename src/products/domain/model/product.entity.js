@@ -1,5 +1,5 @@
 export class Product {
-  constructor({ id, name, description, category, expirationDate, quantity, price, available, supplierId }) {
+  constructor({ id, name, description, category, expirationDate = '', quantity = null, price, available, supplierId, organizationId = null }) {
     this.id = id;
     this.name = name;
     this.description = description;
@@ -9,6 +9,7 @@ export class Product {
     this.price = price;
     this.available = available;
     this.supplierId = supplierId;
+    this.organizationId = organizationId;
   }
 
   get formattedPrice() {

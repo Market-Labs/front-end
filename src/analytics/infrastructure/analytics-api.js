@@ -12,17 +12,17 @@ export class AnalyticsApi extends BaseApi {
   }
   async getReportSources(isSupplier = false) {
     const endpoints = {
-      products: apiEndpoints.products,
+      products: isSupplier ? apiEndpoints.supplierProducts : apiEndpoints.products,
       inventory: isSupplier ? apiEndpoints.supplierInventory : apiEndpoints.inventory,
       orders: apiEndpoints.procurements,
       waste: isSupplier ? apiEndpoints.supplierWaste : apiEndpoints.waste,
       conservation: isSupplier ? apiEndpoints.supplierConservationMonitoring : apiEndpoints.conservationMonitoring,
-      suppliers: apiEndpoints.suppliers,
+      ...(isSupplier ? {} : { suppliers: apiEndpoints.suppliers }),
     };
     const entries = await Promise.all(Object.entries(endpoints).map(async ([key, endpoint]) => {
       const response = await this.http.get(endpoint);
       return [key, response.data];
     }));
-    return Object.fromEntries(entries);
+    return { suppliers: [], ...Object.fromEntries(entries) };
   }
 }

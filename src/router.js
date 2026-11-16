@@ -13,8 +13,6 @@ import communicationRoutes from './communication/presentation/communication-rout
 import i18n from './i18n.js';
 import pinia from './pinia.js';
 import { useIamStore } from './iam/application/iam.store.js';
-import { isDemoMode } from './shared/infrastructure/demo-mode.js';
-import { isFirebaseMode } from './shared/infrastructure/firebase-client.js';
 
 const routes = [
   {
@@ -81,8 +79,7 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
   const iamStore = useIamStore(pinia);
-  if (isDemoMode && to.meta.public) return { name: 'home' };
-  if (isFirebaseMode) await iamStore.restoreSession();
+  await iamStore.restoreSession();
   if (!to.meta.public && !iamStore.isAuthenticated) {
     return { name: 'login', query: { redirect: to.fullPath } };
   }

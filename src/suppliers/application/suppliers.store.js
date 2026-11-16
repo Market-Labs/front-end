@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { SuppliersApi } from '../infrastructure/suppliers-api.js';
 import { Supplier } from '../domain/model/supplier.entity.js';
-import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 import { nextSupplierId } from '../domain/model/supplier-id.js';
 
 const suppliersApi = new SuppliersApi();
@@ -13,7 +12,7 @@ const demoSuppliers = [
 
 export const useSuppliersStore = defineStore('suppliers', {
   state: () => ({
-    suppliers: isFirebaseMode ? [] : demoSuppliers,
+    suppliers: [],
     loading: false,
     error: null,
   }),
@@ -22,17 +21,9 @@ export const useSuppliersStore = defineStore('suppliers', {
   },
   actions: {
     async createSupplier(data) {
-      for (let attempt = 0; attempt < 3; attempt += 1) {
-        this.suppliers = await suppliersApi.getSuppliers();
-        try {
-          const supplier = await suppliersApi.createSupplier({ ...data, id: nextSupplierId(this.suppliers), status: 'active' });
-          this.suppliers.push(supplier);
-          return supplier;
-        } catch (error) {
-          if (error.message !== 'duplicate-id' || attempt === 2) throw error;
-        }
-      }
-      throw new Error('supplier-id-unavailable');
+      const supplier = await suppliersApi.createSupplier(data);
+      this.suppliers.push(supplier);
+      return supplier;
     },
     async updateSupplier(id, changes) {
       const supplier = await suppliersApi.updateSupplier(id, changes);
@@ -47,8 +38,8 @@ export const useSuppliersStore = defineStore('suppliers', {
       try {
         this.suppliers = await suppliersApi.getSuppliers();
       } catch (error) {
-        this.error = isFirebaseMode ? 'No se pudo cargar proveedores desde Firestore.' : 'No se pudo cargar proveedores. Se muestran datos demo.';
-        this.suppliers = isFirebaseMode ? [] : demoSuppliers;
+        this.error = 'No se pudo cargar proveedores desde la API.';
+        this.suppliers = [];
       } finally {
         this.loading = false;
       }

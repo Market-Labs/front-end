@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { RequisitionApi } from '../infrastructure/requisition-api.js';
 import { Requisition } from '../domain/model/requisition.entity.js';
-import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 
 const requisitionApi = new RequisitionApi();
 
@@ -15,13 +14,13 @@ const demoRequisitions = [
 
 export const useRequisitionStore = defineStore('requisition', {
   state: () => ({
-    requisitions: isFirebaseMode ? [] : demoRequisitions,
+    requisitions: [],
     loading: false,
     error: null,
   }),
   actions: {
     async createRequest(data) {
-      const request = await requisitionApi.createRequisition({ ...data, id: `req-${crypto.randomUUID()}`, status: 'pending', createdAt: new Date().toISOString().slice(0, 10) });
+      const request = await requisitionApi.createRequisition(data);
       this.requisitions.unshift(request);
       return request;
     },
@@ -30,8 +29,8 @@ export const useRequisitionStore = defineStore('requisition', {
       try {
         this.requisitions = await requisitionApi.getRequisitions();
       } catch (error) {
-        this.error = isFirebaseMode ? 'No se pudo cargar solicitudes desde Firestore.' : 'No se pudo cargar requisiciones. Se muestran datos demo.';
-        this.requisitions = isFirebaseMode ? [] : demoRequisitions;
+        this.error = 'No se pudo cargar solicitudes desde la API.';
+        this.requisitions = [];
       } finally {
         this.loading = false;
       }
@@ -39,34 +38,21 @@ export const useRequisitionStore = defineStore('requisition', {
     visibleForUser(user) {
       if (!user) return [];
       if (user.roles?.includes('Proveedor Organico')) {
-        return this.requisitions.filter((request) => request.supplierId === (user.supplierId || 'sup-2'));
+        return this.requisitions.filter((request) => request.supplierId === user.organizationId);
       }
-      return this.requisitions.filter((request) => request.minimarketId === (user.minimarketId || 'min-1'));
+      return this.requisitions.filter((request) => request.minimarketId === user.organizationId);
     },
-    async acceptRequest(requestId, supplierId = 'sup-2') {
+    async acceptRequest(requestId, supplierId) {
       const request = this.requisitions.find((entry) => entry.id === requestId);
       if (!request || request.status !== 'pending' || request.supplierId !== supplierId) throw new Error('invalid-request-status');
-      const reviewedAt = new Date().toISOString();
-      const updated = await requisitionApi.updateRequisition(requestId, {
-        status: 'accepted', reviewedAt,
-        response: { id: `res-${requestId}`, supplierId, accepted: true, comment: 'Solicitud aceptada por el proveedor.', respondedAt: reviewedAt },
-      });
+      const updated = await requisitionApi.updateRequisition(requestId, { status: 'accepted' });
       this.requisitions = this.requisitions.map((entry) => entry.id === requestId ? updated : entry);
       return updated;
     },
     async rejectRequest(requestId, reason = 'Solicitud rechazada por disponibilidad.') {
       const request = this.requisitions.find((entry) => entry.id === requestId);
       if (!request || request.status !== 'pending') throw new Error('invalid-request-status');
-      const reviewedAt = new Date().toISOString();
-      const updated = await requisitionApi.updateRequisition(requestId, {
-        status: 'rejected', reviewedAt, rejectionReason: reason,
-        response: { id: `res-${requestId}`, supplierId: request.supplierId, accepted: false, comment: reason, respondedAt: reviewedAt },
-      });
-      this.requisitions = this.requisitions.map((entry) => entry.id === requestId ? updated : entry);
-      return updated;
-    },
-    async linkShippingOrder(requestId, orderId) {
-      const updated = await requisitionApi.updateRequisition(requestId, { shippingOrderId: orderId });
+      const updated = await requisitionApi.updateRequisition(requestId, { status: 'rejected', rejectionReason: reason });
       this.requisitions = this.requisitions.map((entry) => entry.id === requestId ? updated : entry);
       return updated;
     },

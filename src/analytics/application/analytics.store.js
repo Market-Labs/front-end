@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { AnalyticsApi } from '../infrastructure/analytics-api.js';
 import { OperationalIndicator } from '../domain/model/operational-indicator.entity.js';
-import { isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
 
 const analyticsApi = new AnalyticsApi();
 
@@ -66,9 +65,9 @@ const demoReportSummaries = {
 
 export const useAnalyticsStore = defineStore('analytics', {
   state: () => ({
-    indicators: isFirebaseMode ? [] : demoIndicators,
-    reports: isFirebaseMode ? [] : ['Inventario', 'Abastecimiento', 'Mermas', 'Conservacion', 'Proveedores'],
-    reportSummaries: isFirebaseMode ? {} : demoReportSummaries,
+    indicators: [],
+    reports: [],
+    reportSummaries: {},
     reportSources: null,
     loading: false,
     error: null,
@@ -94,10 +93,10 @@ export const useAnalyticsStore = defineStore('analytics', {
         this.reports = Object.keys(summary.reportSummaries);
         this.reportSummaries = summary.reportSummaries;
       } catch (error) {
-        this.error = isFirebaseMode ? 'No se pudo cargar analitica desde Firestore.' : 'No se pudo cargar analitica. Se muestran datos demo.';
-        this.indicators = isSupplier || isFirebaseMode ? [] : demoIndicators;
-        this.reports = isSupplier || isFirebaseMode ? [] : Object.keys(demoReportSummaries);
-        this.reportSummaries = isSupplier || isFirebaseMode ? {} : demoReportSummaries;
+        this.error = 'No se pudo cargar analítica desde la API.';
+        this.indicators = [];
+        this.reports = [];
+        this.reportSummaries = {};
       } finally {
         this.loading = false;
       }

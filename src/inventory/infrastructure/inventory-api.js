@@ -8,12 +8,15 @@ export class InventoryApi extends BaseApi {
     return response.data.map(InventoryItemAssembler.toEntity);
   }
   async createItem(item, isSupplier = false) {
-    const response = await this.http.post(isSupplier ? apiEndpoints.supplierInventory : apiEndpoints.inventory, item);
+    const { productId, stock, minimumStock, lotCode, expirationDate } = item;
+    const response = await this.http.post(isSupplier ? apiEndpoints.supplierInventory : apiEndpoints.inventory,
+      { productId, stock, minimumStock, lotCode, expirationDate });
     return InventoryItemAssembler.toEntity(response.data);
   }
   async updateItem(id, changes, isSupplier = false) {
     const endpoint = isSupplier ? apiEndpoints.supplierInventory : apiEndpoints.inventory;
-    const response = await this.http.patch(`${endpoint}/${encodeURIComponent(id)}`, changes);
+    const response = await this.http.patch(`${endpoint}/${encodeURIComponent(id)}`,
+      { stock: changes.stock ?? null, minimumStock: changes.minimumStock ?? null });
     return InventoryItemAssembler.toEntity(response.data);
   }
   async deleteItem(id) {
@@ -23,8 +26,9 @@ export class InventoryApi extends BaseApi {
     const response = await this.http.get(isSupplier ? apiEndpoints.supplierWaste : apiEndpoints.waste);
     return response.data;
   }
-  async createWaste(record) {
-    const response = await this.http.post(apiEndpoints.waste, record);
+  async createWaste(record, isSupplier = false) {
+    const response = await this.http.post(isSupplier ? apiEndpoints.supplierWaste : apiEndpoints.waste,
+      { inventoryItemId: record.inventoryItemId, quantity: record.quantity, reason: record.reason });
     return response.data;
   }
 }

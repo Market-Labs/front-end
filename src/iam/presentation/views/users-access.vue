@@ -10,6 +10,7 @@
         <pv-button :label="$t('page.iam.editUser')" icon="pi pi-user-edit" outlined :disabled="!editableUsers.length" @click="openUserForm" />
         <pv-button v-if="isFirebaseMode" :label="$t('page.iam.newUser')" icon="pi pi-user-plus" @click="openCreateForm" />
       </div>
+      <p>{{ $t('page.iam.backendUsersReadOnly') }}</p>
     </div>
 
     <pv-dialog v-model:visible="showCreateForm" modal :header="$t('page.iam.newUser')" :style="{ width: '520px' }">
@@ -99,13 +100,13 @@ import { computed, reactive, ref, onMounted, watch } from 'vue';
 import { useIamStore } from '../../application/iam.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useI18n } from 'vue-i18n';
-import { isFirebaseMode } from '../../../shared/infrastructure/firebase-client.js';
+const isFirebaseMode = false;
 
 const iamStore = useIamStore();
 const { t } = useI18n();
 const visibleUsers = computed(() => iamStore.users);
 const editableUsers = computed(() => visibleUsers.value.filter((user) => user.createdBy && user.id !== iamStore.currentUser?.id));
-const canManageUsers = computed(() => iamStore.isAdmin);
+const canManageUsers = computed(() => false);
 const filteredUsers = useSearchFilter(() => visibleUsers.value);
 const showUserForm = ref(false);
 const showCreateForm = ref(false);

@@ -6,7 +6,7 @@
         <h2>{{ $t('page.inventory.title') }}</h2>
         <p>{{ $t('page.inventory.description') }}</p>
       </div>
-      <div v-if="canWrite" class="view-actions"><pv-button v-if="!iamStore.isSupplier" :label="$t('page.inventory.registerOffer')" icon="pi pi-tag" outlined @click="openOfferForm" /><pv-button :label="$t(iamStore.isSupplier ? 'page.inventory.registerWaste' : 'page.inventory.registerOutput')" icon="pi pi-minus" outlined @click="openWasteForm" /><pv-button :label="$t('page.inventory.registerStock')" icon="pi pi-plus" @click="openStockForm" /></div>
+      <div v-if="canWrite" class="view-actions"><pv-button :label="$t(iamStore.isSupplier ? 'page.inventory.registerWaste' : 'page.inventory.registerOutput')" icon="pi pi-minus" outlined @click="openWasteForm" /><pv-button :label="$t('page.inventory.registerStock')" icon="pi pi-plus" @click="openStockForm" /></div>
     </div>
 
     <pv-dialog v-model:visible="showStockForm" modal :header="$t('page.inventory.registerStock')" :style="{ width: '520px' }">

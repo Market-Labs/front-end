@@ -21,7 +21,7 @@
       </div>
 
       <div class="sidebar-footer">
-        <button v-if="!isDemoMode" type="button" class="logout-button" @click="logout">
+        <button type="button" class="logout-button" @click="logout">
           <i class="pi pi-sign-out"></i>
           <span>{{ t('option.logout') }}</span>
         </button>
@@ -56,7 +56,6 @@
         </div>
       </header>
 
-      <p v-if="isDemoMode" class="demo-notice" role="status">{{ t('common.demoReadOnly') }}</p>
       <main class="content">
         <router-view />
       </main>
@@ -70,8 +69,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import LanguageSwitcher from './language-switcher.vue';
 import { useIamStore } from '../../../iam/application/iam.store.js';
-import { isDemoMode } from '../../infrastructure/demo-mode.js';
-import { isFirebaseMode } from '../../infrastructure/firebase-client.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -134,7 +131,7 @@ const pageTitle = computed(() => {
 });
 
 watch([() => route.path, visibleMenuItems], () => {
-  if ((isFirebaseMode && !iamStore.sessionReady) || route.matched.length === 0) return;
+  if (!iamStore.sessionReady || route.matched.length === 0) return;
   const hasVisibleRoute = visibleMenuItems.value.some((item) => route.path === item.to);
   if (!hasVisibleRoute && !alwaysAllowedPaths.includes(route.path)) {
     router.push('/access-denied');

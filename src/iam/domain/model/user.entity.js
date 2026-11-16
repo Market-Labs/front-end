@@ -11,6 +11,9 @@ export class User {
     createdBy = null,
     tenantId = null,
     accessLevel = 'owner',
+    organizationId = null,
+    organizationName = '',
+    accountType = null,
   }) {
     this.id = id;
     this.name = name;
@@ -23,6 +26,9 @@ export class User {
     this.createdBy = createdBy;
     this.tenantId = tenantId;
     this.accessLevel = accessLevel;
+    this.organizationId = organizationId;
+    this.organizationName = organizationName;
+    this.accountType = accountType;
   }
 
   get initials() {

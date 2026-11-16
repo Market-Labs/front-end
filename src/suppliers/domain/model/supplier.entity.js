@@ -1,6 +1,7 @@
 export class Supplier {
-  constructor({ id, businessName, ruc, email, phone, address, specialty, coverageArea, status = 'active' }) {
+  constructor({ id, supplierOrganizationId = null, businessName, ruc, email, phone, address, specialty, coverageArea, status = 'active' }) {
     this.id = id;
+    this.supplierOrganizationId = supplierOrganizationId;
     this.businessName = businessName;
     this.ruc = ruc;
     this.email = email;

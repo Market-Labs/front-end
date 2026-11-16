@@ -7,6 +7,14 @@ export class ProfilesApi extends BaseApi {
     const response = await this.http.get(apiEndpoints.profiles);
     return response.data.map(ProfileAssembler.toEntity);
   }
+  async getProfile(id) {
+    const response = await this.http.get(`${apiEndpoints.profiles}/${id}`);
+    return ProfileAssembler.toEntity(response.data);
+  }
+  async createProfile(payload) {
+    const response = await this.http.post(apiEndpoints.profiles, payload);
+    return ProfileAssembler.toEntity(response.data);
+  }
 
   async updateProfile(id, payload) {
     const response = await this.http.patch(`${apiEndpoints.profiles}/${id}`, payload);

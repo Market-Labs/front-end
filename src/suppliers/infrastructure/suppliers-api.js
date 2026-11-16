@@ -8,7 +8,8 @@ export class SuppliersApi extends BaseApi {
     return response.data.map(SupplierAssembler.toEntity);
   }
   async createSupplier(supplier) {
-    const response = await this.http.post(apiEndpoints.suppliers, supplier);
+    const { id, status, ...payload } = supplier;
+    const response = await this.http.post(apiEndpoints.suppliers, payload);
     return SupplierAssembler.toEntity(response.data);
   }
   async updateSupplier(id, changes) {

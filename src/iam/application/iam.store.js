@@ -1,178 +1,99 @@
 import { defineStore } from 'pinia';
 import { IamApi } from '../infrastructure/iam-api.js';
-import { User } from '../domain/model/user.entity.js';
-import { isAdministrator, permissionsForRole } from '../domain/model/access-role.js';
-import { isDemoMode } from '../../shared/infrastructure/demo-mode.js';
-import { signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { firebaseAuth, firestore, isFirebaseMode } from '../../shared/infrastructure/firebase-client.js';
-import { UserAssembler } from '../infrastructure/user.assembler.js';
+import { isAdministrator } from '../domain/model/access-role.js';
+import { clearSessionToken, isTokenExpired, saveSessionToken, sessionToken, setApiUser } from '../../shared/infrastructure/api-session.js';
 
 const iamApi = new IamApi();
-const sessionKey = 'marketgo.auth.userId';
-
-const demoUsers = [
-  new User({
-    id: 'usr-admin',
-    name: 'Albino Caceres',
-    email: 'admi@marketgo.com',
-    status: 'active',
-    roles: ['Administrador de Minimarket'],
-    permissions: ['inventory:write', 'procurements:approve', 'users:manage'],
-  }),
-  new User({
-    id: 'usr-provider',
-    name: 'Anita Gamboa',
-    email: 'proveedor@marketgo.com',
-    status: 'active',
-    roles: ['Proveedor Organico'],
-    permissions: ['products:write', 'procurements:track'],
-  }),
-];
-
-const staticDemoAdmin = new User({
-  id: 'usr-admin',
-  name: 'Administrador Demo',
-  email: 'contacto@example.invalid',
-  status: 'active',
-  roles: ['Administrador de Minimarket'],
-  permissions: ['inventory:write', 'procurements:approve', 'users:manage'],
-});
+const resetModules = async () => {
+  const factories = await Promise.all([
+    import('../../analytics/application/analytics.store.js').then((module) => module.useAnalyticsStore),
+    import('../../communication/application/communication.store.js').then((module) => module.useCommunicationStore),
+    import('../../conservation/application/conservation.store.js').then((module) => module.useConservationStore),
+    import('../../dashboard/application/dashboard.store.js').then((module) => module.useDashboardStore),
+    import('../../inventory/application/inventory.store.js').then((module) => module.useInventoryStore),
+    import('../../procurements/application/procurements.store.js').then((module) => module.useProcurementsStore),
+    import('../../products/application/products.store.js').then((module) => module.useProductsStore),
+    import('../../profiles/application/profiles.store.js').then((module) => module.useProfilesStore),
+    import('../../requisition/application/requisition.store.js').then((module) => module.useRequisitionStore),
+    import('../../shared/application/dashboard-overview.store.js').then((module) => module.useDashboardOverviewStore),
+    import('../../suppliers/application/suppliers.store.js').then((module) => module.useSuppliersStore),
+  ]);
+  factories.forEach((factory) => factory().$reset());
+};
 
 export const useIamStore = defineStore('iam', {
-  state: () => ({
-    currentUser: isDemoMode ? staticDemoAdmin : isFirebaseMode ? null : demoUsers.find((user) => user.id === (
-      window.localStorage.getItem(sessionKey) || window.sessionStorage.getItem(sessionKey)
-    )) || null,
-    users: isDemoMode ? [staticDemoAdmin] : isFirebaseMode ? [] : demoUsers,
-    sessionReady: false,
-    loading: false,
-    error: null,
-  }),
+  state: () => ({ currentUser: null, users: [], sessionReady: false, loading: false, error: null }),
   getters: {
     isAuthenticated: (state) => Boolean(state.currentUser),
     userName: (state) => state.currentUser?.name || 'Invitado',
     userRole: (state) => state.currentUser?.roles?.[0] || 'Sin rol',
-    isAdmin: (state) => isAdministrator(state.currentUser?.accessLevel)
-      && (state.currentUser?.permissions?.includes('users:manage') || false),
-    isMinimarketAdmin: (state) => Boolean(state.currentUser?.minimarketId || state.currentUser?.roles?.includes('Administrador de Minimarket')),
-    isSupplier: (state) => Boolean(state.currentUser?.supplierId || state.currentUser?.roles?.includes('Proveedor Organico')),
-    currentSupplierId: (state) => state.currentUser?.supplierId || (state.currentUser?.roles?.includes('Proveedor Organico') ? 'sup-2' : null),
-    currentMinimarketId: (state) => state.currentUser?.minimarketId || (state.currentUser?.tenantId ? null : 'min-1'),
+    isAdmin: (state) => isAdministrator(state.currentUser?.accessLevel),
+    isMinimarketAdmin: (state) => state.currentUser?.accountType === 'minimarket',
+    isSupplier: (state) => state.currentUser?.accountType === 'supplier',
+    currentSupplierId: (state) => state.currentUser?.accountType === 'supplier' ? state.currentUser.organizationId : null,
+    currentMinimarketId: (state) => state.currentUser?.accountType === 'minimarket' ? state.currentUser.organizationId : null,
   },
   actions: {
     async restoreSession() {
-      if (!isFirebaseMode || this.sessionReady) return;
-      await firebaseAuth.authStateReady();
-      const uid = firebaseAuth.currentUser?.uid;
-      if (uid) {
-        try {
-          const snapshot = await getDoc(doc(firestore, 'users', uid));
-          if (snapshot.exists() && snapshot.data().status === 'active') {
-            this.currentUser = UserAssembler.toEntity({ ...snapshot.data(), id: uid });
-          } else {
-            await signOut(firebaseAuth);
-          }
-        } catch {
-          this.currentUser = null;
-        }
+      if (this.sessionReady) return;
+      const token = sessionToken();
+      if (!token || isTokenExpired(token)) {
+        clearSessionToken();
+        this.sessionReady = true;
+        return;
       }
-      this.sessionReady = true;
-    },
-    async updateUser(id, changes) {
-      if (isFirebaseMode) {
-        if (!this.isAdmin || !['administrator', 'collaborator'].includes(changes.accessLevel)) {
-          throw new Error('access-denied');
-        }
-        const permissions = permissionsForRole(this.isSupplier ? 'supplier' : 'admin', changes.accessLevel);
-        changes = { ...changes, permissions };
+      try {
+        this.currentUser = await iamApi.me();
+        setApiUser(this.currentUser);
+      } catch {
+        clearSessionToken();
+        this.currentUser = null;
+        setApiUser(null);
+      } finally {
+        this.sessionReady = true;
       }
-      const user = await iamApi.updateUser(id, changes);
-      this.users = this.users.map((entry) => entry.id === id ? user : entry);
-      if (this.currentUser?.id === id) this.currentUser = user;
-      return user;
     },
-    async createUser({ name, email, password, accessLevel = 'collaborator' }) {
-      if (!this.isAdmin) throw new Error('access-denied');
-      if (!['administrator', 'collaborator'].includes(accessLevel)) throw new Error('invalid-access-level');
-      const creator = this.currentUser;
-      const permissions = permissionsForRole(this.isSupplier ? 'supplier' : 'admin', accessLevel);
-      const user = await iamApi.createUser({
-        name: name.trim(), email: email.trim().toLowerCase(), password,
-        role: this.isSupplier ? 'supplier' : 'admin',
-        roles: [...creator.roles],
-        permissions,
-        minimarketId: this.isSupplier ? null : creator.minimarketId,
-        supplierId: this.isSupplier ? creator.supplierId : null,
-        createdBy: creator.id,
-        tenantId: creator.tenantId,
-        accessLevel,
-      });
-      this.users.push(user);
-      return user;
+    async signIn(email, password, remember = false) {
+      try {
+        const account = await iamApi.signIn({ email: email.trim().toLowerCase(), password });
+        if (!account.token || !account.user?.organizationId) throw new Error('invalid-session');
+        saveSessionToken(account.token, remember);
+        setApiUser(account.user);
+        this.currentUser = account.user;
+        this.sessionReady = true;
+        return account.user;
+      } catch (error) {
+        if (error.response?.status === 401) throw new Error('invalid-credentials');
+        throw error;
+      }
     },
     async signUp(payload) {
-      if (!isFirebaseMode) throw new Error('firebase-required');
       const account = await iamApi.signUp({
-        ...payload,
-        name: payload.name.trim(),
-        email: payload.email.trim().toLowerCase(),
+        ...payload, name: payload.name.trim(), email: payload.email.trim().toLowerCase(),
         businessName: payload.businessName.trim(),
       });
+      if (!account.token || !account.user?.organizationId) throw new Error('invalid-session');
+      saveSessionToken(account.token, false);
+      setApiUser(account.user);
       this.currentUser = account.user;
       this.sessionReady = true;
       return account.user;
     },
-    async signIn(email, password, remember = false) {
-      if (isDemoMode) return this.currentUser;
-      this.error = null;
-      const account = await iamApi.signIn({ email: email.trim().toLowerCase(), password, remember });
-      const user = isFirebaseMode ? account.user : demoUsers.find((candidate) => candidate.id === account.userId);
-      if (!user) throw new Error('invalid-credentials');
-      this.currentUser = user;
-      if (isFirebaseMode) return user;
-      window.localStorage.removeItem(sessionKey);
-      window.sessionStorage.removeItem(sessionKey);
-      const storage = remember ? window.localStorage : window.sessionStorage;
-      storage.setItem(sessionKey, user.id);
-      return user;
-    },
     async fetchUsers() {
       this.loading = true;
       this.error = null;
-      try {
-        this.users = await iamApi.getUsers();
-      } catch (error) {
-        this.error = isFirebaseMode ? 'No se pudo cargar usuarios desde Firestore.' : 'No se pudo cargar usuarios desde la API. Se muestran datos demo.';
-        this.users = isFirebaseMode ? [] : demoUsers;
-      } finally {
-        this.loading = false;
-      }
+      try { this.users = await iamApi.getUsers(); }
+      catch { this.users = []; this.error = 'No se pudo cargar usuarios desde la API.'; }
+      finally { this.loading = false; }
     },
+    async createUser() { throw new Error('backend-feature-unavailable:collaborators'); },
+    async updateUser() { throw new Error('backend-feature-unavailable:collaborators'); },
     async logout() {
-      if (isDemoMode) return;
-      if (isFirebaseMode) await signOut(firebaseAuth);
-      window.localStorage.removeItem('marketgo.auth.token');
-      window.localStorage.removeItem(sessionKey);
-      window.sessionStorage.removeItem(sessionKey);
+      clearSessionToken();
+      setApiUser(null);
       this.currentUser = null;
-      if (isFirebaseMode) {
-        this.users = [];
-        const factories = await Promise.all([
-          import('../../analytics/application/analytics.store.js').then((module) => module.useAnalyticsStore),
-          import('../../communication/application/communication.store.js').then((module) => module.useCommunicationStore),
-          import('../../conservation/application/conservation.store.js').then((module) => module.useConservationStore),
-          import('../../dashboard/application/dashboard.store.js').then((module) => module.useDashboardStore),
-          import('../../inventory/application/inventory.store.js').then((module) => module.useInventoryStore),
-          import('../../procurements/application/procurements.store.js').then((module) => module.useProcurementsStore),
-          import('../../products/application/products.store.js').then((module) => module.useProductsStore),
-          import('../../profiles/application/profiles.store.js').then((module) => module.useProfilesStore),
-          import('../../requisition/application/requisition.store.js').then((module) => module.useRequisitionStore),
-          import('../../shared/application/dashboard-overview.store.js').then((module) => module.useDashboardOverviewStore),
-          import('../../suppliers/application/suppliers.store.js').then((module) => module.useSuppliersStore),
-        ]);
-        factories.forEach((factory) => factory().$reset());
-      }
+      this.users = [];
+      await resetModules();
     },
   },
 });
