@@ -14,6 +14,7 @@ export const apiEndpoints = Object.freeze({
   auth: 'api/v1/auth',
   users: 'api/v1/users',
   profiles: 'api/v1/profiles',
+  get clients() { return scoped('clients', 'supplier'); },
   get dashboard() { return scoped('dashboard'); },
   get supplierDashboard() { return scoped('dashboard', 'supplier'); },
   get analytics() { return scoped('analytics'); },

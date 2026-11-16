@@ -268,7 +268,12 @@
     "clients": {
       "eyebrow": "Clients",
       "title": "Minimarket clients",
-      "description": "View the minimarkets receiving your organic products."
+      "description": "Manage the minimarket contacts you work with.",
+      "newClient": "New client",
+      "editClient": "Edit client",
+      "empty": "No clients added yet.",
+      "loadError": "Could not load clients.",
+      "saveError": "Could not save the client. Please try again."
     },
     "iam": {
       "backendUsersReadOnly": "The current API lists users; creating and editing collaborators are not yet available.",

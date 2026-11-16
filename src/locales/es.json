@@ -268,7 +268,12 @@
     "clients": {
       "eyebrow": "Clientes",
       "title": "Minimarkets clientes",
-      "description": "Consulta los minimarkets que reciben tus productos orgánicos."
+      "description": "Gestiona los contactos de minimarkets con los que trabajas.",
+      "newClient": "Nuevo cliente",
+      "editClient": "Editar cliente",
+      "empty": "Aún no agregaste clientes.",
+      "loadError": "No se pudieron cargar los clientes.",
+      "saveError": "No se pudo guardar el cliente. Inténtalo de nuevo."
     },
     "iam": {
       "backendUsersReadOnly": "La API actual permite consultar usuarios; la creación y edición de colaboradores aún no están disponibles.",
