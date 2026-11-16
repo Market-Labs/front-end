@@ -251,7 +251,7 @@
       "address": "Dirección",
       "specialty": "Especialidad",
       "coverage": "Cobertura",
-      "examples": {"businessName": "Jon Doe", "ruc": "10000000000", "phone": "999999999", "email": "jon@marketgo.com", "address": "Distrito, ciudad", "specialty": "Categoría", "coverage": "Zona de cobertura"}
+      "examples": {"businessName": "Jon Doe", "ruc": "10000000000", "phone": "999999999", "address": "Distrito, ciudad", "specialty": "Categoría", "coverage": "Zona de cobertura"}
     },
     "profiles": {
       "eyebrow": "Contactos",

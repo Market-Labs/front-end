@@ -31,7 +31,7 @@
         </div>
         <label>
           {{ $t('page.suppliers.email') }}
-          <pv-input-text v-model="supplierForm.email" :placeholder="$t('page.suppliers.examples.email')" />
+          <pv-input-text v-model="supplierForm.email" placeholder="jon@marketgo.com" />
         </label>
         <label>
           {{ $t('page.suppliers.address') }}
