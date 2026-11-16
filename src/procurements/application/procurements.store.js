@@ -1,18 +1,10 @@
 import { defineStore } from 'pinia';
 import { ProcurementsApi } from '../infrastructure/procurements-api.js';
-import { ProcurementOrder } from '../domain/model/procurement-order.entity.js';
 import { useIamStore } from '../../iam/application/iam.store.js';
 import { useInventoryStore } from '../../inventory/application/inventory.store.js';
 import { useProfilesStore } from '../../profiles/application/profiles.store.js';
 
 const procurementsApi = new ProcurementsApi();
-
-const demoOrders = [
-  new ProcurementOrder({ id: 'ship-1001', supplyRequestId: 'req-2', supplierId: 'sup-2', minimarketId: 'min-1', supplier: 'Anita Gamboa', minimarket: 'Minimarket Verde Sur', status: 'pending-reception', total: 603.6, createdAt: '2026-09-18', shippingDate: '2026-09-19', observations: 'Despacho refrigerado para lacteos.', items: [{ productName: 'Leche organica', quantity: 30, unitPrice: 7.2 }, { productName: 'Queso organico', quantity: 12, unitPrice: 14.5 }, { productName: 'Yogurt organico', quantity: 24, unitPrice: 8.9 }] }),
-  new ProcurementOrder({ id: 'ship-1002', supplyRequestId: 'req-3', supplierId: 'sup-1', minimarketId: 'min-1', supplier: 'BioAndes Organic', minimarket: 'Minimarket Verde Sur', status: 'pending-reception', total: 296.5, createdAt: '2026-09-17', shippingDate: '2026-09-19', observations: 'Entrega parcial de vegetales frescos.', items: [{ productName: 'Tomate organico', quantity: 45, unitPrice: 3.8 }, { productName: 'Pepino organico', quantity: 20, unitPrice: 2.9 }, { productName: 'Lechugas organicas', quantity: 15, unitPrice: 4.5 }] }),
-  new ProcurementOrder({ id: 'ship-1003', supplyRequestId: 'req-5', supplierId: 'sup-2', minimarketId: 'min-1', supplier: 'Anita Gamboa', minimarket: 'Minimarket Verde Sur', status: 'received', total: 359.4, createdAt: '2026-09-15', shippingDate: '2026-09-16', receivedAt: '2026-09-16 15:40', observations: 'Recepcion aceptada sin observaciones.', items: [{ productName: 'Brocoli organico', quantity: 18, unitPrice: 6.3 }, { productName: 'Pimientos organicos', quantity: 24, unitPrice: 5.8 }, { productName: 'Yogurt organico', quantity: 12, unitPrice: 8.9 }] }),
-  new ProcurementOrder({ id: 'ship-1004', supplyRequestId: 'req-4', supplierId: 'sup-2', minimarketId: 'min-1', supplier: 'Anita Gamboa', minimarket: 'Minimarket Verde Sur', status: 'rejected', total: 360.7, createdAt: '2026-09-16', shippingDate: '2026-09-17', rejectionReason: 'Solicitud rechazada por disponibilidad.', items: [{ productName: 'Queso organico', quantity: 15, unitPrice: 14.5 }, { productName: 'Leche organica', quantity: 10, unitPrice: 7.2 }, { productName: 'Yogurt organico', quantity: 8, unitPrice: 8.9 }] }),
-];
 
 export const useProcurementsStore = defineStore('procurements', {
   state: () => ({

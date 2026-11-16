@@ -1,16 +1,7 @@
 import { defineStore } from 'pinia';
 import { RequisitionApi } from '../infrastructure/requisition-api.js';
-import { Requisition } from '../domain/model/requisition.entity.js';
 
 const requisitionApi = new RequisitionApi();
-
-const demoRequisitions = [
-  new Requisition({ id: 'req-1', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Yogurt organico', quantity: 24, reason: 'Reposicion por venta rapida', status: 'pending', createdAt: '2026-09-18', items: [{ productName: 'Yogurt organico', quantity: 24 }, { productName: 'Leche organica', quantity: 30 }, { productName: 'Queso organico', quantity: 12 }] }),
-  new Requisition({ id: 'req-2', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Leche organica', quantity: 30, reason: 'Demanda semanal de lacteos', status: 'accepted', createdAt: '2026-09-18', reviewedAt: '2026-09-18 11:00', shippingOrderId: 'ship-1001', items: [{ productName: 'Leche organica', quantity: 30 }, { productName: 'Queso organico', quantity: 12 }, { productName: 'Yogurt organico', quantity: 24 }] }),
-  new Requisition({ id: 'req-3', minimarketId: 'min-1', supplierId: 'sup-1', requester: 'Albino Caceres', supplier: 'BioAndes Organic', productName: 'Tomate organico', quantity: 45, reason: 'Reposicion para anaquel principal', status: 'pending', createdAt: '2026-09-17', items: [{ productName: 'Tomate organico', quantity: 45 }, { productName: 'Pepino organico', quantity: 20 }, { productName: 'Lechugas organicas', quantity: 15 }] }),
-  new Requisition({ id: 'req-4', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Queso organico', quantity: 15, reason: 'Stock minimo alcanzado', status: 'rejected', createdAt: '2026-09-16', reviewedAt: '2026-09-16 16:20', rejectionReason: 'Produccion diaria agotada', items: [{ productName: 'Queso organico', quantity: 15 }, { productName: 'Leche organica', quantity: 10 }, { productName: 'Yogurt organico', quantity: 8 }] }),
-  new Requisition({ id: 'req-5', minimarketId: 'min-1', supplierId: 'sup-2', requester: 'Albino Caceres', supplier: 'Anita Gamboa', productName: 'Brocoli organico', quantity: 18, reason: 'Campana de productos frescos', status: 'accepted', createdAt: '2026-09-15', reviewedAt: '2026-09-15 12:15', shippingOrderId: 'ship-1003', items: [{ productName: 'Brocoli organico', quantity: 18 }, { productName: 'Pimientos organicos', quantity: 24 }, { productName: 'Yogurt organico', quantity: 12 }] }),
-];
 
 export const useRequisitionStore = defineStore('requisition', {
   state: () => ({
