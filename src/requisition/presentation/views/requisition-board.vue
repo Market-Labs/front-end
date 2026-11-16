@@ -18,7 +18,7 @@
       <form class="entity-form" @submit.prevent>
         <label>
           {{ $t('page.requisition.supplier') }}
-          <pv-select v-model="requisitionForm.supplierId" :options="suppliersStore.activeSuppliers" option-label="businessName" option-value="id" :placeholder="$t('page.requisition.selectSupplier')" />
+          <pv-select v-model="requisitionForm.supplierId" :options="linkedSuppliers" option-label="businessName" option-value="id" :placeholder="$t('page.requisition.selectSupplier')" />
         </label>
         <div class="items-field">
           <strong>{{ $t('common.items') }}</strong>
@@ -139,6 +139,7 @@ const canCreate = computed(() => iamStore.currentUser?.permissions.includes('inv
 const canReview = computed(() => iamStore.currentUser?.permissions.includes('procurements:track'));
 const productsStore = useProductsStore();
 const suppliersStore = useSuppliersStore();
+const linkedSuppliers = computed(() => suppliersStore.activeSuppliers.filter((supplier) => supplier.supplierOrganizationId));
 const { t } = useI18n();
 const formatRequestId = (id) => {
   const value = String(id || '');

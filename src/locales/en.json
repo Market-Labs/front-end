@@ -240,6 +240,8 @@
       "title": "Supplier directory",
       "description": "View your suppliers' business details and coverage areas.",
       "newSupplier": "New supplier",
+      "linkedAccount": "Linked account",
+      "selectAccount": "Select a registered supplier",
       "editSupplier": "Edit supplier",
       "deleteSupplier": "Remove supplier",
       "deleteConfirmation": "Remove {name} from the directory? Their data and history will be kept, but they will not appear in new requests.",
@@ -248,7 +250,8 @@
       "email": "Email",
       "address": "Address",
       "specialty": "Specialty",
-      "coverage": "Coverage"
+      "coverage": "Coverage",
+      "examples": {"businessName": "Jon Doe", "ruc": "10000000000", "phone": "999999999", "email": "jon@marketgo.com", "address": "District, city", "specialty": "Category", "coverage": "Coverage area"}
     },
     "profiles": {
       "eyebrow": "Contacts",

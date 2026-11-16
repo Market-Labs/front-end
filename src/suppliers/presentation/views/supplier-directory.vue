@@ -11,40 +11,40 @@
 
     <pv-dialog v-model:visible="showSupplierForm" modal :header="$t(editingId ? 'page.suppliers.editSupplier' : 'page.suppliers.newSupplier')" :style="{ width: 'min(540px, calc(100vw - 32px))' }">
       <form class="entity-form" @submit.prevent>
-        <label>
-          {{ $t('common.supplier') }}
-          <pv-select v-model="supplierForm.supplierOrganizationId" :options="registeredSuppliers" option-label="businessName" option-value="organizationId" :placeholder="$t('page.suppliers.newSupplier')" />
+        <label v-if="editingId">
+          {{ $t('page.suppliers.linkedAccount') }}
+          <pv-select v-model="supplierForm.supplierOrganizationId" :options="registeredSuppliers" option-label="businessName" option-value="organizationId" :placeholder="$t('page.suppliers.selectAccount')" />
         </label>
         <label>
           {{ $t('page.suppliers.businessName') }}
-          <pv-input-text v-model="supplierForm.businessName" placeholder="Anita Gamboa" />
+          <pv-input-text v-model="supplierForm.businessName" :placeholder="$t('page.suppliers.examples.businessName')" />
         </label>
         <div class="form-row">
           <label>
             RUC
-            <pv-input-text v-model="supplierForm.ruc" placeholder="10456789012" />
+            <pv-input-text v-model="supplierForm.ruc" :placeholder="$t('page.suppliers.examples.ruc')" />
           </label>
           <label>
             {{ $t('page.suppliers.phone') }}
-            <pv-input-text v-model="supplierForm.phone" placeholder="+51 959 404 210" />
+            <pv-input-text v-model="supplierForm.phone" :placeholder="$t('page.suppliers.examples.phone')" />
           </label>
         </div>
         <label>
           {{ $t('page.suppliers.email') }}
-          <pv-input-text v-model="supplierForm.email" placeholder="anitaG@bioandes.pe" />
+          <pv-input-text v-model="supplierForm.email" :placeholder="$t('page.suppliers.examples.email')" />
         </label>
         <label>
           {{ $t('page.suppliers.address') }}
-          <pv-input-text v-model="supplierForm.address" placeholder="Cerro Colorado, Arequipa" />
+          <pv-input-text v-model="supplierForm.address" :placeholder="$t('page.suppliers.examples.address')" />
         </label>
         <div class="form-row">
           <label>
             {{ $t('page.suppliers.specialty') }}
-            <pv-input-text v-model="supplierForm.specialty" placeholder="Lácteos y derivados" />
+            <pv-input-text v-model="supplierForm.specialty" :placeholder="$t('page.suppliers.examples.specialty')" />
           </label>
           <label>
             {{ $t('page.suppliers.coverage') }}
-            <pv-input-text v-model="supplierForm.coverageArea" placeholder="Cerro Colorado - Arequipa" />
+            <pv-input-text v-model="supplierForm.coverageArea" :placeholder="$t('page.suppliers.examples.coverage')" />
           </label>
         </div>
         <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
@@ -117,7 +117,7 @@ const supplierForm = reactive({
 
 const openSupplierForm = () => {
   editingId.value = null;
-  Object.keys(supplierForm).forEach((key) => { supplierForm[key] = ''; });
+  Object.keys(supplierForm).forEach((key) => { supplierForm[key] = key === 'supplierOrganizationId' ? null : ''; });
   formError.value = '';
   showSupplierForm.value = true;
 };
@@ -148,7 +148,7 @@ const deactivateSupplier = async () => {
 };
 const saveSupplier = async () => {
   const data = Object.fromEntries(Object.entries(supplierForm).map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value]));
-  if (Object.values(data).some((value) => !value) || !/^\S+@\S+\.\S+$/.test(data.email) || !/^\d{11}$/.test(data.ruc)) {
+  if (Object.entries(data).some(([key, value]) => key !== 'supplierOrganizationId' && !value) || !/^\S+@\S+\.\S+$/.test(data.email) || !/^\d{11}$/.test(data.ruc)) {
     formError.value = t('common.invalidForm');
     return;
   }
