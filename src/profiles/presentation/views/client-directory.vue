@@ -25,30 +25,41 @@
     </pv-dialog>
 
     <p v-if="clientsStore.error" class="load-error" role="alert">{{ $t('page.clients.loadError') }}</p>
-    <p v-else-if="!clientsStore.loading && !clientsStore.clients.length" class="empty-state">{{ $t('page.clients.empty') }}</p>
+    <p v-else-if="!clientsStore.loading && !visibleClients.length" class="empty-state">{{ $t('page.clients.empty') }}</p>
     <div class="clients-grid">
       <article v-for="client in filteredClients" :key="client.id">
         <h3>{{ client.businessName }}</h3>
-        <p>{{ client.address }}</p>
+        <p v-if="client.address">{{ client.address }}</p>
         <dl>
-          <div><dt>{{ $t('page.suppliers.email') }}</dt><dd>{{ client.email }}</dd></div>
-          <div><dt>{{ $t('page.profiles.phone') }}</dt><dd>{{ client.phone }}</dd></div>
+          <div v-if="client.email"><dt>{{ $t('page.suppliers.email') }}</dt><dd>{{ client.email }}</dd></div>
+          <div v-if="client.phone"><dt>{{ $t('page.profiles.phone') }}</dt><dd>{{ client.phone }}</dd></div>
           <div><dt>{{ $t('page.profiles.zone') }}</dt><dd>{{ client.district }}</dd></div>
         </dl>
-        <pv-button :label="$t('common.edit')" icon="pi pi-pencil" size="small" outlined @click="openEditForm(client)" />
+        <pv-button v-if="!client.registeredOnly" :label="$t('common.edit')" icon="pi pi-pencil" size="small" outlined @click="openEditForm(client)" />
       </article>
     </div>
   </section>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useClientsStore } from '../../application/clients.store.js';
+import { useProfilesStore } from '../../application/profiles.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useI18n } from 'vue-i18n';
 
 const clientsStore = useClientsStore();
-const filteredClients = useSearchFilter(() => clientsStore.clients);
+const profilesStore = useProfilesStore();
+const visibleClients = computed(() => {
+  const local = clientsStore.clients;
+  const names = new Set(local.map((client) => client.businessName.trim().toLocaleLowerCase()));
+  return [...local, ...profilesStore.profiles.filter((profile) => profile.type === 'minimarket'
+    && !names.has(profile.businessName.trim().toLocaleLowerCase()))
+    .map((profile) => ({ id: `registered-${profile.organizationId}`, registeredOnly: true,
+      businessName: profile.businessName, address: profile.address, email: profile.email,
+      phone: profile.phone, district: profile.district || profile.coverageArea || '-' }))];
+});
+const filteredClients = useSearchFilter(() => visibleClients.value);
 const { t } = useI18n();
 const showForm = ref(false);
 const editingId = ref(null);
@@ -87,7 +98,10 @@ const saveClient = async () => {
     saving.value = false;
   }
 };
-onMounted(() => clientsStore.fetchClients());
+onMounted(() => {
+  clientsStore.fetchClients();
+  profilesStore.fetchProfiles();
+});
 </script>
 
 <style scoped>

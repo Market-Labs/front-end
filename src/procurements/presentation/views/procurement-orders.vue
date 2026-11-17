@@ -6,6 +6,7 @@
         <h2>{{ iamStore.isMinimarketAdmin ? $t('option.reception') : $t('page.procurements.title') }}</h2>
         <p>{{ $t('page.procurements.description') }}</p>
       </div>
+      <pv-button v-if="iamStore.isSupplier && canCreate" :label="$t('page.procurements.createOrder')" icon="pi pi-plus" @click="openManualOrder" />
     </div>
 
     <pv-dialog v-model:visible="showOrderForm" modal :header="$t('page.procurements.createOrder')" :style="{ width: 'min(640px, calc(100vw - 32px))' }" @hide="closeOrderForm">
@@ -18,7 +19,7 @@
         <label v-if="linkedRequest">{{ $t('common.minimarket') }}<span class="read-only-value">{{ linkedRequest.minimarket || linkedRequest.minimarketId }}</span></label>
         <label v-else>
           {{ $t('common.minimarket') }}
-          <pv-select v-model="orderForm.minimarketId" :options="minimarkets" option-label="businessName" option-value="id" :placeholder="$t('page.procurements.selectMinimarket')" />
+          <pv-select v-model="orderForm.minimarketId" :options="minimarkets" option-label="businessName" option-value="organizationId" :placeholder="$t('page.procurements.selectMinimarket')" />
         </label>
         <div v-if="linkedRequest" class="detail-scroll">
           <table class="detail-table">
@@ -190,6 +191,8 @@ const linkedItems = computed(() => linkedRequest.value?.items.map((item) => ({
 })) || []);
 const openManualOrder = () => {
   linkedRequest.value = null;
+  orderForm.minimarketId = null;
+  orderForm.items = [newItem()];
   formError.value = '';
   showOrderForm.value = true;
 };
@@ -238,7 +241,7 @@ const saveOrder = async () => {
     }
     return;
   }
-  const minimarket = minimarkets.value.find((entry) => entry.id === orderForm.minimarketId);
+  const minimarket = minimarkets.value.find((entry) => entry.organizationId === orderForm.minimarketId);
   const items = orderForm.items.filter((line) => line.productId || line.quantity !== '').map((line) => {
     const product = productsStore.products.find((entry) => entry.id === line.productId && entry.supplierId === iamStore.currentSupplierId);
     return product && { productName: product.name, quantity: Number(line.quantity), unitPrice: product.price };
@@ -250,7 +253,7 @@ const saveOrder = async () => {
   saving.value = true;
   formError.value = '';
   try {
-    await procurementsStore.createOrder({ supplierId: iamStore.currentSupplierId, minimarketId: minimarket.id, supplier: iamStore.userName, minimarket: minimarket.businessName, shippingDate: orderForm.shippingDate, items, total: Number(items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0).toFixed(2)) });
+    await procurementsStore.createOrder({ supplierId: iamStore.currentSupplierId, minimarketId: minimarket.organizationId, supplier: iamStore.currentUser?.organizationName || iamStore.userName, minimarket: minimarket.businessName, shippingDate: orderForm.shippingDate, items, total: Number(items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0).toFixed(2)) });
     showOrderForm.value = false;
     orderForm.minimarketId = null;
     orderForm.items = [newItem()];

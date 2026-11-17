@@ -18,7 +18,7 @@
       <form class="entity-form" @submit.prevent>
         <label>
           {{ $t('page.requisition.supplier') }}
-          <pv-select v-model="requisitionForm.supplierId" :options="linkedSuppliers" option-label="businessName" option-value="id" :placeholder="$t('page.requisition.selectSupplier')" />
+          <pv-select v-model="requisitionForm.supplierId" :options="registeredSuppliers" option-label="businessName" option-value="organizationId" :placeholder="$t('page.requisition.selectSupplier')" />
         </label>
         <div class="items-field">
           <strong>{{ $t('common.items') }}</strong>
@@ -129,7 +129,7 @@ import { useRouter } from 'vue-router';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useProductsStore } from '../../../products/application/products.store.js';
-import { useSuppliersStore } from '../../../suppliers/application/suppliers.store.js';
+import { useProfilesStore } from '../../../profiles/application/profiles.store.js';
 import { useI18n } from 'vue-i18n';
 
 const requisitionStore = useRequisitionStore();
@@ -138,8 +138,8 @@ const iamStore = useIamStore();
 const canCreate = computed(() => iamStore.currentUser?.permissions.includes('inventory:write'));
 const canReview = computed(() => iamStore.currentUser?.permissions.includes('procurements:track'));
 const productsStore = useProductsStore();
-const suppliersStore = useSuppliersStore();
-const linkedSuppliers = computed(() => suppliersStore.activeSuppliers.filter((supplier) => supplier.supplierOrganizationId));
+const profilesStore = useProfilesStore();
+const registeredSuppliers = computed(() => profilesStore.profiles.filter((profile) => profile.type === 'supplier'));
 const { t } = useI18n();
 const formatRequestId = (id) => {
   const value = String(id || '');
@@ -175,8 +175,7 @@ const addItem = () => requisitionForm.items.push(newItem());
 const removeItem = (index) => requisitionForm.items.splice(index, 1);
 const availableProducts = (index) => {
   const selected = new Set(requisitionForm.items.filter((_, itemIndex) => itemIndex !== index).map((item) => item.productId));
-  const supplier = suppliersStore.activeSuppliers.find((entry) => entry.id === requisitionForm.supplierId);
-  return productsStore.products.filter((product) => !selected.has(product.id) && product.organizationId === supplier?.supplierOrganizationId);
+  return productsStore.products.filter((product) => !selected.has(product.id) && product.organizationId === requisitionForm.supplierId);
 };
 const openDetails = (request) => {
   selectedRequestId.value = request.id;
@@ -184,19 +183,19 @@ const openDetails = (request) => {
 };
 
 const saveRequest = async () => {
-  const supplier = suppliersStore.activeSuppliers.find((entry) => entry.id === requisitionForm.supplierId);
+  const supplier = registeredSuppliers.value.find((entry) => entry.organizationId === requisitionForm.supplierId);
   const items = requisitionForm.items.filter((line) => line.productId || line.quantity !== '').map((line) => {
-    const product = productsStore.products.find((entry) => entry.id === line.productId && entry.organizationId === supplier?.supplierOrganizationId);
+    const product = productsStore.products.find((entry) => entry.id === line.productId && entry.organizationId === supplier?.organizationId);
     return product && { productName: product.name, quantity: Number(line.quantity), unitPrice: product.price };
   });
-  if (!supplier?.supplierOrganizationId || !requisitionForm.reason || items.length === 0 || items.some((item) => !item || !Number.isInteger(item.quantity) || item.quantity <= 0) || new Set(items.map((item) => item?.productName)).size !== items.length) {
+  if (!supplier?.organizationId || !requisitionForm.reason || items.length === 0 || items.some((item) => !item || !Number.isInteger(item.quantity) || item.quantity <= 0) || new Set(items.map((item) => item?.productName)).size !== items.length) {
     formError.value = t('common.invalidForm');
     return;
   }
   saving.value = true;
   formError.value = '';
   try {
-    await requisitionStore.createRequest({ supplierOrganizationId: supplier.supplierOrganizationId, supplier: supplier.businessName, reason: requisitionForm.reason, items });
+    await requisitionStore.createRequest({ supplierOrganizationId: supplier.organizationId, supplier: supplier.businessName, reason: requisitionForm.reason, items });
     showRequisitionForm.value = false;
     requisitionForm.supplierId = null;
     requisitionForm.reason = null;
@@ -220,9 +219,7 @@ const createShippingOrder = (request) => router.push({ path: '/procurements', qu
 onMounted(() => {
   requisitionStore.fetchRequisitions();
   productsStore.fetchProducts();
-  if (iamStore.isMinimarketAdmin) {
-    suppliersStore.fetchSuppliers();
-  }
+  profilesStore.fetchProfiles();
 });
 </script>
 

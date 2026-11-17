@@ -21,7 +21,7 @@
         </label>
         <label v-if="!editingId && iamStore.isMinimarketAdmin">
           {{ $t('common.supplier') }}
-          <pv-select v-model="productForm.supplierId" :options="suppliersStore.activeSuppliers" option-label="businessName" option-value="id" :placeholder="$t('page.products.selectSupplier')" />
+          <pv-select v-model="productForm.supplierId" :options="suppliersStore.activeSuppliers" option-label="businessName" option-value="id" show-clear :placeholder="$t('page.products.selectSupplier')" />
         </label>
         <label v-if="!editingId && iamStore.isSupplier">{{ $t('common.supplier') }}<span class="read-only-value">{{ supplierName(iamStore.currentSupplierId) }}</span></label>
         <label v-if="!editingId">
@@ -95,9 +95,8 @@ const canWrite = computed(() => iamStore.currentUser?.permissions.includes(iamSt
 const suppliersStore = useSuppliersStore();
 const { t } = useI18n();
 const supplierName = (id) => suppliersStore.suppliers.find((supplier) => supplier.supplierOrganizationId === id || supplier.id === id)?.businessName || (id === iamStore.currentSupplierId ? iamStore.currentUser?.organizationName : id) || '-';
-const visibleProducts = computed(() => iamStore.isSupplier
-  ? productsStore.products.filter((product) => product.supplierId === iamStore.currentSupplierId)
-  : productsStore.products);
+const visibleProducts = computed(() => productsStore.products.filter((product) =>
+  product.organizationId === iamStore.currentUser?.organizationId));
 const filteredProducts = useSearchFilter(() => visibleProducts.value, [
   'id', 'name', 'category', 'description', 'price', 'quantity',
   (product) => supplierName(product.supplierId),
@@ -137,7 +136,7 @@ const saveProduct = async () => {
   const description = productForm.description.trim();
   const quantity = Number(productForm.quantity);
   if (!description || !Number.isFinite(price) || price <= 0 || (!editingId.value && (
-    !productForm.name.trim() || !categoryOptions.includes(productForm.category) || (!iamStore.isSupplier && !suppliersStore.activeSuppliers.some((supplier) => supplier.id === productForm.supplierId)) ||
+    !productForm.name.trim() || !categoryOptions.includes(productForm.category) || (productForm.supplierId && !iamStore.isSupplier && !suppliersStore.activeSuppliers.some((supplier) => supplier.id === productForm.supplierId)) ||
     !/^\d{4}-\d{2}-\d{2}$/.test(productForm.expirationDate) || !Number.isInteger(quantity) || quantity < 0
   ))) {
     formError.value = t('page.products.invalidForm');

@@ -66,14 +66,14 @@
 
     <div class="supplier-grid">
       <article v-for="supplier in filteredSuppliers" :key="supplier.id">
-        <span>{{ supplier.ruc }}</span>
+        <span v-if="supplier.ruc">{{ supplier.ruc }}</span>
         <h3>{{ supplier.businessName }}</h3>
-        <p>{{ supplier.specialty }}</p>
+        <p v-if="supplier.specialty">{{ supplier.specialty }}</p>
         <footer>
           <small>{{ supplier.coverageArea }}</small>
-          <strong>{{ supplier.phone }}</strong>
+          <strong v-if="supplier.phone">{{ supplier.phone }}</strong>
         </footer>
-        <div v-if="canWrite" class="supplier-actions">
+        <div v-if="canWrite && !supplier.registeredOnly" class="supplier-actions">
           <pv-button :label="$t('common.edit')" icon="pi pi-pencil" size="small" outlined @click="openEditForm(supplier)" />
           <pv-button :label="$t('common.delete')" icon="pi pi-trash" size="small" severity="danger" text @click="confirmDelete(supplier)" />
         </div>
@@ -96,7 +96,18 @@ const profilesStore = useProfilesStore();
 const registeredSuppliers = computed(() => profilesStore.profiles.filter((profile) => profile.type === 'supplier'));
 const canWrite = computed(() => iamStore.currentUser?.permissions.includes('inventory:write'));
 const { t } = useI18n();
-const filteredSuppliers = useSearchFilter(() => suppliersStore.activeSuppliers);
+const visibleSuppliers = computed(() => {
+  const local = suppliersStore.activeSuppliers;
+  const linkedIds = new Set(local.map((supplier) => supplier.supplierOrganizationId).filter(Boolean));
+  const hiddenIds = new Set(suppliersStore.suppliers.filter((supplier) => supplier.status === 'inactive')
+    .map((supplier) => supplier.supplierOrganizationId).filter(Boolean));
+  return [...local, ...registeredSuppliers.value.filter((profile) => !linkedIds.has(profile.organizationId))
+    .filter((profile) => !hiddenIds.has(profile.organizationId))
+    .map((profile) => ({ id: `registered-${profile.organizationId}`, registeredOnly: true,
+      businessName: profile.businessName, specialty: profile.specialty,
+      coverageArea: profile.coverageArea, phone: profile.phone }))];
+});
+const filteredSuppliers = useSearchFilter(() => visibleSuppliers.value);
 const showSupplierForm = ref(false);
 const showDeleteDialog = ref(false);
 const editingId = ref(null);
