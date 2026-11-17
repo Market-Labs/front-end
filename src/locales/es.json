@@ -112,6 +112,7 @@
     "rejected": "Rechazado",
     "pending-reception": "Pendiente de recepción",
     "received": "Recibido",
+    "sent": "Enviado a cliente externo",
     "healthy": "Normal",
     "risk": "En riesgo"
   },
@@ -228,6 +229,7 @@
       "estimatedTotal": "Total estimado",
       "selectStatus": "Selecciona un estado",
       "selectMinimarket": "Selecciona un minimarket",
+      "externalDeliveryNote": "Este cliente no tiene cuenta en MarketGo. La orden quedará registrada para el proveedor, sin recepción en línea.",
       "selectProduct": "Selecciona un producto",
       "shippingDate": "Fecha de envío",
       "acceptReception": "Aceptar recepción",

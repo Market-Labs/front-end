@@ -112,6 +112,7 @@
     "rejected": "Rejected",
     "pending-reception": "Pending reception",
     "received": "Received",
+    "sent": "Sent to external client",
     "healthy": "Normal",
     "risk": "At risk"
   },
@@ -228,6 +229,7 @@
       "estimatedTotal": "Estimated total",
       "selectStatus": "Select status",
       "selectMinimarket": "Select a minimarket",
+      "externalDeliveryNote": "This client has no MarketGo account. The order will be recorded for the supplier without online reception.",
       "selectProduct": "Select a product",
       "shippingDate": "Shipping date",
       "acceptReception": "Accept reception",

@@ -98,9 +98,8 @@ const iamStore = useIamStore();
 const canWrite = computed(() => iamStore.currentUser?.permissions.includes(iamStore.isSupplier ? 'products:write' : 'inventory:write'));
 const productsStore = useProductsStore();
 const { t } = useI18n();
-const availableProducts = computed(() => iamStore.isSupplier
-  ? productsStore.products.filter((product) => product.supplierId === iamStore.currentSupplierId)
-  : productsStore.products);
+const availableProducts = computed(() => productsStore.products.filter((product) =>
+  product.organizationId === iamStore.currentUser?.organizationId));
 const filteredItems = useSearchFilter(() => inventoryStore.items);
 const lotStatus = (item) => {
   const days = daysUntilExpiration(item.expirationDate);

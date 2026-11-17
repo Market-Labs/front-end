@@ -67,7 +67,7 @@
         <p>{{ product.description }}</p>
         <p class="supplier-name">{{ $t('common.supplier') }}: {{ supplierName(product.supplierId) }}</p>
         <footer>
-          <small v-if="product.quantity !== null">{{ product.quantity }} {{ $t('page.products.units') }}</small>
+          <small v-if="product.quantity !== null">{{ stockForProduct(product) }} {{ $t('page.products.units') }}</small>
           <span :class="['status-badge', product.available ? 'status-approved' : 'status-rejected']">
             {{ product.available ? $t('page.products.available') : $t('page.products.unavailable') }}
           </span>
@@ -87,17 +87,23 @@ import { useProductsStore } from '../../application/products.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useSuppliersStore } from '../../../suppliers/application/suppliers.store.js';
+import { useInventoryStore } from '../../../inventory/application/inventory.store.js';
 import { useI18n } from 'vue-i18n';
 
 const productsStore = useProductsStore();
 const iamStore = useIamStore();
 const canWrite = computed(() => iamStore.currentUser?.permissions.includes(iamStore.isSupplier ? 'products:write' : 'inventory:write'));
 const suppliersStore = useSuppliersStore();
+const inventoryStore = useInventoryStore();
 const { t } = useI18n();
 const supplierName = (id) => suppliersStore.suppliers.find((supplier) => supplier.supplierOrganizationId === id || supplier.id === id)?.businessName
   || (id === iamStore.currentUser?.organizationId ? iamStore.currentUser?.organizationName : id) || '-';
 const visibleProducts = computed(() => productsStore.products.filter((product) =>
   product.organizationId === iamStore.currentUser?.organizationId));
+const stockForProduct = (product) => inventoryStore.loading || inventoryStore.error
+  ? product.quantity
+  : inventoryStore.items.filter((item) => item.productId === product.id)
+    .reduce((total, item) => total + Number(item.stock || 0), 0);
 const filteredProducts = useSearchFilter(() => visibleProducts.value, [
   'id', 'name', 'category', 'description', 'price', 'quantity',
   (product) => supplierName(product.supplierId),
@@ -149,6 +155,7 @@ const saveProduct = async () => {
       await productsStore.updateProduct(editingId.value, { price, description });
     } else {
       await productsStore.createProduct({ name: productForm.name.trim(), category: productForm.category, supplierId: productForm.supplierId, expirationDate: productForm.expirationDate, quantity, price, description, available: true });
+      await inventoryStore.fetchInventory();
     }
     showProductForm.value = false;
   } catch {
@@ -172,6 +179,7 @@ const deleteProduct = async () => {
 
 onMounted(() => {
   productsStore.fetchProducts();
+  inventoryStore.fetchInventory();
   if (iamStore.isMinimarketAdmin) suppliersStore.fetchSuppliers();
 });
 </script>

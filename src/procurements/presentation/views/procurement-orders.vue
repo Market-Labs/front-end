@@ -19,8 +19,9 @@
         <label v-if="linkedRequest">{{ $t('common.minimarket') }}<span class="read-only-value">{{ linkedRequest.minimarket || linkedRequest.minimarketId }}</span></label>
         <label v-else>
           {{ $t('common.minimarket') }}
-          <pv-select v-model="orderForm.minimarketId" :options="minimarkets" option-label="businessName" option-value="organizationId" :placeholder="$t('page.procurements.selectMinimarket')" />
+          <pv-select v-model="orderForm.recipientKey" :options="shippingRecipients" option-label="label" option-value="key" :placeholder="$t('page.procurements.selectMinimarket')" />
         </label>
+        <p v-if="selectedRecipient?.clientContactId" class="external-note">{{ $t('page.procurements.externalDeliveryNote') }}</p>
         <div v-if="linkedRequest" class="detail-scroll">
           <table class="detail-table">
             <thead><tr><th>{{ $t('common.product') }}</th><th>{{ $t('common.quantity') }}</th><th>{{ $t('common.unitPrice') }}</th></tr></thead>
@@ -146,6 +147,7 @@ import { useInventoryStore } from '../../../inventory/application/inventory.stor
 import { useIamStore } from '../../../iam/application/iam.store.js';
 import { useSearchFilter } from '../../../shared/application/use-search-filter.js';
 import { useProfilesStore } from '../../../profiles/application/profiles.store.js';
+import { useClientsStore } from '../../../profiles/application/clients.store.js';
 import { useProductsStore } from '../../../products/application/products.store.js';
 import { useI18n } from 'vue-i18n';
 
@@ -158,6 +160,7 @@ const iamStore = useIamStore();
 const canCreate = computed(() => iamStore.currentUser?.permissions.includes('procurements:track'));
 const canReview = computed(() => iamStore.currentUser?.permissions.includes('procurements:approve'));
 const profilesStore = useProfilesStore();
+const clientsStore = useClientsStore();
 const productsStore = useProductsStore();
 const { t } = useI18n();
 const visibleOrders = computed(() => procurementsStore.visibleForUser(iamStore.currentUser));
@@ -179,8 +182,17 @@ const formatMoney = (value) => `S/ ${Number(value || 0).toFixed(2)}`;
 let nextItemKey = 0;
 const newItem = () => ({ key: nextItemKey++, productId: null, quantity: '' });
 const minimarkets = computed(() => profilesStore.profiles.filter((profile) => profile.type === 'minimarket'));
+const shippingRecipients = computed(() => [
+  ...minimarkets.value.map((profile) => ({ key: `organization:${profile.organizationId}`,
+    label: `${profile.businessName} · ${profile.district || profile.organizationId.slice(0, 8)}`,
+    businessName: profile.businessName, minimarketId: profile.organizationId })),
+  ...clientsStore.clients.map((contact) => ({ key: `contact:${contact.id}`,
+    label: `${contact.businessName} · ${contact.district}`,
+    businessName: contact.businessName, clientContactId: contact.id })),
+]);
+const selectedRecipient = computed(() => shippingRecipients.value.find((entry) => entry.key === orderForm.recipientKey));
 const orderForm = reactive({
-  minimarketId: null,
+  recipientKey: null,
   shippingDate: new Date().toISOString().slice(0, 10),
   items: [newItem()],
 });
@@ -191,7 +203,7 @@ const linkedItems = computed(() => linkedRequest.value?.items.map((item) => ({
 })) || []);
 const openManualOrder = () => {
   linkedRequest.value = null;
-  orderForm.minimarketId = null;
+  orderForm.recipientKey = null;
   orderForm.items = [newItem()];
   formError.value = '';
   showOrderForm.value = true;
@@ -241,21 +253,25 @@ const saveOrder = async () => {
     }
     return;
   }
-  const minimarket = minimarkets.value.find((entry) => entry.organizationId === orderForm.minimarketId);
+  const recipient = selectedRecipient.value;
   const items = orderForm.items.filter((line) => line.productId || line.quantity !== '').map((line) => {
     const product = productsStore.products.find((entry) => entry.id === line.productId && entry.supplierId === iamStore.currentSupplierId);
     return product && { productName: product.name, quantity: Number(line.quantity), unitPrice: product.price };
   });
-  if (!minimarket || !/^\d{4}-\d{2}-\d{2}$/.test(orderForm.shippingDate) || items.length === 0 || items.some((item) => !item || !Number.isInteger(item.quantity) || item.quantity <= 0) || new Set(items.map((item) => item?.productName)).size !== items.length) {
+  if (!recipient || !/^\d{4}-\d{2}-\d{2}$/.test(orderForm.shippingDate) || items.length === 0 || items.some((item) => !item || !Number.isInteger(item.quantity) || item.quantity <= 0) || new Set(items.map((item) => item?.productName)).size !== items.length) {
     formError.value = t('common.invalidForm');
     return;
   }
   saving.value = true;
   formError.value = '';
   try {
-    await procurementsStore.createOrder({ supplierId: iamStore.currentSupplierId, minimarketId: minimarket.organizationId, supplier: iamStore.currentUser?.organizationName || iamStore.userName, minimarket: minimarket.businessName, shippingDate: orderForm.shippingDate, items, total: Number(items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0).toFixed(2)) });
+    await procurementsStore.createOrder({ supplierId: iamStore.currentSupplierId,
+      minimarketId: recipient.minimarketId, clientContactId: recipient.clientContactId,
+      supplier: iamStore.currentUser?.organizationName || iamStore.userName,
+      minimarket: recipient.businessName, shippingDate: orderForm.shippingDate, items,
+      total: Number(items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0).toFixed(2)) });
     showOrderForm.value = false;
-    orderForm.minimarketId = null;
+    orderForm.recipientKey = null;
     orderForm.items = [newItem()];
   } catch {
     formError.value = t('common.errorSaving');
@@ -318,7 +334,8 @@ onMounted(async () => {
     tasks.push(inventoryStore.fetchInventory(), productsStore.fetchProducts());
   }
   if (iamStore.isSupplier) {
-    tasks.push(profilesStore.fetchProfiles(), productsStore.fetchProducts(), requisitionStore.fetchRequisitions());
+    tasks.push(profilesStore.fetchProfiles(), clientsStore.fetchClients(),
+      productsStore.fetchProducts(), requisitionStore.fetchRequisitions());
   }
   await Promise.all(tasks);
   if (typeof route.query.requestId === 'string' && canCreate.value) {
@@ -379,6 +396,7 @@ onMounted(async () => {
   gap: 14px;
 }
 .form-error { color: #bc2d2d; font-weight: 700; margin: 0; }
+.external-note { color: #526780; font-size: 13px; margin: 0; }
 
 .entity-form label {
   color: #023192;
