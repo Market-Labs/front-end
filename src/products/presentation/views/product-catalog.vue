@@ -94,7 +94,8 @@ const iamStore = useIamStore();
 const canWrite = computed(() => iamStore.currentUser?.permissions.includes(iamStore.isSupplier ? 'products:write' : 'inventory:write'));
 const suppliersStore = useSuppliersStore();
 const { t } = useI18n();
-const supplierName = (id) => suppliersStore.suppliers.find((supplier) => supplier.supplierOrganizationId === id || supplier.id === id)?.businessName || (id === iamStore.currentSupplierId ? iamStore.currentUser?.organizationName : id) || '-';
+const supplierName = (id) => suppliersStore.suppliers.find((supplier) => supplier.supplierOrganizationId === id || supplier.id === id)?.businessName
+  || (id === iamStore.currentUser?.organizationId ? iamStore.currentUser?.organizationName : id) || '-';
 const visibleProducts = computed(() => productsStore.products.filter((product) =>
   product.organizationId === iamStore.currentUser?.organizationId));
 const filteredProducts = useSearchFilter(() => visibleProducts.value, [
